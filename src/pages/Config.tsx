@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Layout } from '../components/layout/Layout';
 import { useF1Data } from '../context/F1DataContext';
@@ -272,92 +273,96 @@ const Config = () => {
 
   return (
     <Layout>
-      <div className="max-w-5xl mx-auto">
-        <div className="flex items-center mb-8">
-          <Settings className="w-8 h-8 text-f1-red mr-3" />
-          <h1 className="text-3xl font-bold">Tournament Configuration</h1>
+      <div className="max-w-5xl mx-auto px-4">
+        <div className="flex items-center mb-6">
+          <Settings className="w-6 h-6 text-f1-red mr-2" />
+          <h1 className="text-2xl md:text-3xl font-bold">Tournament Config</h1>
         </div>
         
-        <Tabs defaultValue="drivers">
-          <TabsList className="grid w-full grid-cols-7 mb-8">
-            <TabsTrigger value="drivers">Driver Names</TabsTrigger>
-            <TabsTrigger value="driver-details">Driver Details</TabsTrigger>
-            <TabsTrigger value="teams">Team Points</TabsTrigger>
-            <TabsTrigger value="races">Race Calendar</TabsTrigger>
-            <TabsTrigger value="news">News</TabsTrigger>
-            <TabsTrigger value="tournament">Tournament Settings</TabsTrigger>
-            <TabsTrigger value="add">Add New</TabsTrigger>
-          </TabsList>
+        <Tabs defaultValue="drivers" className="space-y-6">
+          <div className="overflow-x-auto pb-2">
+            <TabsList className="grid w-full min-w-max grid-cols-3 md:grid-cols-7">
+              <TabsTrigger value="drivers" className="text-sm py-1.5">Drivers</TabsTrigger>
+              <TabsTrigger value="driver-details" className="text-sm py-1.5">Details</TabsTrigger>
+              <TabsTrigger value="teams" className="text-sm py-1.5">Teams</TabsTrigger>
+              <TabsTrigger value="races" className="text-sm py-1.5">Races</TabsTrigger>
+              <TabsTrigger value="news" className="text-sm py-1.5">News</TabsTrigger>
+              <TabsTrigger value="tournament" className="text-sm py-1.5">Settings</TabsTrigger>
+              <TabsTrigger value="add" className="text-sm py-1.5">Add New</TabsTrigger>
+            </TabsList>
+          </div>
           
           <TabsContent value="drivers">
             <Card className="mb-6">
-              <CardHeader>
-                <CardTitle className="flex items-center">
-                  <Users className="w-5 h-5 mr-2" />
-                  Update Driver Names
+              <CardHeader className="pb-2">
+                <CardTitle className="flex items-center text-lg">
+                  <Users className="w-4 h-4 mr-2" />
+                  Driver Names
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="space-y-4">
+                <div className="space-y-3">
                   {drivers.map(driver => (
-                    <div key={`name-${driver.id}`} className="flex items-center space-x-4">
-                      <div className="w-1 h-10 rounded-full" style={{ backgroundColor: driver.color }}></div>
+                    <div key={`name-${driver.id}`} className="flex items-center space-x-3">
+                      <div className="w-1 h-8 rounded-full" style={{ backgroundColor: driver.color }}></div>
                       <div className="flex-1">
                         <Input
                           value={driverNames[driver.id]}
                           onChange={(e) => handleDriverNameChange(driver.id, e.target.value)}
                           placeholder="Driver name"
+                          className="text-sm"
                         />
                       </div>
-                      <div className="text-sm text-gray-500">{driver.team}</div>
+                      <div className="text-xs text-gray-500 hidden sm:block">{driver.team}</div>
                     </div>
                   ))}
                   
                   <Button 
-                    className="w-full mt-6"
+                    className="w-full mt-4 text-sm"
                     onClick={saveDriverNames}
+                    size="sm"
                   >
                     <Save className="w-4 h-4 mr-2" />
-                    Save Driver Names
+                    Save Names
                   </Button>
                 </div>
               </CardContent>
             </Card>
             
             <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center">
-                  <Trophy className="w-5 h-5 mr-2" />
-                  Update Driver Points
+              <CardHeader className="pb-2">
+                <CardTitle className="flex items-center text-lg">
+                  <Trophy className="w-4 h-4 mr-2" />
+                  Driver Points
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="space-y-4">
+                <div className="space-y-3">
                   {drivers.map(driver => (
-                    <div key={`points-${driver.id}`} className="flex items-center space-x-4">
-                      <div className="w-1 h-10 rounded-full" style={{ backgroundColor: driver.color }}></div>
-                      <div className="flex-1">
+                    <div key={`points-${driver.id}`} className="flex items-center space-x-3">
+                      <div className="w-1 h-8 rounded-full" style={{ backgroundColor: driver.color }}></div>
+                      <div className="flex-1 text-sm truncate">
                         <div className="font-medium">{driver.name}</div>
-                        <div className="text-sm text-gray-500">{driver.team}</div>
                       </div>
-                      <div className="w-24">
+                      <div className="w-20">
                         <Input
                           type="number"
                           min="0"
                           value={driverPoints[driver.id]}
                           onChange={(e) => handleDriverPointsChange(driver.id, e.target.value)}
-                          className="text-right"
+                          className="text-right text-sm h-8"
                         />
                       </div>
                     </div>
                   ))}
                   
                   <Button 
-                    className="w-full mt-6"
+                    className="w-full mt-4 text-sm"
                     onClick={saveDriverPoints}
+                    size="sm"
                   >
                     <Save className="w-4 h-4 mr-2" />
-                    Save Driver Points
+                    Save Points
                   </Button>
                 </div>
               </CardContent>
@@ -366,68 +371,71 @@ const Config = () => {
           
           <TabsContent value="driver-details">
             <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center">
-                  <FileText className="w-5 h-5 mr-2" />
-                  Update Driver Details
+              <CardHeader className="pb-2">
+                <CardTitle className="flex items-center text-lg">
+                  <FileText className="w-4 h-4 mr-2" />
+                  Driver Details
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="space-y-8">
+                <div className="space-y-6">
                   {drivers.map(driver => (
-                    <div key={`details-${driver.id}`} className="border-b pb-6">
-                      <div className="flex items-center mb-4">
-                        <div className="w-1 h-10 rounded-full mr-3" style={{ backgroundColor: driver.color }}></div>
-                        <div className="font-bold text-lg">{driver.name}</div>
+                    <div key={`details-${driver.id}`} className="border-b pb-5">
+                      <div className="flex items-center mb-3">
+                        <div className="w-1 h-8 rounded-full mr-2" style={{ backgroundColor: driver.color }}></div>
+                        <div className="font-bold text-sm">{driver.name}</div>
                       </div>
                       
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                      <div className="space-y-3">
                         <div>
-                          <label className="block text-sm font-medium mb-1 flex items-center">
-                            <MapPin className="w-4 h-4 mr-1 text-f1-red" />
+                          <label className="block text-xs font-medium mb-1 flex items-center">
+                            <MapPin className="w-3 h-3 mr-1 text-f1-red" />
                             Country
                           </label>
                           <Input
                             value={driverDetails[driver.id]?.country || ''}
                             onChange={(e) => handleDriverDetailsChange(driver.id, 'country', e.target.value)}
                             placeholder="Driver country"
+                            className="text-sm h-9"
                           />
                         </div>
                         
                         <div>
-                          <label className="block text-sm font-medium mb-1 flex items-center">
-                            <Image className="w-4 h-4 mr-1 text-f1-red" />
+                          <label className="block text-xs font-medium mb-1 flex items-center">
+                            <Image className="w-3 h-3 mr-1 text-f1-red" />
                             Image URL
                           </label>
                           <Input
                             value={driverDetails[driver.id]?.image || ''}
                             onChange={(e) => handleDriverDetailsChange(driver.id, 'image', e.target.value)}
                             placeholder="Image URL or path"
+                            className="text-sm h-9"
                           />
                         </div>
-                      </div>
                       
-                      <div>
-                        <label className="block text-sm font-medium mb-1 flex items-center">
-                          <FileText className="w-4 h-4 mr-1 text-f1-red" />
-                          Driver Description
-                        </label>
-                        <Textarea
-                          value={driverDetails[driver.id]?.description || ''}
-                          onChange={(e) => handleDriverDetailsChange(driver.id, 'description', e.target.value)}
-                          placeholder="Brief description of the driver's career or notable achievements"
-                          className="min-h-[100px]"
-                        />
+                        <div>
+                          <label className="block text-xs font-medium mb-1 flex items-center">
+                            <FileText className="w-3 h-3 mr-1 text-f1-red" />
+                            Description
+                          </label>
+                          <Textarea
+                            value={driverDetails[driver.id]?.description || ''}
+                            onChange={(e) => handleDriverDetailsChange(driver.id, 'description', e.target.value)}
+                            placeholder="Brief description of the driver"
+                            className="min-h-[80px] text-sm"
+                          />
+                        </div>
                       </div>
                     </div>
                   ))}
                   
                   <Button 
-                    className="w-full mt-6"
+                    className="w-full mt-4 text-sm"
                     onClick={saveDriverDetails}
+                    size="sm"
                   >
                     <Save className="w-4 h-4 mr-2" />
-                    Save Driver Details
+                    Save Details
                   </Button>
                 </div>
               </CardContent>
@@ -436,38 +444,39 @@ const Config = () => {
           
           <TabsContent value="teams">
             <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center">
-                  <Trophy className="w-5 h-5 mr-2" />
-                  Update Team Points
+              <CardHeader className="pb-2">
+                <CardTitle className="flex items-center text-lg">
+                  <Trophy className="w-4 h-4 mr-2" />
+                  Team Points
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="space-y-4">
+                <div className="space-y-3">
                   {teams.map(team => (
-                    <div key={team.id} className="flex items-center space-x-4">
-                      <div className="w-1 h-10 rounded-full" style={{ backgroundColor: team.color }}></div>
-                      <div className="flex-1">
-                        <div className="font-medium">{team.name}</div>
+                    <div key={team.id} className="flex items-center space-x-3">
+                      <div className="w-1 h-8 rounded-full" style={{ backgroundColor: team.color }}></div>
+                      <div className="flex-1 truncate">
+                        <div className="font-medium text-sm">{team.name}</div>
                       </div>
-                      <div className="w-24">
+                      <div className="w-20">
                         <Input
                           type="number"
                           min="0"
                           value={teamPoints[team.id]}
                           onChange={(e) => handleTeamPointsChange(team.id, e.target.value)}
-                          className="text-right"
+                          className="text-right text-sm h-8"
                         />
                       </div>
                     </div>
                   ))}
                   
                   <Button 
-                    className="w-full mt-6"
+                    className="w-full mt-4 text-sm"
                     onClick={saveTeamPoints}
+                    size="sm"
                   >
                     <Save className="w-4 h-4 mr-2" />
-                    Save Team Points
+                    Save Points
                   </Button>
                 </div>
               </CardContent>
@@ -476,59 +485,62 @@ const Config = () => {
           
           <TabsContent value="races">
             <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center">
-                  <Calendar className="w-5 h-5 mr-2" />
-                  Update Race Calendar
+              <CardHeader className="pb-2">
+                <CardTitle className="flex items-center text-lg">
+                  <Calendar className="w-4 h-4 mr-2" />
+                  Race Calendar
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="space-y-4">
+                <div className="space-y-5">
                   {races.map(race => (
                     <div key={race.id} className="border-b pb-4">
-                      <div className="font-medium text-lg mb-2">{race.name}</div>
-                      <div className="text-sm text-gray-500 mb-3">{race.circuit}</div>
+                      <div className="font-medium text-base mb-1">{race.name}</div>
+                      <div className="text-xs text-gray-500 mb-2">{race.circuit}</div>
                       
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div className="space-y-3">
                         <div>
-                          <label className="block text-sm font-medium mb-1">Date</label>
+                          <label className="block text-xs font-medium mb-1">Date</label>
                           <Input
                             type="date"
                             value={raceDetails[race.id].date}
                             onChange={(e) => handleRaceDetailsChange(race.id, 'date', e.target.value)}
+                            className="text-sm h-9"
                           />
                         </div>
                         
                         <div>
-                          <label className="block text-sm font-medium mb-1">Country</label>
+                          <label className="block text-xs font-medium mb-1">Country</label>
                           <Input
                             type="text"
                             value={raceDetails[race.id].country}
                             onChange={(e) => handleRaceDetailsChange(race.id, 'country', e.target.value)}
+                            className="text-sm h-9"
                           />
                         </div>
-                      </div>
                       
-                      <div className="mt-2">
-                        <label className="flex items-center cursor-pointer">
-                          <input
-                            type="checkbox"
-                            className="form-checkbox h-4 w-4 text-f1-red border-gray-300 rounded mr-2"
-                            checked={raceDetails[race.id].completed}
-                            onChange={(e) => handleRaceDetailsChange(race.id, 'completed', e.target.checked)}
-                          />
-                          <span className="text-sm">Race completed</span>
-                        </label>
+                        <div className="pt-1">
+                          <label className="flex items-center cursor-pointer">
+                            <input
+                              type="checkbox"
+                              className="form-checkbox h-4 w-4 text-f1-red border-gray-300 rounded mr-2"
+                              checked={raceDetails[race.id].completed}
+                              onChange={(e) => handleRaceDetailsChange(race.id, 'completed', e.target.checked)}
+                            />
+                            <span className="text-xs">Race completed</span>
+                          </label>
+                        </div>
                       </div>
                     </div>
                   ))}
                   
                   <Button 
-                    className="w-full mt-6"
+                    className="w-full mt-4 text-sm"
                     onClick={saveRaceDetails}
+                    size="sm"
                   >
                     <Save className="w-4 h-4 mr-2" />
-                    Save Race Calendar
+                    Save Calendar
                   </Button>
                 </div>
               </CardContent>
@@ -536,149 +548,155 @@ const Config = () => {
           </TabsContent>
           
           <TabsContent value="news">
-            <Card className="mb-6">
-              <CardHeader>
-                <CardTitle className="flex items-center">
-                  <Newspaper className="w-5 h-5 mr-2" />
-                  Add News Item
+            <Card className="mb-4">
+              <CardHeader className="pb-2">
+                <CardTitle className="flex items-center text-lg">
+                  <Newspaper className="w-4 h-4 mr-2" />
+                  Add News
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="space-y-4">
+                <div className="space-y-3">
                   <div>
-                    <label className="block text-sm font-medium mb-1">Title</label>
+                    <label className="block text-xs font-medium mb-1">Title</label>
                     <Input
                       value={newNewsItem.title}
                       onChange={(e) => handleNewNewsItemChange('title', e.target.value)}
                       placeholder="News title"
+                      className="text-sm h-9"
                     />
                   </div>
                   
                   <div>
-                    <label className="block text-sm font-medium mb-1">Content</label>
+                    <label className="block text-xs font-medium mb-1">Content</label>
                     <Textarea
                       value={newNewsItem.content}
                       onChange={(e) => handleNewNewsItemChange('content', e.target.value)}
                       placeholder="News content"
-                      className="min-h-[100px]"
+                      className="min-h-[80px] text-sm"
                     />
                   </div>
                   
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 gap-3">
                     <div>
-                      <label className="block text-sm font-medium mb-1">Date</label>
+                      <label className="block text-xs font-medium mb-1">Date</label>
                       <Input
                         type="date"
                         value={newNewsItem.date}
                         onChange={(e) => handleNewNewsItemChange('date', e.target.value)}
+                        className="text-sm h-9"
                       />
                     </div>
                     
                     <div>
-                      <label className="block text-sm font-medium mb-1">Image URL (optional)</label>
+                      <label className="block text-xs font-medium mb-1">Image URL</label>
                       <Input
                         value={newNewsItem.imageUrl}
                         onChange={(e) => handleNewNewsItemChange('imageUrl', e.target.value)}
                         placeholder="URL to an image"
+                        className="text-sm h-9"
                       />
                     </div>
                   </div>
                   
-                  <div className="flex items-center space-x-2">
+                  <div className="flex items-center space-x-2 pt-1">
                     <Switch
                       id="featured-new"
                       checked={newNewsItem.featured}
                       onCheckedChange={(checked) => handleNewNewsItemChange('featured', checked)}
                     />
-                    <label htmlFor="featured-new" className="text-sm font-medium">
+                    <label htmlFor="featured-new" className="text-xs font-medium">
                       Featured news
                     </label>
                   </div>
                   
                   <Button 
-                    className="w-full mt-2"
+                    className="w-full mt-2 text-sm"
                     onClick={submitNewNewsItem}
+                    size="sm"
                   >
                     <PlusCircle className="w-4 h-4 mr-2" />
-                    Add News Item
+                    Add News
                   </Button>
                 </div>
               </CardContent>
             </Card>
             
             <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center">
-                  <Newspaper className="w-5 h-5 mr-2" />
-                  Manage News Items
+              <CardHeader className="pb-2">
+                <CardTitle className="flex items-center text-lg">
+                  <Newspaper className="w-4 h-4 mr-2" />
+                  Manage News
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="space-y-6">
+                <div className="space-y-5">
                   {newsItems.length === 0 ? (
-                    <p className="text-center text-gray-500 py-4">No news items found</p>
+                    <p className="text-center text-gray-500 py-3 text-sm">No news items found</p>
                   ) : (
                     newsItems.map((item) => (
-                      <div key={item.id} className="border-b pb-6 mb-6">
-                        <div className="flex justify-between items-center mb-4">
-                          <h3 className="font-bold text-lg">{item.title}</h3>
-                          <div className="flex items-center space-x-2">
-                            <Button
-                              variant="destructive"
-                              size="sm"
-                              onClick={() => handleDeleteNewsItem(item.id)}
-                            >
-                              <Trash2 className="w-4 h-4" />
-                            </Button>
-                          </div>
+                      <div key={item.id} className="border-b pb-4 mb-4">
+                        <div className="flex justify-between items-center mb-3">
+                          <h3 className="font-bold text-sm truncate pr-2">{item.title}</h3>
+                          <Button
+                            variant="destructive"
+                            size="icon"
+                            className="h-6 w-6"
+                            onClick={() => handleDeleteNewsItem(item.id)}
+                          >
+                            <Trash2 className="w-3 h-3" />
+                          </Button>
                         </div>
                         
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                        <div className="space-y-3">
                           <div>
-                            <label className="block text-sm font-medium mb-1">Title</label>
+                            <label className="block text-xs font-medium mb-1">Title</label>
                             <Input
                               value={item.title}
                               onChange={(e) => handleNewsItemChange(item.id, 'title', e.target.value)}
+                              className="text-sm h-9"
                             />
                           </div>
                           
                           <div>
-                            <label className="block text-sm font-medium mb-1">Date</label>
+                            <label className="block text-xs font-medium mb-1">Date</label>
                             <Input
                               type="date"
                               value={item.date}
                               onChange={(e) => handleNewsItemChange(item.id, 'date', e.target.value)}
+                              className="text-sm h-9"
                             />
                           </div>
-                        </div>
                         
-                        <div className="mb-4">
-                          <label className="block text-sm font-medium mb-1">Content</label>
-                          <Textarea
-                            value={item.content}
-                            onChange={(e) => handleNewsItemChange(item.id, 'content', e.target.value)}
-                            className="min-h-[100px]"
-                          />
-                        </div>
+                          <div>
+                            <label className="block text-xs font-medium mb-1">Content</label>
+                            <Textarea
+                              value={item.content}
+                              onChange={(e) => handleNewsItemChange(item.id, 'content', e.target.value)}
+                              className="min-h-[80px] text-sm"
+                            />
+                          </div>
                         
-                        <div className="mb-4">
-                          <label className="block text-sm font-medium mb-1">Image URL</label>
-                          <Input
-                            value={item.imageUrl || ''}
-                            onChange={(e) => handleNewsItemChange(item.id, 'imageUrl', e.target.value)}
-                            placeholder="URL to an image"
-                          />
-                        </div>
+                          <div>
+                            <label className="block text-xs font-medium mb-1">Image URL</label>
+                            <Input
+                              value={item.imageUrl || ''}
+                              onChange={(e) => handleNewsItemChange(item.id, 'imageUrl', e.target.value)}
+                              placeholder="URL to an image"
+                              className="text-sm h-9"
+                            />
+                          </div>
                         
-                        <div className="flex items-center space-x-2">
-                          <Switch
-                            id={`featured-${item.id}`}
-                            checked={item.featured}
-                            onCheckedChange={(e) => handleNewsItemChange(item.id, 'featured', checked)}
-                          />
-                          <label htmlFor={`featured-${item.id}`} className="text-sm font-medium">
-                            Featured news
-                          </label>
+                          <div className="flex items-center space-x-2 pt-1">
+                            <Switch
+                              id={`featured-${item.id}`}
+                              checked={item.featured}
+                              onCheckedChange={(checked) => handleNewsItemChange(item.id, 'featured', checked)}
+                            />
+                            <label htmlFor={`featured-${item.id}`} className="text-xs font-medium">
+                              Featured news
+                            </label>
+                          </div>
                         </div>
                       </div>
                     ))
@@ -686,11 +704,12 @@ const Config = () => {
                   
                   {newsItems.length > 0 && (
                     <Button 
-                      className="w-full mt-2"
+                      className="w-full mt-2 text-sm"
                       onClick={saveNewsItems}
+                      size="sm"
                     >
                       <Save className="w-4 h-4 mr-2" />
-                      Save News Changes
+                      Save Changes
                     </Button>
                   )}
                 </div>
@@ -699,28 +718,30 @@ const Config = () => {
           </TabsContent>
           
           <TabsContent value="tournament">
-            <Card className="mb-6">
-              <CardHeader>
-                <CardTitle>Tournament Details</CardTitle>
+            <Card className="mb-4">
+              <CardHeader className="pb-2">
+                <CardTitle className="text-lg">Tournament Details</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="space-y-4">
+                <div className="space-y-3">
                   <div>
-                    <label className="block text-sm font-medium mb-1">Tournament Name</label>
+                    <label className="block text-xs font-medium mb-1">Tournament Name</label>
                     <Input
                       value={tournamentConfig.title}
                       onChange={(e) => handleConfigChange('title', e.target.value)}
+                      className="text-sm h-9"
                     />
                   </div>
                   
                   <div>
-                    <label className="block text-sm font-medium mb-1">Season Year</label>
+                    <label className="block text-xs font-medium mb-1">Season Year</label>
                     <Input
                       type="number"
                       min="2000"
                       max="2100"
                       value={tournamentConfig.season}
                       onChange={(e) => handleConfigChange('season', parseInt(e.target.value, 10) || 2024)}
+                      className="text-sm h-9"
                     />
                   </div>
                 </div>
@@ -728,86 +749,92 @@ const Config = () => {
             </Card>
             
             <Card>
-              <CardHeader>
-                <CardTitle>Points System</CardTitle>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-lg">Points System</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4">
+                <div className="grid grid-cols-3 gap-2">
                   {Object.entries(tournamentConfig.pointsSystem).map(([position, points]) => (
                     <div key={position}>
-                      <label className="block text-sm font-medium mb-1">Position {position}</label>
+                      <label className="block text-xs font-medium mb-1">P{position}</label>
                       <Input
                         type="number"
                         min="0"
                         value={points}
                         onChange={(e) => handlePointsSystemChange(position, e.target.value)}
+                        className="text-sm h-8"
                       />
                     </div>
                   ))}
                 </div>
                 
                 <Button 
-                  className="w-full mt-6"
+                  className="w-full mt-4 text-sm"
                   onClick={saveTournamentConfig}
+                  size="sm"
                 >
                   <Save className="w-4 h-4 mr-2" />
-                  Save Tournament Settings
+                  Save Settings
                 </Button>
               </CardContent>
             </Card>
           </TabsContent>
           
           <TabsContent value="add">
-            <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+            <div className="space-y-4">
               <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center">
-                    <Trophy className="w-5 h-5 mr-2" />
-                    Add New Team
+                <CardHeader className="pb-2">
+                  <CardTitle className="flex items-center text-lg">
+                    <Trophy className="w-4 h-4 mr-2" />
+                    Add Team
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="space-y-4">
+                  <div className="space-y-3">
                     <div>
-                      <label className="block text-sm font-medium mb-1">Team Name</label>
+                      <label className="block text-xs font-medium mb-1">Team Name</label>
                       <Input
                         value={newTeam.name}
                         onChange={(e) => handleNewTeamChange('name', e.target.value)}
                         placeholder="Enter team name"
+                        className="text-sm h-9"
                       />
                     </div>
                     
                     <div>
-                      <label className="block text-sm font-medium mb-1">Initial Points</label>
+                      <label className="block text-xs font-medium mb-1">Initial Points</label>
                       <Input
                         type="number"
                         min="0"
                         value={newTeam.points}
                         onChange={(e) => handleNewTeamChange('points', parseInt(e.target.value, 10) || 0)}
+                        className="text-sm h-9"
                       />
                     </div>
                     
                     <div>
-                      <label className="block text-sm font-medium mb-1">Team Color</label>
+                      <label className="block text-xs font-medium mb-1">Team Color</label>
                       <div className="flex items-center gap-2">
                         <Input
                           type="color"
                           value={newTeam.color}
                           onChange={(e) => handleNewTeamChange('color', e.target.value)}
-                          className="w-16 h-10 p-1"
+                          className="w-12 h-9 p-1"
                         />
                         <Input
                           type="text"
                           value={newTeam.color}
                           onChange={(e) => handleNewTeamChange('color', e.target.value)}
                           placeholder="#000000"
+                          className="text-sm h-9"
                         />
                       </div>
                     </div>
                     
                     <Button 
-                      className="w-full mt-4"
+                      className="w-full mt-3 text-sm"
                       onClick={submitNewTeam}
+                      size="sm"
                     >
                       <PlusCircle className="w-4 h-4 mr-2" />
                       Add Team
@@ -817,51 +844,55 @@ const Config = () => {
               </Card>
               
               <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center">
-                    <Flag className="w-5 h-5 mr-2" />
-                    Add New Race
+                <CardHeader className="pb-2">
+                  <CardTitle className="flex items-center text-lg">
+                    <Flag className="w-4 h-4 mr-2" />
+                    Add Race
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="space-y-4">
+                  <div className="space-y-3">
                     <div>
-                      <label className="block text-sm font-medium mb-1">Race Name</label>
+                      <label className="block text-xs font-medium mb-1">Race Name</label>
                       <Input
                         value={newRace.name}
                         onChange={(e) => handleNewRaceChange('name', e.target.value)}
                         placeholder="E.g. Monaco Grand Prix"
+                        className="text-sm h-9"
                       />
                     </div>
                     
                     <div>
-                      <label className="block text-sm font-medium mb-1">Circuit</label>
+                      <label className="block text-xs font-medium mb-1">Circuit</label>
                       <Input
                         value={newRace.circuit}
                         onChange={(e) => handleNewRaceChange('circuit', e.target.value)}
                         placeholder="E.g. Circuit de Monaco"
+                        className="text-sm h-9"
                       />
                     </div>
                     
                     <div>
-                      <label className="block text-sm font-medium mb-1">Country</label>
+                      <label className="block text-xs font-medium mb-1">Country</label>
                       <Input
                         value={newRace.country}
                         onChange={(e) => handleNewRaceChange('country', e.target.value)}
                         placeholder="E.g. Monaco"
+                        className="text-sm h-9"
                       />
                     </div>
                     
                     <div>
-                      <label className="block text-sm font-medium mb-1">Date</label>
+                      <label className="block text-xs font-medium mb-1">Date</label>
                       <Input
                         type="date"
                         value={newRace.date}
                         onChange={(e) => handleNewRaceChange('date', e.target.value)}
+                        className="text-sm h-9"
                       />
                     </div>
                     
-                    <div>
+                    <div className="pt-1">
                       <label className="flex items-center cursor-pointer">
                         <input
                           type="checkbox"
@@ -869,13 +900,14 @@ const Config = () => {
                           checked={newRace.completed}
                           onChange={(e) => handleNewRaceChange('completed', e.target.checked)}
                         />
-                        <span className="text-sm">Race completed</span>
+                        <span className="text-xs">Race completed</span>
                       </label>
                     </div>
                     
                     <Button 
-                      className="w-full mt-4"
+                      className="w-full mt-3 text-sm"
                       onClick={submitNewRace}
+                      size="sm"
                     >
                       <PlusCircle className="w-4 h-4 mr-2" />
                       Add Race
@@ -892,4 +924,3 @@ const Config = () => {
 };
 
 export default Config;
-
