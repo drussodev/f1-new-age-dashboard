@@ -4,7 +4,7 @@ import { Layout } from '../components/layout/Layout';
 import { useF1Data } from '../context/F1DataContext';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { format } from 'date-fns';
-import { Newspaper, Star } from 'lucide-react';
+import { Newspaper, Star, Image, Video } from 'lucide-react';
 
 const News = () => {
   const { news } = useF1Data();
@@ -27,8 +27,11 @@ const News = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {sortedNews.map((newsItem) => (
             <Card key={newsItem.id} className="h-full flex flex-col overflow-hidden hover:shadow-lg transition-shadow">
-              {newsItem.imageUrl && (
+              {newsItem.imageUrl && !newsItem.videoUrl && (
                 <div className="relative h-48 overflow-hidden">
+                  <div className="absolute top-2 left-2 bg-black/50 text-white p-1 rounded-md">
+                    <Image className="w-4 h-4" />
+                  </div>
                   <img 
                     src={newsItem.imageUrl} 
                     alt={newsItem.title} 
@@ -43,10 +46,33 @@ const News = () => {
                 </div>
               )}
               
-              <CardHeader className={newsItem.imageUrl ? "" : "pb-2"}>
+              {newsItem.videoUrl && (
+                <div className="relative h-48 overflow-hidden">
+                  <div className="absolute top-2 left-2 bg-black/50 text-white p-1 rounded-md z-10">
+                    <Video className="w-4 h-4" />
+                  </div>
+                  <div className="w-full h-full">
+                    <iframe 
+                      src={newsItem.videoUrl} 
+                      title={newsItem.title}
+                      className="w-full h-full"
+                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                      allowFullScreen
+                    ></iframe>
+                  </div>
+                  {newsItem.featured && (
+                    <div className="absolute top-2 right-2 bg-f1-red text-white p-1 rounded-md flex items-center z-10">
+                      <Star className="w-4 h-4 mr-1" />
+                      <span className="text-xs font-medium">Featured</span>
+                    </div>
+                  )}
+                </div>
+              )}
+              
+              <CardHeader className={newsItem.imageUrl || newsItem.videoUrl ? "" : "pb-2"}>
                 <div className="flex justify-between items-start">
                   <CardTitle className="text-xl">{newsItem.title}</CardTitle>
-                  {!newsItem.imageUrl && newsItem.featured && (
+                  {!newsItem.imageUrl && !newsItem.videoUrl && newsItem.featured && (
                     <Star className="w-5 h-5 text-f1-red" />
                   )}
                 </div>

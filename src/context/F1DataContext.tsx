@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState, useEffect } from 'react';
 
 interface Driver {
@@ -47,7 +46,9 @@ interface News {
   title: string;
   content: string;
   date: string;
-  image?: string;
+  imageUrl?: string;
+  videoUrl?: string;
+  featured?: boolean;
 }
 
 interface F1DataContextType {
@@ -67,7 +68,6 @@ interface F1DataContextType {
   completedRaces: Race[];
 }
 
-// Default data
 const defaultDrivers: Driver[] = [
   { id: '1', name: 'Lewis Hamilton', number: 44, team: 'Mercedes', country: 'United Kingdom', points: 180, color: '#00D2BE' },
   { id: '2', name: 'Max Verstappen', number: 33, team: 'Red Bull Racing', country: 'Netherlands', points: 220, color: '#0600EF' },
@@ -107,23 +107,21 @@ const defaultNews: News[] = [
     title: 'Hamilton Dominates in Monaco',
     content: 'Lewis Hamilton takes a commanding win at the Monaco Grand Prix, extending his championship lead.',
     date: '2023-05-28',
-    image: 'https://images.unsplash.com/photo-1568605117036-5fe5e7bab0b7?q=80&w=2000'
+    imageUrl: 'https://images.unsplash.com/photo-1568605117036-5fe5e7bab0b7?q=80&w=2000',
+    featured: true
   },
   {
     id: '2',
     title: 'Verstappen Signs New Contract',
     content: 'Max Verstappen has signed a new multi-year contract with Red Bull Racing, securing his future with the team.',
     date: '2023-05-24',
-    image: 'https://images.unsplash.com/photo-1511919884226-fd3cad34687c?q=80&w=2000'
+    imageUrl: 'https://images.unsplash.com/photo-1511919884226-fd3cad34687c?q=80&w=2000'
   },
 ];
 
-// Create the context
 const F1DataContext = createContext<F1DataContextType | undefined>(undefined);
 
-// Provider component
 export const F1DataProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  // Load from localStorage if available
   const [drivers, setDrivers] = useState<Driver[]>(() => {
     const saved = localStorage.getItem('f1-drivers');
     return saved ? JSON.parse(saved) : defaultDrivers;
@@ -149,7 +147,6 @@ export const F1DataProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     return saved ? JSON.parse(saved) : defaultNews;
   });
 
-  // Save to localStorage when state changes
   useEffect(() => {
     localStorage.setItem('f1-drivers', JSON.stringify(drivers));
   }, [drivers]);
@@ -170,7 +167,6 @@ export const F1DataProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     localStorage.setItem('f1-news', JSON.stringify(news));
   }, [news]);
 
-  // Computed properties
   const sortedDrivers = [...drivers].sort((a, b) => b.points - a.points);
   const sortedTeams = [...teams].sort((a, b) => b.points - a.points);
   
@@ -199,7 +195,6 @@ export const F1DataProvider: React.FC<{ children: React.ReactNode }> = ({ childr
   );
 };
 
-// Custom hook to use the F1 data context
 export const useF1Data = () => {
   const context = useContext(F1DataContext);
   if (context === undefined) {
