@@ -3,7 +3,7 @@ import React from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useF1Data } from '../../context/F1DataContext';
 import { useAuth } from '../../context/AuthContext';
-import { Trophy, Users, Calendar, Settings, LogIn, LogOut, UserCircle } from 'lucide-react';
+import { Trophy, Users, Calendar, Settings, LogIn, LogOut, UserCircle, Newspaper } from 'lucide-react';
 
 export const Navbar: React.FC = () => {
   const { config } = useF1Data();
@@ -42,6 +42,10 @@ export const Navbar: React.FC = () => {
             <NavLink to="/calendar" active={isActive('/calendar')}>
               <Calendar className="w-5 h-5 mr-1" />
               <span>Calendar</span>
+            </NavLink>
+            <NavLink to="/news" active={isActive('/news')}>
+              <Newspaper className="w-5 h-5 mr-1" />
+              <span>News</span>
             </NavLink>
             {isAdmin && (
               <NavLink to="/config" active={isActive('/config')}>
@@ -160,6 +164,10 @@ const MobileMenu: React.FC = () => {
           <NavItem to="/calendar" active={isActive('/calendar')} onClick={closeMenu}>
             <Calendar className="w-5 h-5 mr-2" />
             Calendar
+          </NavItem>
+          <NavItem to="/news" active={isActive('/news')} onClick={closeMenu}>
+            <Newspaper className="w-5 h-5 mr-2" />
+            News
           </NavItem>
           {isAdmin && (
             <NavItem to="/config" active={isActive('/config')} onClick={closeMenu}>

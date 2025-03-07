@@ -37,11 +37,21 @@ export interface TournamentConfig {
   };
 }
 
+export interface NewsItem {
+  id: string;
+  title: string;
+  content: string;
+  date: string;
+  imageUrl?: string;
+  featured: boolean;
+}
+
 interface F1DataContextType {
   drivers: Driver[];
   teams: Team[];
   races: Race[];
   config: TournamentConfig;
+  news: NewsItem[];
   updateDriverPoints: (driverId: string, newPoints: number) => void;
   updateTeamPoints: (teamId: string, newPoints: number) => void;
   updateRaceDetails: (raceId: string, updatedRace: Partial<Race>) => void;
@@ -50,6 +60,9 @@ interface F1DataContextType {
   addTeam: (team: Omit<Team, 'id'>) => void;
   addRace: (race: Omit<Race, 'id'>) => void;
   updateDriverDetails: (driverId: string, details: Partial<Driver>) => void;
+  addNewsItem: (newsItem: Omit<NewsItem, 'id'>) => void;
+  updateNewsItem: (id: string, updates: Partial<Omit<NewsItem, 'id'>>) => void;
+  deleteNewsItem: (id: string) => void;
   sortedDrivers: Driver[];
   sortedTeams: Team[];
 }
@@ -129,6 +142,32 @@ export const F1DataProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     const stored = localStorage.getItem(STORAGE_KEYS.CONFIG);
     return stored ? JSON.parse(stored) : defaultConfig;
   });
+
+  const [news, setNews] = useState<NewsItem[]>([
+    {
+      id: "news-1",
+      title: "Season Opener: Exciting Start to the Championship",
+      content: "The new season kicked off with an incredible race that saw multiple lead changes and surprising performances from rookies.",
+      date: "2024-03-15",
+      imageUrl: "https://images.unsplash.com/photo-1568605117036-5fe5e7bab0b7?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3",
+      featured: true,
+    },
+    {
+      id: "news-2",
+      title: "Team Changes: New Technical Directors Announced",
+      content: "Multiple teams have announced changes to their technical leadership as they prepare for next season's regulation changes.",
+      date: "2024-04-02",
+      imageUrl: "https://images.unsplash.com/photo-1511818966892-d7d671e672a2?q=80&w=2071&auto=format&fit=crop&ixlib=rb-4.0.3",
+      featured: false,
+    },
+    {
+      id: "news-3",
+      title: "Driver Market: Contract Negotiations Begin",
+      content: "Several top drivers are entering negotiations for new contracts as the mid-season approaches.",
+      date: "2024-04-10",
+      featured: false,
+    }
+  ]);
 
   useEffect(() => {
     localStorage.setItem(STORAGE_KEYS.DRIVERS, JSON.stringify(drivers));
@@ -224,6 +263,26 @@ export const F1DataProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     toast.success("Driver details updated successfully");
   };
 
+  const addNewsItem = (newsItem: Omit<NewsItem, 'id'>) => {
+    const newItem = {
+      ...newsItem,
+      id: `news-${Date.now()}`
+    };
+    setNews(prev => [...prev, newItem]);
+  };
+
+  const updateNewsItem = (id: string, updates: Partial<Omit<NewsItem, 'id'>>) => {
+    setNews(prev => 
+      prev.map(item => 
+        item.id === id ? { ...item, ...updates } : item
+      )
+    );
+  };
+
+  const deleteNewsItem = (id: string) => {
+    setNews(prev => prev.filter(item => item.id !== id));
+  };
+
   const sortedDrivers = [...drivers].sort((a, b) => b.points - a.points);
   
   const sortedTeams = [...teams].sort((a, b) => b.points - a.points);
@@ -233,6 +292,7 @@ export const F1DataProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     teams,
     races,
     config,
+    news,
     updateDriverPoints,
     updateTeamPoints,
     updateRaceDetails,
@@ -241,6 +301,9 @@ export const F1DataProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     addTeam,
     addRace,
     updateDriverDetails,
+    addNewsItem,
+    updateNewsItem,
+    deleteNewsItem,
     sortedDrivers,
     sortedTeams
   };

@@ -12,6 +12,7 @@ import ProtectedRoute from "./components/auth/ProtectedRoute";
 import Index from "./pages/Index";
 import Drivers from "./pages/Drivers";
 import Calendar from "./pages/Calendar";
+import News from "./pages/News";
 import Config from "./pages/Config";
 import NotFound from "./pages/NotFound";
 import Login from "./pages/Login";
@@ -31,6 +32,7 @@ const App = () => (
               <Route path="/" element={<Index />} />
               <Route path="/drivers" element={<Drivers />} />
               <Route path="/calendar" element={<Calendar />} />
+              <Route path="/news" element={<News />} />
               <Route path="/config" element={
                 <ProtectedRoute requireAdmin>
                   <Config />
