@@ -77,9 +77,6 @@ const Login = () => {
               <Button type="submit" className="w-full">
                 Sign In
               </Button>
-              <p className="text-xs text-center text-gray-500 mt-4">
-                For demo: Use "admin" / "f1admin" for admin access or "root" / "f1root" for root access
-              </p>
               {isRoot && (
                 <div className="text-center mt-4">
                   <Link to="/accounts" className="text-sm text-f1-red hover:underline">
