@@ -17,7 +17,6 @@ import Config from "./pages/Config";
 import NotFound from "./pages/NotFound";
 import Login from "./pages/Login";
 import AccountsManagement from "./pages/AccountsManagement";
-import Logs from "./pages/Logs";
 
 const queryClient = new QueryClient();
 
@@ -43,11 +42,6 @@ const App = () => (
               <Route path="/accounts" element={
                 <ProtectedRoute requireRoot>
                   <AccountsManagement />
-                </ProtectedRoute>
-              } />
-              <Route path="/logs" element={
-                <ProtectedRoute requireRoot>
-                  <Logs />
                 </ProtectedRoute>
               } />
               <Route path="*" element={<NotFound />} />
