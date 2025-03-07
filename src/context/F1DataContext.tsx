@@ -1,4 +1,3 @@
-
 import React, { createContext, useState, useContext, useEffect } from 'react';
 import { toast } from "sonner";
 
@@ -44,6 +43,7 @@ interface F1DataContextType {
   config: TournamentConfig;
   updateDriverPoints: (driverId: string, newPoints: number) => void;
   updateTeamPoints: (teamId: string, newPoints: number) => void;
+  updateRaceDetails: (raceId: string, updatedRace: Partial<Race>) => void;
   updateConfig: (newConfig: Partial<TournamentConfig>) => void;
   sortedDrivers: Driver[];
   sortedTeams: Team[];
@@ -172,6 +172,18 @@ export const F1DataProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     toast.success("Team points updated successfully");
   };
 
+  // Update race details
+  const updateRaceDetails = (raceId: string, updatedRace: Partial<Race>) => {
+    setRaces(prevRaces => 
+      prevRaces.map(race => 
+        race.id === raceId 
+          ? { ...race, ...updatedRace } 
+          : race
+      )
+    );
+    toast.success("Race details updated successfully");
+  };
+
   // Update config
   const updateConfig = (newConfig: Partial<TournamentConfig>) => {
     setConfig(prevConfig => ({ ...prevConfig, ...newConfig }));
@@ -192,6 +204,7 @@ export const F1DataProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     config,
     updateDriverPoints,
     updateTeamPoints,
+    updateRaceDetails,
     updateConfig,
     sortedDrivers,
     sortedTeams
