@@ -11,19 +11,10 @@ const Index = () => {
 
   return (
     <Layout>
-      <div className="bg-f1-red bg-opacity-5 py-16 relative">
-        {/* F1 Wallpaper behind header section only */}
-        <div 
-          className="absolute inset-0 bg-cover bg-center bg-no-repeat opacity-10 pointer-events-none z-0" 
-          style={{ 
-            backgroundImage: "url('https://images.unsplash.com/photo-1504707748692-419802cf939d?q=80&w=2000')",
-          }}
-          id="f1-wallpaper"
-        ></div>
-        
+      <div className="bg-black bg-opacity-70 py-16 relative">
         <div className="container mx-auto text-center px-4 relative z-10">
-          <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">F1 New Age Tournament</h1>
-          <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+          <h1 className="text-4xl md:text-5xl font-bold text-white mb-4">F1 New Age Tournament</h1>
+          <p className="text-xl text-gray-300 max-w-3xl mx-auto">
             Follow the latest standings, driver profiles, and race calendar for the F1 New Age Tournament
           </p>
         </div>
@@ -37,7 +28,7 @@ const Index = () => {
           </TabsList>
           
           <TabsContent value="drivers">
-            <Card>
+            <Card className="bg-white bg-opacity-95">
               <CardHeader>
                 <CardTitle className="flex items-center text-xl">
                   <User className="w-5 h-5 mr-2" />
@@ -80,7 +71,7 @@ const Index = () => {
           </TabsContent>
           
           <TabsContent value="teams">
-            <Card>
+            <Card className="bg-white bg-opacity-95">
               <CardHeader>
                 <CardTitle className="flex items-center text-xl">
                   <Trophy className="w-5 h-5 mr-2" />

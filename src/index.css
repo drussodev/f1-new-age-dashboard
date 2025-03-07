@@ -42,6 +42,10 @@
 
   body {
     @apply bg-background text-foreground font-sans;
+    background-image: url('https://i.imgur.com/cSXNrED.png');
+    background-size: cover;
+    background-position: center;
+    background-attachment: fixed;
   }
 }
 
