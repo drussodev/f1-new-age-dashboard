@@ -24,7 +24,12 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
         <div className="speed-line top-[80%] w-[75%]"></div>
       </div>
 
-      <Navbar />
+      <header 
+        className="bg-cover bg-center" 
+        style={{ backgroundImage: 'url("https://i.imgur.com/cSXNrED.png")' }}
+      >
+        <Navbar />
+      </header>
       
       <main className={`flex-1 ${isAdmin ? 'container mx-auto px-4 py-8' : ''}`}>
         {children}
