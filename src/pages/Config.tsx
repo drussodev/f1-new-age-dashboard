@@ -674,7 +674,7 @@ const Config = () => {
                           <Switch
                             id={`featured-${item.id}`}
                             checked={item.featured}
-                            onCheckedChange={(e) => handleNewsItemChange(item.id, 'featured', checked)}
+                            onCheckedChange={(checked) => handleNewsItemChange(item.id, 'featured', checked)}
                           />
                           <label htmlFor={`featured-${item.id}`} className="text-sm font-medium">
                             Featured news
@@ -892,4 +892,3 @@ const Config = () => {
 };
 
 export default Config;
-

@@ -33,7 +33,7 @@ const Drivers = () => {
                 <CardContent className="p-6">
                   <div className="flex items-center mb-4">
                     <div className="w-16 h-16 bg-gray-200 rounded-full mr-4 flex items-center justify-center text-2xl font-bold">
-                      {driver.number}
+                      {driver.number || '??'}
                     </div>
                     <div>
                       <h2 className="font-bold text-xl">{driver.name}</h2>
@@ -82,7 +82,7 @@ const Drivers = () => {
                         
                         <div className="aspect-square rounded-md overflow-hidden bg-gray-100">
                           <img 
-                            src={driver.image || "/placeholder.svg"} 
+                            src={driver.image || driver.imageUrl || "/placeholder.svg"} 
                             alt={`${driver.name} profile`}
                             className="w-full h-full object-cover" 
                           />

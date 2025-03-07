@@ -8,7 +8,10 @@ interface Driver {
   team: string;
   points: number;
   position: number;
+  number: number;
+  color: string;
   imageUrl?: string;
+  image?: string;
   description?: string;
   country?: string;
 }
@@ -27,6 +30,7 @@ interface Race {
   name: string;
   date: string;
   circuit: string;
+  country: string;
   location: string;
   winner?: string;
   completed: boolean;
@@ -46,6 +50,9 @@ interface Config {
   title: string;
   season: string;
   nextRace: string;
+  pointsSystem: {
+    [position: string]: number;
+  };
   theme: {
     primaryColor: string;
     secondaryColor: string;
@@ -58,6 +65,8 @@ interface F1DataContextType {
   races: Race[];
   news: News[];
   config: Config;
+  sortedDrivers: Driver[];
+  sortedTeams: Team[];
   updateDriverName: (id: string, name: string) => void;
   updateDriverTeam: (id: string, team: string) => void;
   updateTeamName: (id: string, name: string) => void;
@@ -77,6 +86,13 @@ interface F1DataContextType {
   addNews: (news: Omit<News, 'id'>) => string;
   updateNews: (id: string, updates: Partial<Omit<News, 'id'>>) => void;
   deleteNews: (id: string) => void;
+  addNewsItem: (newsItem: any) => void;
+  updateNewsItem: (id: string, updates: any) => void;
+  deleteNewsItem: (id: string) => void;
+  updateRaceDetails: (id: string, details: any) => void;
+  addTeam: (team: any) => void;
+  addRace: (race: any) => void;
+  updateDriverDetails: (id: string, details: any) => void;
 }
 
 // Initial data
@@ -87,7 +103,10 @@ const initialDrivers: Driver[] = [
     team: 'Red Bull Racing',
     points: 395,
     position: 1,
+    number: 1,
+    color: '#0600EF',
     imageUrl: 'https://www.formula1.com/content/dam/fom-website/drivers/M/MAXVER01_Max_Verstappen/maxver01.png',
+    image: 'https://www.formula1.com/content/dam/fom-website/drivers/M/MAXVER01_Max_Verstappen/maxver01.png',
     description: 'The reigning world champion known for his aggressive driving style.',
     country: 'Netherlands'
   },
@@ -97,7 +116,10 @@ const initialDrivers: Driver[] = [
     team: 'Red Bull Racing',
     points: 285,
     position: 2,
+    number: 11,
+    color: '#0600EF',
     imageUrl: 'https://www.formula1.com/content/dam/fom-website/drivers/S/SERPER01_Sergio_Perez/serper01.png',
+    image: 'https://www.formula1.com/content/dam/fom-website/drivers/S/SERPER01_Sergio_Perez/serper01.png',
     description: 'An experienced driver known for his strategic racing and tire management.',
     country: 'Mexico'
   },
@@ -107,7 +129,10 @@ const initialDrivers: Driver[] = [
     team: 'Mercedes',
     points: 240,
     position: 3,
+    number: 44,
+    color: '#00D2BE',
     imageUrl: 'https://www.formula1.com/content/dam/fom-website/drivers/L/LEWHAM01_Lewis_Hamilton/lewham01.png',
+    image: 'https://www.formula1.com/content/dam/fom-website/drivers/L/LEWHAM01_Lewis_Hamilton/lewham01.png',
     description: 'A seven-time world champion and one of the greatest drivers of all time.',
     country: 'United Kingdom'
   },
@@ -117,7 +142,10 @@ const initialDrivers: Driver[] = [
     team: 'Aston Martin',
     points: 200,
     position: 4,
+    number: 14,
+    color: '#006F62',
     imageUrl: 'https://www.formula1.com/content/dam/fom-website/drivers/F/FERALO01_Fernando_Alonso/feralo01.png',
+    image: 'https://www.formula1.com/content/dam/fom-website/drivers/F/FERALO01_Fernando_Alonso/feralo01.png',
     description: 'A two-time world champion making a strong comeback with Aston Martin.',
     country: 'Spain'
   },
@@ -127,7 +155,10 @@ const initialDrivers: Driver[] = [
     team: 'Ferrari',
     points: 180,
     position: 5,
+    number: 16,
+    color: '#DC0000',
     imageUrl: 'https://www.formula1.com/content/dam/fom-website/drivers/C/CHLLEC01_Charles_Leclerc/chllec01.png',
+    image: 'https://www.formula1.com/content/dam/fom-website/drivers/C/CHLLEC01_Charles_Leclerc/chllec01.png',
     description: 'A young and talented driver known for his qualifying speed.',
     country: 'Monaco'
   },
@@ -137,7 +168,10 @@ const initialDrivers: Driver[] = [
     team: 'McLaren',
     points: 160,
     position: 6,
+    number: 47,
+    color: '#FF8700',
     imageUrl: 'https://www.formula1.com/content/dam/fom-website/drivers/L/LANNOR01_Lando_Norris/lannor01.png',
+    image: 'https://www.formula1.com/content/dam/fom-website/drivers/L/LANNOR01_Lando_Norris/lannor01.png',
     description: 'A rising star with consistent performances and a fan favorite.',
     country: 'United Kingdom'
   },
@@ -147,7 +181,10 @@ const initialDrivers: Driver[] = [
     team: 'Ferrari',
     points: 150,
     position: 7,
+    number: 55,
+    color: '#DC0000',
     imageUrl: 'https://www.formula1.com/content/dam/fom-website/drivers/C/CARSAI01_Carlos_Sainz/carsai01.png',
+    image: 'https://www.formula1.com/content/dam/fom-website/drivers/C/CARSAI01_Carlos_Sainz/carsai01.png',
     description: 'A consistent performer with a strong racing pedigree.',
     country: 'Spain'
   },
@@ -157,7 +194,10 @@ const initialDrivers: Driver[] = [
     team: 'Mercedes',
     points: 140,
     position: 8,
+    number: 12,
+    color: '#00D2BE',
     imageUrl: 'https://www.formula1.com/content/dam/fom-website/drivers/G/GEORUS01_George_Russell/georus01.png',
+    image: 'https://www.formula1.com/content/dam/fom-website/drivers/G/GEORUS01_George_Russell/georus01.png',
     description: 'A young and promising driver with a bright future.',
     country: 'United Kingdom'
   },
@@ -167,7 +207,10 @@ const initialDrivers: Driver[] = [
     team: 'McLaren',
     points: 120,
     position: 9,
+    number: 18,
+    color: '#FF8700',
     imageUrl: 'https://www.formula1.com/content/dam/fom-website/drivers/O/OSCPIA01_Oscar_Piastri/oscpia01.png',
+    image: 'https://www.formula1.com/content/dam/fom-website/drivers/O/OSCPIA01_Oscar_Piastri/oscpia01.png',
     description: 'A talented rookie making a name for himself in Formula 1.',
     country: 'Australia'
   },
@@ -177,7 +220,10 @@ const initialDrivers: Driver[] = [
     team: 'Aston Martin',
     points: 100,
     position: 10,
+    number: 10,
+    color: '#006F62',
     imageUrl: 'https://www.formula1.com/content/dam/fom-website/drivers/L/LANSTR01_Lance_Stroll/lanstr01.png',
+    image: 'https://www.formula1.com/content/dam/fom-website/drivers/L/LANSTR01_Lance_Stroll/lanstr01.png',
     description: 'A solid driver with experience and occasional flashes of brilliance.',
     country: 'Canada'
   }
@@ -232,6 +278,7 @@ const initialRaces: Race[] = [
     name: 'Bahrain Grand Prix',
     date: '2024-02-29',
     circuit: 'Bahrain International Circuit',
+    country: 'Bahrain',
     location: 'Sakhir, Bahrain',
     winner: 'Max Verstappen',
     completed: true,
@@ -242,6 +289,7 @@ const initialRaces: Race[] = [
     name: 'Saudi Arabian Grand Prix',
     date: '2024-03-07',
     circuit: 'Jeddah Street Circuit',
+    country: 'Saudi Arabia',
     location: 'Jeddah, Saudi Arabia',
     winner: 'Sergio Pérez',
     completed: true,
@@ -252,6 +300,7 @@ const initialRaces: Race[] = [
     name: 'Australian Grand Prix',
     date: '2024-03-21',
     circuit: 'Albert Park Circuit',
+    country: 'Australia',
     location: 'Melbourne, Australia',
     winner: 'Carlos Sainz Jr.',
     completed: true,
@@ -262,6 +311,7 @@ const initialRaces: Race[] = [
     name: 'Japanese Grand Prix',
     date: '2024-04-04',
     circuit: 'Suzuka International Racing Course',
+    country: 'Japan',
     location: 'Suzuka, Japan',
     winner: 'Max Verstappen',
     completed: true,
@@ -272,6 +322,7 @@ const initialRaces: Race[] = [
     name: 'Chinese Grand Prix',
     date: '2024-04-18',
     circuit: 'Shanghai International Circuit',
+    country: 'China',
     location: 'Shanghai, China',
     completed: false,
     imageUrl: 'https://www.formula1.com/content/dam/fom-website/races/2024/China/Circuit.png'
@@ -281,6 +332,7 @@ const initialRaces: Race[] = [
     name: 'Miami Grand Prix',
     date: '2024-05-02',
     circuit: 'Miami International Autodrome',
+    country: 'USA',
     location: 'Miami, Florida, USA',
     completed: false,
     imageUrl: 'https://www.formula1.com/content/dam/fom-website/races/2024/Miami/Circuit.png'
@@ -330,6 +382,18 @@ const initialConfig: Config = {
   title: 'F1 New Age Tournament',
   season: '2024',
   nextRace: 'Chinese Grand Prix',
+  pointsSystem: {
+    '1': 25,
+    '2': 18,
+    '3': 15,
+    '4': 12,
+    '5': 10,
+    '6': 8,
+    '7': 6,
+    '8': 4,
+    '9': 2,
+    '10': 1
+  },
   theme: {
     primaryColor: '#F1000D',
     secondaryColor: '#000'
@@ -365,6 +429,10 @@ export const F1DataProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     const storedData = localStorage.getItem(STORAGE_KEY);
     return storedData ? JSON.parse(storedData).config : initialConfig;
   });
+
+  // Computed properties
+  const sortedDrivers = [...drivers].sort((a, b) => b.points - a.points);
+  const sortedTeams = [...teams].sort((a, b) => b.points - a.points);
 
   // Save state to localStorage on changes
   useEffect(() => {
@@ -430,6 +498,21 @@ export const F1DataProvider: React.FC<{ children: React.ReactNode }> = ({ childr
       )
     );
     addLog('Updated Driver', `Changed driver ${id} photo`);
+  };
+
+  const updateDriverDetails = (id: string, details: { country?: string; image?: string; description?: string }) => {
+    setDrivers(prevDrivers =>
+      prevDrivers.map(driver =>
+        driver.id === id ? { 
+          ...driver, 
+          country: details.country || driver.country, 
+          image: details.image || driver.image,
+          imageUrl: details.image || driver.imageUrl, 
+          description: details.description || driver.description 
+        } : driver
+      )
+    );
+    addLog('Updated Driver', `Updated details for driver ${id}`);
   };
 
   // Team update functions
@@ -521,30 +604,64 @@ export const F1DataProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     addLog('Updated Race', `${completed ? 'Marked' : 'Unmarked'} race ${id} as completed`);
   };
 
-  // Config update function
-  const updateConfig = (newConfig: Partial<Config>) => {
-    setConfig(prevConfig => ({
-      ...prevConfig,
-      ...newConfig
-    }));
-    addLog('Updated Config', `Changed system configuration`);
+  const updateRaceDetails = (id: string, details: { date?: string; country?: string; completed?: boolean }) => {
+    setRaces(prevRaces =>
+      prevRaces.map(race =>
+        race.id === id ? { 
+          ...race, 
+          date: details.date || race.date, 
+          country: details.country || race.country, 
+          completed: details.completed !== undefined ? details.completed : race.completed 
+        } : race
+      )
+    );
+    addLog('Updated Race', `Updated details for race ${id}`);
   };
 
-  // News functions
-  const addNews = (news: Omit<News, 'id'>) => {
-    const id = `news-${Date.now()}`;
-    const newNewsItem = {
-      id,
-      ...news
+  const addTeam = (team: { name: string; points: number; color: string }) => {
+    const newTeam: Team = {
+      id: `team-${Date.now()}`,
+      name: team.name,
+      points: team.points,
+      position: teams.length + 1,
+      color: team.color,
+      drivers: []
+    };
+    
+    setTeams(prevTeams => [...prevTeams, newTeam]);
+    addLog('Added Team', `Created new team: "${team.name}"`);
+  };
+
+  const addRace = (race: { name: string; circuit: string; date: string; country: string; completed: boolean }) => {
+    const newRace: Race = {
+      id: `race-${Date.now()}`,
+      name: race.name,
+      circuit: race.circuit,
+      date: race.date,
+      country: race.country,
+      location: race.country,
+      completed: race.completed
+    };
+    
+    setRaces(prevRaces => [...prevRaces, newRace]);
+    addLog('Added Race', `Created new race: "${race.name}"`);
+  };
+
+  const addNewsItem = (newsItem: { title: string; content: string; date: string; imageUrl?: string; featured?: boolean }) => {
+    const newNewsItem: News = {
+      id: `news-${Date.now()}`,
+      title: newsItem.title,
+      content: newsItem.content,
+      date: newsItem.date,
+      imageUrl: newsItem.imageUrl,
+      featured: newsItem.featured
     };
     
     setNews(prevNews => [newNewsItem, ...prevNews]);
-    addLog('Added News', `Created new article: "${news.title}"`);
-    
-    return id;
+    addLog('Added News', `Created new article: "${newsItem.title}"`);
   };
-  
-  const updateNews = (id: string, updates: Partial<Omit<News, 'id'>>) => {
+
+  const updateNewsItem = (id: string, updates: Partial<Omit<News, 'id'>>) => {
     setNews(prevNews =>
       prevNews.map(item =>
         item.id === id ? { ...item, ...updates } : item
@@ -552,10 +669,23 @@ export const F1DataProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     );
     addLog('Updated News', `Modified article ${id}: "${updates.title || 'No title change'}"`);
   };
-  
-  const deleteNews = (id: string) => {
+
+  const deleteNewsItem = (id: string) => {
     setNews(prevNews => prevNews.filter(item => item.id !== id));
     addLog('Deleted News', `Removed article ${id}`);
+  };
+
+  const addNews = addNewsItem;
+  const updateNews = updateNewsItem;
+  const deleteNews = deleteNewsItem;
+
+  // Config update function
+  const updateConfig = (newConfig: Partial<Config>) => {
+    setConfig(prevConfig => ({
+      ...prevConfig,
+      ...newConfig
+    }));
+    addLog('Updated Config', `Changed system configuration`);
   };
 
   // Context provider
@@ -566,6 +696,8 @@ export const F1DataProvider: React.FC<{ children: React.ReactNode }> = ({ childr
       races,
       news,
       config,
+      sortedDrivers,
+      sortedTeams,
       updateDriverName,
       updateDriverTeam,
       updateTeamName,
@@ -584,7 +716,14 @@ export const F1DataProvider: React.FC<{ children: React.ReactNode }> = ({ childr
       updateDriverPhoto,
       addNews,
       updateNews,
-      deleteNews
+      deleteNews,
+      addNewsItem,
+      updateNewsItem,
+      deleteNewsItem,
+      updateRaceDetails,
+      addTeam,
+      addRace,
+      updateDriverDetails
     }}>
       {children}
     </F1DataContext.Provider>
