@@ -3,7 +3,7 @@ import React from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useF1Data } from '../../context/F1DataContext';
 import { useAuth } from '../../context/AuthContext';
-import { Trophy, Users, Calendar, Settings, LogIn, LogOut, UserCircle, Newspaper } from 'lucide-react';
+import { Trophy, Users, Calendar, Settings, LogIn, LogOut, UserCircle, Newspaper, FileText } from 'lucide-react';
 
 export const Navbar: React.FC = () => {
   const { config } = useF1Data();
@@ -54,10 +54,16 @@ export const Navbar: React.FC = () => {
               </NavLink>
             )}
             {isRoot && (
-              <NavLink to="/accounts" active={isActive('/accounts')}>
-                <UserCircle className="w-5 h-5 mr-1" />
-                <span>Accounts</span>
-              </NavLink>
+              <>
+                <NavLink to="/accounts" active={isActive('/accounts')}>
+                  <UserCircle className="w-5 h-5 mr-1" />
+                  <span>Accounts</span>
+                </NavLink>
+                <NavLink to="/logs" active={isActive('/logs')}>
+                  <FileText className="w-5 h-5 mr-1" />
+                  <span>Logs</span>
+                </NavLink>
+              </>
             )}
             
             {user ? (
@@ -176,10 +182,16 @@ const MobileMenu: React.FC = () => {
             </NavItem>
           )}
           {isRoot && (
-            <NavItem to="/accounts" active={isActive('/accounts')} onClick={closeMenu}>
-              <UserCircle className="w-5 h-5 mr-2" />
-              Accounts
-            </NavItem>
+            <>
+              <NavItem to="/accounts" active={isActive('/accounts')} onClick={closeMenu}>
+                <UserCircle className="w-5 h-5 mr-2" />
+                Accounts
+              </NavItem>
+              <NavItem to="/logs" active={isActive('/logs')} onClick={closeMenu}>
+                <FileText className="w-5 h-5 mr-2" />
+                Logs
+              </NavItem>
+            </>
           )}
           
           {user ? (
