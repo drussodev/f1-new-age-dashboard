@@ -37,8 +37,8 @@ const News = () => {
     
     if (!videoId) return url; // Return original if no match
     
-    // Return proper embed URL
-    return `https://www.youtube.com/embed/${videoId}`;
+    // Return proper embed URL with necessary parameters
+    return `https://www.youtube.com/embed/${videoId}?origin=${window.location.origin}`;
   };
 
   return (
@@ -83,6 +83,7 @@ const News = () => {
                       className="w-full h-full"
                       allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                       allowFullScreen
+                      referrerPolicy="origin"
                     ></iframe>
                   </div>
                   {newsItem.featured && (
