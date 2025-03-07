@@ -1,13 +1,25 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Layout } from '../components/layout/Layout';
 import { useF1Data } from '../context/F1DataContext';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { format } from 'date-fns';
 import { Newspaper, Star, Image, Video } from 'lucide-react';
+import MediaPopup from '../components/news/MediaPopup';
 
 const News = () => {
   const { news } = useF1Data();
+  const [popupMedia, setPopupMedia] = useState<{
+    isOpen: boolean;
+    type: 'image' | 'video';
+    url: string;
+    title: string;
+  }>({
+    isOpen: false,
+    type: 'image',
+    url: '',
+    title: ''
+  });
   
   // Sort news by date (newest first) and put featured news at the top
   const sortedNews = [...news].sort((a, b) => {
@@ -41,6 +53,31 @@ const News = () => {
     return `https://www.youtube.com/embed/${videoId}?origin=${window.location.origin}`;
   };
 
+  const openImagePopup = (url: string, title: string) => {
+    setPopupMedia({
+      isOpen: true,
+      type: 'image',
+      url,
+      title
+    });
+  };
+
+  const openVideoPopup = (url: string, title: string) => {
+    setPopupMedia({
+      isOpen: true,
+      type: 'video',
+      url,
+      title
+    });
+  };
+
+  const closePopup = () => {
+    setPopupMedia(prev => ({
+      ...prev,
+      isOpen: false
+    }));
+  };
+
   return (
     <Layout>
       <div className="container mx-auto px-4 py-8">
@@ -53,7 +90,10 @@ const News = () => {
           {sortedNews.map((newsItem) => (
             <Card key={newsItem.id} className="h-full flex flex-col overflow-hidden hover:shadow-lg transition-shadow">
               {newsItem.imageUrl && !newsItem.videoUrl && (
-                <div className="relative h-48 overflow-hidden">
+                <div 
+                  className="relative h-48 overflow-hidden cursor-pointer"
+                  onClick={() => openImagePopup(newsItem.imageUrl, newsItem.title)}
+                >
                   <div className="absolute top-2 left-2 bg-black/50 text-white p-1 rounded-md">
                     <Image className="w-4 h-4" />
                   </div>
@@ -72,7 +112,10 @@ const News = () => {
               )}
               
               {newsItem.videoUrl && (
-                <div className="relative h-48 overflow-hidden">
+                <div 
+                  className="relative h-48 overflow-hidden cursor-pointer"
+                  onClick={() => openVideoPopup(newsItem.videoUrl, newsItem.title)}
+                >
                   <div className="absolute top-2 left-2 bg-black/50 text-white p-1 rounded-md z-10">
                     <Video className="w-4 h-4" />
                   </div>
@@ -116,6 +159,14 @@ const News = () => {
           ))}
         </div>
       </div>
+
+      <MediaPopup 
+        isOpen={popupMedia.isOpen}
+        onClose={closePopup}
+        mediaType={popupMedia.type}
+        mediaUrl={popupMedia.url}
+        title={popupMedia.title}
+      />
     </Layout>
   );
 };
