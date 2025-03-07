@@ -5,17 +5,26 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Trophy, Calendar, Users, Settings, Newspaper, Twitch, Image, Video, Star } from 'lucide-react';
+import { Trophy, Calendar, Users, Settings, Newspaper, Twitch } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import { Label } from '@/components/ui/label';
-import { Checkbox } from "@/components/ui/checkbox";
+import {
+  Table,
+  TableBody,
+  TableCaption,
+  TableCell,
+  TableFooter,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table"
 
 const Config = () => {
   const { 
-    drivers, setDrivers, 
-    teams, setTeams, 
-    races, setRaces,
     config, setConfig,
+    drivers, setDrivers,
+    teams, setTeams,
+    races, setRaces,
     news, setNews
   } = useF1Data();
 
@@ -190,110 +199,168 @@ const Config = () => {
   };
 
   // Race State
-  const [newRace, setNewRace] = useState({
-    id: '',
-    name: '',
-    circuit: '',
-    date: '',
-    location: '',
-    country: '',
-    completed: false,
-    winner: ''
-  });
+  const [raceName, setRaceName] = useState('');
+  const [raceCircuit, setRaceCircuit] = useState('');
+  const [raceDate, setRaceDate] = useState('');
+  const [raceLocation, setRaceLocation] = useState('');
+  const [raceCompleted, setRaceCompleted] = useState(false);
+  const [raceWinner, setRaceWinner] = useState('');
 
-  const handleAddRace = () => {
-    if (!newRace.name || !newRace.circuit || !newRace.date || !newRace.location || !newRace.country) {
+  const addRace = () => {
+    if (!raceName.trim() || !raceCircuit.trim() || !raceDate.trim() || !raceLocation.trim()) {
       toast({
         title: "Error",
-        description: "Please fill all required fields.",
-        variant: "destructive"
-      });
-      return;
-    }
-    
-    const raceId = Date.now().toString();
-    setRaces([...races, { ...newRace, id: raceId }]);
-    setNewRace({
-      id: '',
-      name: '',
-      circuit: '',
-      date: '',
-      location: '',
-      country: '',
-      completed: false,
-      winner: ''
-    });
-    
-    toast({
-      title: "Success",
-      description: "Race added successfully!"
-    });
-  };
-
-  // News State
-  const [newsTitle, setNewsTitle] = useState('');
-  const [newsContent, setNewsContent] = useState('');
-  const [newsDate, setNewsDate] = useState('');
-  const [newsImageUrl, setNewsImageUrl] = useState('');
-  const [newsVideoUrl, setNewsVideoUrl] = useState('');
-  const [newsFeatured, setNewsFeatured] = useState(false);
-
-  const addNews = () => {
-    if (!newsTitle.trim() || !newsContent.trim() || !newsDate.trim()) {
-      toast({
-        title: "Error",
-        description: "Please fill in all required news fields (title, content, date).",
+        description: "Please fill in all race fields.",
         variant: "destructive"
       });
       return;
     }
 
-    const newNews = {
+    const newRace = {
       id: Math.random().toString(36).substring(7),
-      title: newsTitle,
-      content: newsContent,
-      date: newsDate,
-      imageUrl: newsImageUrl.trim() || undefined,
-      videoUrl: newsVideoUrl.trim() || undefined,
-      featured: newsFeatured
+      name: raceName,
+      circuit: raceCircuit,
+      date: raceDate,
+      location: raceLocation,
+      completed: raceCompleted,
+      winner: raceCompleted ? raceWinner : undefined
     };
 
-    setNews([...news, newNews]);
-    setNewsTitle('');
-    setNewsContent('');
-    setNewsDate('');
-    setNewsImageUrl('');
-    setNewsVideoUrl('');
-    setNewsFeatured(false);
+    setRaces([...races, newRace]);
+    setRaceName('');
+    setRaceCircuit('');
+    setRaceDate('');
+    setRaceLocation('');
+    setRaceCompleted(false);
+    setRaceWinner('');
 
     toast({
-      title: "News added",
-      description: `${newsTitle} has been added to the news list`,
+      title: "Race added",
+      description: `${raceName} has been added to the race calendar`,
     });
   };
 
-  const removeNews = (id: string) => {
-    setNews(news.filter(newsItem => newsItem.id !== id));
+  const removeRace = (id: string) => {
+    setRaces(races.filter(race => race.id !== id));
     toast({
-      title: "News removed",
-      description: `News has been removed from the news list`,
+      title: "Race removed",
+      description: `Race has been removed from the race calendar`,
     });
   };
+
+    // News State
+    const [newsTitle, setNewsTitle] = useState('');
+    const [newsContent, setNewsContent] = useState('');
+    const [newsDate, setNewsDate] = useState('');
+  
+    const addNews = () => {
+      if (!newsTitle.trim() || !newsContent.trim() || !newsDate.trim()) {
+        toast({
+          title: "Error",
+          description: "Please fill in all news fields.",
+          variant: "destructive"
+        });
+        return;
+      }
+  
+      const newNews = {
+        id: Math.random().toString(36).substring(7),
+        title: newsTitle,
+        content: newsContent,
+        date: newsDate
+      };
+  
+      setNews([...news, newNews]);
+      setNewsTitle('');
+      setNewsContent('');
+      setNewsDate('');
+  
+      toast({
+        title: "News added",
+        description: `${newsTitle} has been added to the news list`,
+      });
+    };
+  
+    const removeNews = (id: string) => {
+      setNews(news.filter(newsItem => newsItem.id !== id));
+      toast({
+        title: "News removed",
+        description: `News has been removed from the news list`,
+      });
+    };
 
   return (
     <Layout>
-      <div className="bg-white bg-opacity-95 p-6 rounded-lg shadow-lg">
-        <h1 className="text-2xl font-bold mb-6">Admin Configuration</h1>
-        
-        <Tabs defaultValue="drivers">
-          <TabsList className="grid grid-cols-5 mb-8">
-            <TabsTrigger value="drivers" className="flex items-center gap-1"><Users className="w-4 h-4" /> Drivers</TabsTrigger>
-            <TabsTrigger value="teams" className="flex items-center gap-1"><Trophy className="w-4 h-4" /> Teams</TabsTrigger>
-            <TabsTrigger value="races" className="flex items-center gap-1"><Calendar className="w-4 h-4" /> Races</TabsTrigger>
-            <TabsTrigger value="news" className="flex items-center gap-1"><Newspaper className="w-4 h-4" /> News</TabsTrigger>
-            <TabsTrigger value="settings" className="flex items-center gap-1"><Settings className="w-4 h-4" /> Settings</TabsTrigger>
+      <div className="container mx-auto px-4 py-8">
+        <h1 className="text-3xl font-bold mb-6 flex items-center">
+          <Settings className="mr-2 h-8 w-8" />
+          Configuration Panel
+        </h1>
+
+        <Tabs defaultValue="general">
+          <TabsList className="grid w-full md:w-auto md:inline-grid grid-cols-1 sm:grid-cols-3 md:grid-cols-5 lg:grid-cols-6 gap-2 mb-6">
+            <TabsTrigger value="general" className="flex items-center">
+              <Settings className="mr-2 h-4 w-4" />
+              General
+            </TabsTrigger>
+            <TabsTrigger value="drivers" className="flex items-center">
+              <Users className="mr-2 h-4 w-4" />
+              Drivers
+            </TabsTrigger>
+            <TabsTrigger value="teams" className="flex items-center">
+              <Trophy className="mr-2 h-4 w-4" />
+              Teams
+            </TabsTrigger>
+            <TabsTrigger value="calendar" className="flex items-center">
+              <Calendar className="mr-2 h-4 w-4" />
+              Calendar
+            </TabsTrigger>
+            <TabsTrigger value="news" className="flex items-center">
+              <Newspaper className="mr-2 h-4 w-4" />
+              News
+            </TabsTrigger>
+            <TabsTrigger value="streaming" className="flex items-center">
+              <Twitch className="mr-2 h-4 w-4" />
+              Streaming
+            </TabsTrigger>
           </TabsList>
-          
+
+          <TabsContent value="general">
+            <Card>
+              <CardHeader>
+                <CardTitle>General Settings</CardTitle>
+                <CardDescription>
+                  Configure the basic settings for the F1 tournament.
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium mb-1" htmlFor="title">
+                    Tournament Title
+                  </label>
+                  <Input
+                    id="title"
+                    value={title}
+                    onChange={(e) => setTitle(e.target.value)}
+                    placeholder="Enter tournament title"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-1" htmlFor="season">
+                    Season
+                  </label>
+                  <Input
+                    id="season"
+                    value={season}
+                    onChange={(e) => setSeason(e.target.value)}
+                    placeholder="Enter season year"
+                  />
+                </div>
+                <Button onClick={saveGeneralSettings}>Save Settings</Button>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
           <TabsContent value="drivers">
             <Card>
               <CardHeader>
@@ -501,146 +568,120 @@ const Config = () => {
             </Card>
           </TabsContent>
 
-          <TabsContent value="races">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Add Race</CardTitle>
-                  <CardDescription>Add a new race to the calendar</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    <div>
-                      <Label htmlFor="race-name">Race Name</Label>
-                      <Input 
-                        id="race-name"
-                        value={newRace.name}
-                        onChange={(e) => setNewRace({...newRace, name: e.target.value})}
-                        placeholder="e.g. Monaco Grand Prix"
-                      />
-                    </div>
-                    
-                    <div>
-                      <Label htmlFor="race-circuit">Circuit</Label>
-                      <Input 
-                        id="race-circuit"
-                        value={newRace.circuit}
-                        onChange={(e) => setNewRace({...newRace, circuit: e.target.value})}
-                        placeholder="e.g. Circuit de Monaco"
-                      />
-                    </div>
-                    
-                    <div>
-                      <Label htmlFor="race-date">Date</Label>
-                      <Input 
-                        id="race-date"
-                        type="date"
-                        value={newRace.date}
-                        onChange={(e) => setNewRace({...newRace, date: e.target.value})}
-                      />
-                    </div>
-                    
-                    <div>
-                      <Label htmlFor="race-location">Location</Label>
-                      <Input 
-                        id="race-location"
-                        value={newRace.location}
-                        onChange={(e) => setNewRace({...newRace, location: e.target.value})}
-                        placeholder="e.g. Monte Carlo, Monaco"
-                      />
-                    </div>
-                    
-                    <div>
-                      <Label htmlFor="race-country">Country</Label>
-                      <Input 
-                        id="race-country"
-                        value={newRace.country}
-                        onChange={(e) => setNewRace({...newRace, country: e.target.value})}
-                        placeholder="e.g. Monaco"
-                      />
-                    </div>
-                    
-                    <div className="flex items-center space-x-2">
-                      <Checkbox 
-                        id="race-completed"
-                        checked={newRace.completed}
-                        onCheckedChange={(checked) => 
-                          setNewRace({...newRace, completed: checked === true})
-                        }
-                      />
-                      <Label htmlFor="race-completed">Race Completed</Label>
-                    </div>
-                    
-                    {newRace.completed && (
-                      <div>
-                        <Label htmlFor="race-winner">Winner</Label>
-                        <Input 
-                          id="race-winner"
-                          value={newRace.winner || ''}
-                          onChange={(e) => setNewRace({...newRace, winner: e.target.value})}
-                          placeholder="Race winner's name"
-                        />
-                      </div>
-                    )}
-                    
-                    <Button type="button" onClick={handleAddRace} className="w-full">
-                      Add Race
-                    </Button>
+          <TabsContent value="calendar">
+            <Card>
+              <CardHeader>
+                <CardTitle>Calendar Settings</CardTitle>
+                <CardDescription>
+                  Add, remove, and manage races in the F1 calendar.
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="raceName">Race Name</Label>
+                    <Input
+                      id="raceName"
+                      value={raceName}
+                      onChange={(e) => setRaceName(e.target.value)}
+                      placeholder="Enter race name"
+                    />
                   </div>
-                </CardContent>
-              </Card>
-              
-              <Card>
-                <CardHeader>
-                  <CardTitle>Race Calendar</CardTitle>
-                  <CardDescription>Manage existing races</CardDescription>
-                </CardHeader>
-                <CardContent className="max-h-96 overflow-y-auto">
-                  {races.length === 0 ? (
-                    <p className="text-muted-foreground">No races added yet</p>
-                  ) : (
-                    <div className="space-y-4">
-                      {races.map((race) => (
-                        <div key={race.id} className="border p-3 rounded-md">
-                          <div className="flex justify-between items-center">
-                            <h3 className="font-semibold">{race.name}</h3>
-                            <Button 
-                              variant="destructive" 
-                              size="sm"
-                              onClick={() => {
-                                setRaces(races.filter(r => r.id !== race.id));
-                                toast({
-                                  title: "Success",
-                                  description: "Race removed successfully!"
-                                });
-                              }}
-                            >
-                              Remove
-                            </Button>
-                          </div>
-                          <p className="text-sm text-muted-foreground">
-                            {race.circuit} - {new Date(race.date).toLocaleDateString()}
-                          </p>
-                          <p className="text-sm text-muted-foreground">
-                            {race.location}, {race.country}
-                          </p>
-                          <div className="mt-1 text-sm">
-                            {race.completed ? (
-                              <span className="text-green-600 flex items-center gap-1">
-                                <Trophy className="w-3 h-3" />
-                                {race.winner ? `Winner: ${race.winner}` : 'Completed'}
-                              </span>
-                            ) : (
-                              <span className="text-blue-600">Upcoming</span>
-                            )}
-                          </div>
-                        </div>
-                      ))}
+                  <div>
+                    <Label htmlFor="raceCircuit">Race Circuit</Label>
+                    <Input
+                      id="raceCircuit"
+                      value={raceCircuit}
+                      onChange={(e) => setRaceCircuit(e.target.value)}
+                      placeholder="Enter race circuit"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="raceDate">Race Date</Label>
+                    <Input
+                      id="raceDate"
+                      type="date"
+                      value={raceDate}
+                      onChange={(e) => setRaceDate(e.target.value)}
+                      placeholder="Enter race date"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="raceLocation">Race Location</Label>
+                    <Input
+                      id="raceLocation"
+                      value={raceLocation}
+                      onChange={(e) => setRaceLocation(e.target.value)}
+                      placeholder="Enter race location"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="raceCompleted">Race Completed</Label>
+                    <Input
+                      id="raceCompleted"
+                      type="checkbox"
+                      checked={raceCompleted}
+                      onChange={(e) => setRaceCompleted(e.target.checked)}
+                    />
+                  </div>
+                  {raceCompleted && (
+                    <div>
+                      <Label htmlFor="raceWinner">Race Winner</Label>
+                      <Input
+                        id="raceWinner"
+                        value={raceWinner}
+                        onChange={(e) => setRaceWinner(e.target.value)}
+                        placeholder="Enter race winner"
+                      />
                     </div>
                   )}
-                </CardContent>
-              </Card>
-            </div>
+                </div>
+                <Button onClick={addRace}>Add Race</Button>
+
+                <div className="mt-4">
+                  <h3 className="text-sm font-medium mb-2">Current Races</h3>
+                  {races.length === 0 ? (
+                    <div className="text-center p-8 border border-dashed rounded-lg">
+                      <Calendar className="w-8 h-8 mx-auto mb-2 text-gray-400" />
+                      <p className="text-gray-500">No races added yet</p>
+                    </div>
+                  ) : (
+                    <div className="overflow-x-auto">
+                      <Table>
+                        <TableHeader>
+                          <TableRow>
+                            <TableHead className="w-[150px]">Name</TableHead>
+                            <TableHead>Circuit</TableHead>
+                            <TableHead>Date</TableHead>
+                            <TableHead>Location</TableHead>
+                            <TableHead>Completed</TableHead>
+                            <TableHead>Winner</TableHead>
+                            <TableHead className="text-right">Actions</TableHead>
+                          </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                          {races.map((race) => (
+                            <TableRow key={race.id}>
+                              <TableCell className="font-medium">{race.name}</TableCell>
+                              <TableCell>{race.circuit}</TableCell>
+                              <TableCell>{race.date}</TableCell>
+                              <TableCell>{race.location}</TableCell>
+                              <TableCell>{race.completed ? 'Yes' : 'No'}</TableCell>
+                              <TableCell>{race.winner}</TableCell>
+                              <TableCell className="text-right">
+                                <Button variant="destructive" size="sm" onClick={() => removeRace(race.id)}>
+                                  Remove
+                                </Button>
+                              </TableCell>
+                            </TableRow>
+                          ))}
+                        </TableBody>
+                      </Table>
+                    </div>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
           </TabsContent>
 
           <TabsContent value="news">
@@ -654,67 +695,32 @@ const Config = () => {
               <CardContent className="space-y-4">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
-                    <Label htmlFor="newsTitle">News Title *</Label>
+                    <Label htmlFor="newsTitle">News Title</Label>
                     <Input
                       id="newsTitle"
                       value={newsTitle}
                       onChange={(e) => setNewsTitle(e.target.value)}
                       placeholder="Enter news title"
-                      required
                     />
                   </div>
                   <div>
-                    <Label htmlFor="newsContent">News Content *</Label>
+                    <Label htmlFor="newsContent">News Content</Label>
                     <Input
                       id="newsContent"
                       value={newsContent}
                       onChange={(e) => setNewsContent(e.target.value)}
                       placeholder="Enter news content"
-                      required
                     />
                   </div>
                   <div>
-                    <Label htmlFor="newsDate">News Date *</Label>
+                    <Label htmlFor="newsDate">News Date</Label>
                     <Input
                       id="newsDate"
                       type="date"
                       value={newsDate}
                       onChange={(e) => setNewsDate(e.target.value)}
                       placeholder="Enter news date"
-                      required
                     />
-                  </div>
-                  <div>
-                    <Label htmlFor="newsImageUrl" className="flex items-center gap-2">
-                      <Image className="h-4 w-4" /> Image URL
-                    </Label>
-                    <Input
-                      id="newsImageUrl"
-                      value={newsImageUrl}
-                      onChange={(e) => setNewsImageUrl(e.target.value)}
-                      placeholder="Enter image URL"
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="newsVideoUrl" className="flex items-center gap-2">
-                      <Video className="h-4 w-4" /> Video URL
-                    </Label>
-                    <Input
-                      id="newsVideoUrl"
-                      value={newsVideoUrl}
-                      onChange={(e) => setNewsVideoUrl(e.target.value)}
-                      placeholder="Enter video embed URL"
-                    />
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <Checkbox 
-                      id="newsFeatured" 
-                      checked={newsFeatured}
-                      onCheckedChange={(checked) => setNewsFeatured(checked === true)}
-                    />
-                    <Label htmlFor="newsFeatured" className="flex items-center gap-2">
-                      <Star className="h-4 w-4 text-f1-red" /> Featured News
-                    </Label>
                   </div>
                 </div>
                 <Button onClick={addNews}>Add News</Button>
@@ -734,8 +740,6 @@ const Config = () => {
                             <TableHead className="w-[150px]">Title</TableHead>
                             <TableHead>Content</TableHead>
                             <TableHead>Date</TableHead>
-                            <TableHead>Media</TableHead>
-                            <TableHead>Featured</TableHead>
                             <TableHead className="text-right">Actions</TableHead>
                           </TableRow>
                         </TableHeader>
@@ -743,13 +747,8 @@ const Config = () => {
                           {news.map((newsItem) => (
                             <TableRow key={newsItem.id}>
                               <TableCell className="font-medium">{newsItem.title}</TableCell>
-                              <TableCell>{newsItem.content.length > 50 ? `${newsItem.content.substring(0, 50)}...` : newsItem.content}</TableCell>
+                              <TableCell>{newsItem.content}</TableCell>
                               <TableCell>{newsItem.date}</TableCell>
-                              <TableCell>
-                                {newsItem.imageUrl && <Image className="h-4 w-4 inline mr-2" />}
-                                {newsItem.videoUrl && <Video className="h-4 w-4 inline" />}
-                              </TableCell>
-                              <TableCell>{newsItem.featured ? "Yes" : "No"}</TableCell>
                               <TableCell className="text-right">
                                 <Button variant="destructive" size="sm" onClick={() => removeNews(newsItem.id)}>
                                   Remove
@@ -762,42 +761,6 @@ const Config = () => {
                     </div>
                   )}
                 </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          <TabsContent value="settings">
-            <Card>
-              <CardHeader>
-                <CardTitle>General Settings</CardTitle>
-                <CardDescription>
-                  Configure the basic settings for the F1 tournament.
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium mb-1" htmlFor="title">
-                    Tournament Title
-                  </label>
-                  <Input
-                    id="title"
-                    value={title}
-                    onChange={(e) => setTitle(e.target.value)}
-                    placeholder="Enter tournament title"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium mb-1" htmlFor="season">
-                    Season
-                  </label>
-                  <Input
-                    id="season"
-                    value={season}
-                    onChange={(e) => setSeason(e.target.value)}
-                    placeholder="Enter season year"
-                  />
-                </div>
-                <Button onClick={saveGeneralSettings}>Save Settings</Button>
               </CardContent>
             </Card>
           </TabsContent>
@@ -870,4 +833,3 @@ const Config = () => {
 };
 
 export default Config;
-

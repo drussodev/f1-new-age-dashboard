@@ -1,3 +1,4 @@
+
 import React, { createContext, useContext, useState, useEffect } from 'react';
 
 interface Driver {
@@ -9,7 +10,6 @@ interface Driver {
   points: number;
   color: string;
   image?: string;
-  description?: string;
 }
 
 interface Team {
@@ -27,7 +27,6 @@ interface Race {
   circuit: string;
   date: string;
   location: string;
-  country: string;
   completed: boolean;
   winner?: string;
 }
@@ -48,9 +47,7 @@ interface News {
   title: string;
   content: string;
   date: string;
-  imageUrl?: string;
-  videoUrl?: string;
-  featured?: boolean;
+  image?: string;
 }
 
 interface F1DataContextType {
@@ -88,11 +85,11 @@ const defaultTeams: Team[] = [
 ];
 
 const defaultRaces: Race[] = [
-  { id: '1', name: 'Bahrain Grand Prix', circuit: 'Bahrain International Circuit', date: '2023-03-05', location: 'Sakhir, Bahrain', country: 'Bahrain', completed: true, winner: 'Max Verstappen' },
-  { id: '2', name: 'Saudi Arabian Grand Prix', circuit: 'Jeddah Corniche Circuit', date: '2023-03-19', location: 'Jeddah, Saudi Arabia', country: 'Saudi Arabia', completed: true, winner: 'Sergio Perez' },
-  { id: '3', name: 'Australian Grand Prix', circuit: 'Albert Park Circuit', date: '2023-04-02', location: 'Melbourne, Australia', country: 'Australia', completed: true, winner: 'Max Verstappen' },
-  { id: '4', name: 'Azerbaijan Grand Prix', circuit: 'Baku City Circuit', date: '2023-04-30', location: 'Baku, Azerbaijan', country: 'Azerbaijan', completed: false },
-  { id: '5', name: 'Miami Grand Prix', circuit: 'Miami International Autodrome', date: '2023-05-07', location: 'Miami, USA', country: 'USA', completed: false },
+  { id: '1', name: 'Bahrain Grand Prix', circuit: 'Bahrain International Circuit', date: '2023-03-05', location: 'Sakhir, Bahrain', completed: true, winner: 'Max Verstappen' },
+  { id: '2', name: 'Saudi Arabian Grand Prix', circuit: 'Jeddah Corniche Circuit', date: '2023-03-19', location: 'Jeddah, Saudi Arabia', completed: true, winner: 'Sergio Perez' },
+  { id: '3', name: 'Australian Grand Prix', circuit: 'Albert Park Circuit', date: '2023-04-02', location: 'Melbourne, Australia', completed: true, winner: 'Max Verstappen' },
+  { id: '4', name: 'Azerbaijan Grand Prix', circuit: 'Baku City Circuit', date: '2023-04-30', location: 'Baku, Azerbaijan', completed: false },
+  { id: '5', name: 'Miami Grand Prix', circuit: 'Miami International Autodrome', date: '2023-05-07', location: 'Miami, USA', completed: false },
 ];
 
 const defaultConfig: Config = {
@@ -110,15 +107,14 @@ const defaultNews: News[] = [
     title: 'Hamilton Dominates in Monaco',
     content: 'Lewis Hamilton takes a commanding win at the Monaco Grand Prix, extending his championship lead.',
     date: '2023-05-28',
-    imageUrl: 'https://images.unsplash.com/photo-1568605117036-5fe5e7bab0b7?q=80&w=2000',
-    featured: true
+    image: 'https://images.unsplash.com/photo-1568605117036-5fe5e7bab0b7?q=80&w=2000'
   },
   {
     id: '2',
     title: 'Verstappen Signs New Contract',
     content: 'Max Verstappen has signed a new multi-year contract with Red Bull Racing, securing his future with the team.',
     date: '2023-05-24',
-    imageUrl: 'https://images.unsplash.com/photo-1511919884226-fd3cad34687c?q=80&w=2000'
+    image: 'https://images.unsplash.com/photo-1511919884226-fd3cad34687c?q=80&w=2000'
   },
 ];
 
