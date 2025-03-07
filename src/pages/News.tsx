@@ -16,6 +16,31 @@ const News = () => {
     return new Date(b.date).getTime() - new Date(a.date).getTime();
   });
 
+  // Function to convert YouTube URL to embed URL
+  const getEmbedUrl = (url: string) => {
+    if (!url) return '';
+    
+    // Extract video ID from different YouTube URL formats
+    let videoId = '';
+    
+    // Match youtube.com/watch?v=VIDEO_ID
+    const watchMatch = url.match(/youtube\.com\/watch\?v=([^&]+)/);
+    if (watchMatch) videoId = watchMatch[1];
+    
+    // Match youtu.be/VIDEO_ID
+    const shortMatch = url.match(/youtu\.be\/([^?]+)/);
+    if (shortMatch) videoId = shortMatch[1];
+    
+    // Match youtube.com/embed/VIDEO_ID
+    const embedMatch = url.match(/youtube\.com\/embed\/([^?]+)/);
+    if (embedMatch) videoId = embedMatch[1];
+    
+    if (!videoId) return url; // Return original if no match
+    
+    // Return proper embed URL
+    return `https://www.youtube.com/embed/${videoId}`;
+  };
+
   return (
     <Layout>
       <div className="container mx-auto px-4 py-8">
@@ -53,7 +78,7 @@ const News = () => {
                   </div>
                   <div className="w-full h-full">
                     <iframe 
-                      src={newsItem.videoUrl} 
+                      src={getEmbedUrl(newsItem.videoUrl)} 
                       title={newsItem.title}
                       className="w-full h-full"
                       allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
