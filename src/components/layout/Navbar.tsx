@@ -3,7 +3,7 @@ import React from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useF1Data } from '../../context/F1DataContext';
 import { useAuth } from '../../context/AuthContext';
-import { Trophy, Users, Calendar, Settings, LogIn, LogOut, UserCircle, Newspaper, Twitch } from 'lucide-react';
+import { Trophy, Users, Calendar, Settings, LogIn, LogOut, UserCircle, Newspaper, Twitch, UserPlus } from 'lucide-react';
 
 export const Navbar: React.FC = () => {
   const { config } = useF1Data();
@@ -50,6 +50,10 @@ export const Navbar: React.FC = () => {
             <NavLink to="/streaming" active={isActive('/streaming')}>
               <Twitch className="w-5 h-5 mr-1" />
               <span>Streaming</span>
+            </NavLink>
+            <NavLink to="/apply" active={isActive('/apply')}>
+              <UserPlus className="w-5 h-5 mr-1" />
+              <span>Apply</span>
             </NavLink>
             {isAdmin && (
               <NavLink to="/config" active={isActive('/config')}>
@@ -176,6 +180,10 @@ const MobileMenu: React.FC = () => {
           <NavItem to="/streaming" active={isActive('/streaming')} onClick={closeMenu}>
             <Twitch className="w-5 h-5 mr-2" />
             Streaming
+          </NavItem>
+          <NavItem to="/apply" active={isActive('/apply')} onClick={closeMenu}>
+            <UserPlus className="w-5 h-5 mr-2" />
+            Apply
           </NavItem>
           {isAdmin && (
             <NavItem to="/config" active={isActive('/config')} onClick={closeMenu}>

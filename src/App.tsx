@@ -15,6 +15,7 @@ import Calendar from "./pages/Calendar";
 import News from "./pages/News";
 import Config from "./pages/Config";
 import Streaming from "./pages/Streaming";
+import Application from "./pages/Application";
 import NotFound from "./pages/NotFound";
 import Login from "./pages/Login";
 import AccountsManagement from "./pages/AccountsManagement";
@@ -35,6 +36,7 @@ const App = () => (
               <Route path="/calendar" element={<Calendar />} />
               <Route path="/news" element={<News />} />
               <Route path="/streaming" element={<Streaming />} />
+              <Route path="/apply" element={<Application />} />
               <Route path="/config" element={
                 <ProtectedRoute requireAdmin>
                   <Config />
