@@ -5,9 +5,10 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Trophy, Calendar, Users, Settings, Newspaper, Twitch } from 'lucide-react';
+import { Trophy, Calendar, Users, Settings, Newspaper, Twitch, Image, Video } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import { Label } from '@/components/ui/label';
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   Table,
   TableBody,
@@ -248,46 +249,55 @@ const Config = () => {
     });
   };
 
-    // News State
-    const [newsTitle, setNewsTitle] = useState('');
-    const [newsContent, setNewsContent] = useState('');
-    const [newsDate, setNewsDate] = useState('');
-  
-    const addNews = () => {
-      if (!newsTitle.trim() || !newsContent.trim() || !newsDate.trim()) {
-        toast({
-          title: "Error",
-          description: "Please fill in all news fields.",
-          variant: "destructive"
-        });
-        return;
-      }
-  
-      const newNews = {
-        id: Math.random().toString(36).substring(7),
-        title: newsTitle,
-        content: newsContent,
-        date: newsDate
-      };
-  
-      setNews([...news, newNews]);
-      setNewsTitle('');
-      setNewsContent('');
-      setNewsDate('');
-  
+  // News State
+  const [newsTitle, setNewsTitle] = useState('');
+  const [newsContent, setNewsContent] = useState('');
+  const [newsDate, setNewsDate] = useState('');
+  const [newsImageUrl, setNewsImageUrl] = useState('');
+  const [newsVideoUrl, setNewsVideoUrl] = useState('');
+  const [newsFeatured, setNewsFeatured] = useState(false);
+
+  const addNews = () => {
+    if (!newsTitle.trim() || !newsContent.trim() || !newsDate.trim()) {
       toast({
-        title: "News added",
-        description: `${newsTitle} has been added to the news list`,
+        title: "Error",
+        description: "Please fill in all required news fields (title, content, date).",
+        variant: "destructive"
       });
+      return;
+    }
+
+    const newNews = {
+      id: Math.random().toString(36).substring(7),
+      title: newsTitle,
+      content: newsContent,
+      date: newsDate,
+      imageUrl: newsImageUrl.trim() || undefined,
+      videoUrl: newsVideoUrl.trim() || undefined,
+      featured: newsFeatured
     };
-  
-    const removeNews = (id: string) => {
-      setNews(news.filter(newsItem => newsItem.id !== id));
-      toast({
-        title: "News removed",
-        description: `News has been removed from the news list`,
-      });
-    };
+
+    setNews([...news, newNews]);
+    setNewsTitle('');
+    setNewsContent('');
+    setNewsDate('');
+    setNewsImageUrl('');
+    setNewsVideoUrl('');
+    setNewsFeatured(false);
+
+    toast({
+      title: "News added",
+      description: `${newsTitle} has been added to the news list`,
+    });
+  };
+
+  const removeNews = (id: string) => {
+    setNews(news.filter(newsItem => newsItem.id !== id));
+    toast({
+      title: "News removed",
+      description: `News has been removed from the news list`,
+    });
+  };
 
   return (
     <Layout>
@@ -695,32 +705,67 @@ const Config = () => {
               <CardContent className="space-y-4">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
-                    <Label htmlFor="newsTitle">News Title</Label>
+                    <Label htmlFor="newsTitle">News Title *</Label>
                     <Input
                       id="newsTitle"
                       value={newsTitle}
                       onChange={(e) => setNewsTitle(e.target.value)}
                       placeholder="Enter news title"
+                      required
                     />
                   </div>
                   <div>
-                    <Label htmlFor="newsContent">News Content</Label>
+                    <Label htmlFor="newsContent">News Content *</Label>
                     <Input
                       id="newsContent"
                       value={newsContent}
                       onChange={(e) => setNewsContent(e.target.value)}
                       placeholder="Enter news content"
+                      required
                     />
                   </div>
                   <div>
-                    <Label htmlFor="newsDate">News Date</Label>
+                    <Label htmlFor="newsDate">News Date *</Label>
                     <Input
                       id="newsDate"
                       type="date"
                       value={newsDate}
                       onChange={(e) => setNewsDate(e.target.value)}
                       placeholder="Enter news date"
+                      required
                     />
+                  </div>
+                  <div>
+                    <Label htmlFor="newsImageUrl" className="flex items-center gap-2">
+                      <Image className="h-4 w-4" /> Image URL
+                    </Label>
+                    <Input
+                      id="newsImageUrl"
+                      value={newsImageUrl}
+                      onChange={(e) => setNewsImageUrl(e.target.value)}
+                      placeholder="Enter image URL"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="newsVideoUrl" className="flex items-center gap-2">
+                      <Video className="h-4 w-4" /> Video URL
+                    </Label>
+                    <Input
+                      id="newsVideoUrl"
+                      value={newsVideoUrl}
+                      onChange={(e) => setNewsVideoUrl(e.target.value)}
+                      placeholder="Enter video embed URL"
+                    />
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <Checkbox 
+                      id="newsFeatured" 
+                      checked={newsFeatured}
+                      onCheckedChange={(checked) => setNewsFeatured(checked === true)}
+                    />
+                    <Label htmlFor="newsFeatured" className="flex items-center gap-2">
+                      <Star className="h-4 w-4 text-f1-red" /> Featured News
+                    </Label>
                   </div>
                 </div>
                 <Button onClick={addNews}>Add News</Button>
@@ -740,6 +785,8 @@ const Config = () => {
                             <TableHead className="w-[150px]">Title</TableHead>
                             <TableHead>Content</TableHead>
                             <TableHead>Date</TableHead>
+                            <TableHead>Media</TableHead>
+                            <TableHead>Featured</TableHead>
                             <TableHead className="text-right">Actions</TableHead>
                           </TableRow>
                         </TableHeader>
@@ -747,8 +794,13 @@ const Config = () => {
                           {news.map((newsItem) => (
                             <TableRow key={newsItem.id}>
                               <TableCell className="font-medium">{newsItem.title}</TableCell>
-                              <TableCell>{newsItem.content}</TableCell>
+                              <TableCell>{newsItem.content.length > 50 ? `${newsItem.content.substring(0, 50)}...` : newsItem.content}</TableCell>
                               <TableCell>{newsItem.date}</TableCell>
+                              <TableCell>
+                                {newsItem.imageUrl && <Image className="h-4 w-4 inline mr-2" />}
+                                {newsItem.videoUrl && <Video className="h-4 w-4 inline" />}
+                              </TableCell>
+                              <TableCell>{newsItem.featured ? "Yes" : "No"}</TableCell>
                               <TableCell className="text-right">
                                 <Button variant="destructive" size="sm" onClick={() => removeNews(newsItem.id)}>
                                   Remove

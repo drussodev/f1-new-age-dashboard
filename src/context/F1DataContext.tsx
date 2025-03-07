@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState, useEffect } from 'react';
 
 interface Driver {
@@ -47,7 +46,9 @@ interface News {
   title: string;
   content: string;
   date: string;
-  image?: string;
+  imageUrl?: string;
+  videoUrl?: string;
+  featured?: boolean;
 }
 
 interface F1DataContextType {
@@ -107,14 +108,15 @@ const defaultNews: News[] = [
     title: 'Hamilton Dominates in Monaco',
     content: 'Lewis Hamilton takes a commanding win at the Monaco Grand Prix, extending his championship lead.',
     date: '2023-05-28',
-    image: 'https://images.unsplash.com/photo-1568605117036-5fe5e7bab0b7?q=80&w=2000'
+    imageUrl: 'https://images.unsplash.com/photo-1568605117036-5fe5e7bab0b7?q=80&w=2000',
+    featured: true
   },
   {
     id: '2',
     title: 'Verstappen Signs New Contract',
     content: 'Max Verstappen has signed a new multi-year contract with Red Bull Racing, securing his future with the team.',
     date: '2023-05-24',
-    image: 'https://images.unsplash.com/photo-1511919884226-fd3cad34687c?q=80&w=2000'
+    imageUrl: 'https://images.unsplash.com/photo-1511919884226-fd3cad34687c?q=80&w=2000'
   },
 ];
 
