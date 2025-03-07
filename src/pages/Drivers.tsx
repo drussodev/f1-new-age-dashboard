@@ -1,12 +1,18 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Layout } from '../components/layout/Layout';
 import { useF1Data } from '../context/F1DataContext';
-import { Users } from 'lucide-react';
+import { Users, MapPin, Trophy, ChevronDown, ChevronUp } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
 
 const Drivers = () => {
   const { drivers } = useF1Data();
+  const [expandedDriverId, setExpandedDriverId] = useState<string | null>(null);
+
+  const toggleDriverDetails = (driverId: string) => {
+    setExpandedDriverId(expandedDriverId === driverId ? null : driverId);
+  };
 
   return (
     <Layout>
@@ -31,19 +37,53 @@ const Drivers = () => {
                     </div>
                     <div>
                       <h2 className="font-bold text-xl">{driver.name}</h2>
-                      <p className="text-gray-500">{driver.country}</p>
                     </div>
                   </div>
                   
                   <div className="border-t pt-4">
                     <div className="flex justify-between items-center mb-2">
-                      <span className="text-gray-600">Team</span>
+                      <div className="flex items-center gap-2">
+                        <Users className="w-4 h-4 text-f1-red" />
+                        <span className="text-gray-600">Team</span>
+                      </div>
                       <span className="font-medium">{driver.team}</span>
                     </div>
-                    <div className="flex justify-between items-center">
-                      <span className="text-gray-600">Points</span>
+                    <div className="flex justify-between items-center mb-4">
+                      <div className="flex items-center gap-2">
+                        <Trophy className="w-4 h-4 text-f1-red" />
+                        <span className="text-gray-600">Points</span>
+                      </div>
                       <span className="font-bold text-lg">{driver.points}</span>
                     </div>
+                    
+                    <Button 
+                      variant="ghost" 
+                      className="w-full flex items-center justify-between mt-2 border"
+                      onClick={() => toggleDriverDetails(driver.id)}
+                    >
+                      <span>More Details</span>
+                      {expandedDriverId === driver.id ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+                    </Button>
+                    
+                    {expandedDriverId === driver.id && (
+                      <div className="mt-4 pt-4 border-t">
+                        <div className="mb-4">
+                          <div className="flex items-center gap-2 mb-2">
+                            <MapPin className="w-4 h-4 text-f1-red" />
+                            <span className="text-gray-600">Country:</span>
+                            <span className="font-medium">{driver.country}</span>
+                          </div>
+                        </div>
+                        
+                        <div className="aspect-square rounded-md overflow-hidden bg-gray-100">
+                          <img 
+                            src={driver.image || "/placeholder.svg"} 
+                            alt={`${driver.name} profile`}
+                            className="w-full h-full object-cover" 
+                          />
+                        </div>
+                      </div>
+                    )}
                   </div>
                 </CardContent>
               </Card>
