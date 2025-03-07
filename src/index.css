@@ -58,3 +58,8 @@
     @apply absolute h-1 bg-f1-red opacity-20 animate-speed-lines;
   }
 }
+
+/* F1 Wallpaper controls */
+#f1-wallpaper {
+  transition: background-image 0.5s ease-in-out;
+}
