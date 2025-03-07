@@ -1,320 +1,205 @@
-import React, { createContext, useState, useContext, useEffect } from 'react';
-import { toast } from "sonner";
 
-export interface Driver {
+import React, { createContext, useContext, useState, useEffect } from 'react';
+
+interface Driver {
   id: string;
   name: string;
-  team: string;
-  points: number;
-  country: string;
   number: number;
-  image: string;
-  color: string;
-  description?: string;
-}
-
-export interface Team {
-  id: string;
-  name: string;
+  team: string;
+  country: string;
   points: number;
   color: string;
+  image?: string;
 }
 
-export interface Race {
+interface Team {
+  id: string;
+  name: string;
+  color: string;
+  points: number;
+  base: string;
+  logo?: string;
+}
+
+interface Race {
   id: string;
   name: string;
   circuit: string;
   date: string;
-  country: string;
+  location: string;
   completed: boolean;
+  winner?: string;
 }
 
-export interface TournamentConfig {
+interface Streamer {
+  username: string;
+  displayName?: string;
+}
+
+interface Config {
   title: string;
-  season: number;
-  pointsSystem: {
-    [position: string]: number;
-  };
+  season: string;
+  streamers: Streamer[];
 }
 
-export interface NewsItem {
+interface News {
   id: string;
   title: string;
   content: string;
   date: string;
-  imageUrl?: string;
-  featured: boolean;
+  image?: string;
 }
 
 interface F1DataContextType {
   drivers: Driver[];
+  setDrivers: React.Dispatch<React.SetStateAction<Driver[]>>;
   teams: Team[];
+  setTeams: React.Dispatch<React.SetStateAction<Team[]>>;
   races: Race[];
-  config: TournamentConfig;
-  news: NewsItem[];
-  updateDriverPoints: (driverId: string, newPoints: number) => void;
-  updateTeamPoints: (teamId: string, newPoints: number) => void;
-  updateRaceDetails: (raceId: string, updatedRace: Partial<Race>) => void;
-  updateConfig: (newConfig: Partial<TournamentConfig>) => void;
-  updateDriverName: (driverId: string, newName: string) => void;
-  addTeam: (team: Omit<Team, 'id'>) => void;
-  addRace: (race: Omit<Race, 'id'>) => void;
-  updateDriverDetails: (driverId: string, details: Partial<Driver>) => void;
-  addNewsItem: (newsItem: Omit<NewsItem, 'id'>) => void;
-  updateNewsItem: (id: string, updates: Partial<Omit<NewsItem, 'id'>>) => void;
-  deleteNewsItem: (id: string) => void;
+  setRaces: React.Dispatch<React.SetStateAction<Race[]>>;
+  config: Config;
+  setConfig: React.Dispatch<React.SetStateAction<Config>>;
+  news: News[];
+  setNews: React.Dispatch<React.SetStateAction<News[]>>;
   sortedDrivers: Driver[];
   sortedTeams: Team[];
+  upcomingRaces: Race[];
+  completedRaces: Race[];
 }
 
+// Default data
 const defaultDrivers: Driver[] = [
-  { id: '1', name: 'Max Verstappen', team: 'Red Bull Racing', points: 312, country: 'Netherlands', number: 1, image: '/placeholder.svg', color: '#0600EF', description: 'Reigning World Champion known for his aggressive driving style.' },
-  { id: '2', name: 'Lewis Hamilton', team: 'Mercedes', points: 196, country: 'United Kingdom', number: 44, image: '/placeholder.svg', color: '#00D2BE', description: 'Seven-time World Champion and one of the most successful F1 drivers in history.' },
-  { id: '3', name: 'Lando Norris', team: 'McLaren', points: 195, country: 'United Kingdom', number: 4, image: '/placeholder.svg', color: '#FF9800', description: 'Rising star known for his consistency and skill in wet conditions.' },
-  { id: '4', name: 'Charles Leclerc', team: 'Ferrari', points: 175, country: 'Monaco', number: 16, image: '/placeholder.svg', color: '#DC0000', description: 'Ferrari\'s lead driver known for his qualifying pace and race craft.' },
-  { id: '5', name: 'Carlos Sainz', team: 'Ferrari', points: 170, country: 'Spain', number: 55, image: '/placeholder.svg', color: '#DC0000', description: 'Consistent performer who has driven for multiple teams throughout his career.' },
-  { id: '6', name: 'Oscar Piastri', team: 'McLaren', points: 165, country: 'Australia', number: 81, image: '/placeholder.svg', color: '#FF9800', description: 'Rookie sensation who was highly sought after following his junior formula success.' },
-  { id: '7', name: 'Sergio Perez', team: 'Red Bull Racing', points: 155, country: 'Mexico', number: 11, image: '/placeholder.svg', color: '#0600EF', description: 'Known as the \"tire whisperer\" for his ability to manage tire wear during races.' },
-  { id: '8', name: 'George Russell', team: 'Mercedes', points: 155, country: 'United Kingdom', number: 63, image: '/placeholder.svg', color: '#00D2BE', description: 'Former Williams driver who earned his promotion to Mercedes through consistent performances.' },
+  { id: '1', name: 'Lewis Hamilton', number: 44, team: 'Mercedes', country: 'United Kingdom', points: 180, color: '#00D2BE' },
+  { id: '2', name: 'Max Verstappen', number: 33, team: 'Red Bull Racing', country: 'Netherlands', points: 220, color: '#0600EF' },
+  { id: '3', name: 'Charles Leclerc', number: 16, team: 'Ferrari', country: 'Monaco', points: 150, color: '#DC0000' },
+  { id: '4', name: 'Lando Norris', number: 4, team: 'McLaren', country: 'United Kingdom', points: 130, color: '#FF8700' },
+  { id: '5', name: 'Carlos Sainz', number: 55, team: 'Ferrari', country: 'Spain', points: 140, color: '#DC0000' },
+  { id: '6', name: 'Sergio Perez', number: 11, team: 'Red Bull Racing', country: 'Mexico', points: 190, color: '#0600EF' },
 ];
 
 const defaultTeams: Team[] = [
-  { id: '1', name: 'Red Bull Racing', points: 467, color: '#0600EF' },
-  { id: '2', name: 'Mercedes', points: 351, color: '#00D2BE' },
-  { id: '3', name: 'McLaren', points: 360, color: '#FF9800' },
-  { id: '4', name: 'Ferrari', points: 345, color: '#DC0000' },
+  { id: '1', name: 'Mercedes', color: '#00D2BE', points: 280, base: 'Brackley, United Kingdom' },
+  { id: '2', name: 'Red Bull Racing', color: '#0600EF', points: 410, base: 'Milton Keynes, United Kingdom' },
+  { id: '3', name: 'Ferrari', color: '#DC0000', points: 290, base: 'Maranello, Italy' },
+  { id: '4', name: 'McLaren', color: '#FF8700', points: 240, base: 'Woking, United Kingdom' },
 ];
 
 const defaultRaces: Race[] = [
-  { id: '1', name: 'Bahrain Grand Prix', circuit: 'Bahrain International Circuit', date: '2024-03-02', country: 'Bahrain', completed: true },
-  { id: '2', name: 'Saudi Arabian Grand Prix', circuit: 'Jeddah Corniche Circuit', date: '2024-03-09', country: 'Saudi Arabia', completed: true },
-  { id: '3', name: 'Australian Grand Prix', circuit: 'Albert Park Circuit', date: '2024-03-24', country: 'Australia', completed: true },
-  { id: '4', name: 'Japanese Grand Prix', circuit: 'Suzuka International Racing Course', date: '2024-04-07', country: 'Japan', completed: true },
-  { id: '5', name: 'Chinese Grand Prix', circuit: 'Shanghai International Circuit', date: '2024-04-21', country: 'China', completed: true },
-  { id: '6', name: 'Miami Grand Prix', circuit: 'Miami International Autodrome', date: '2024-05-05', country: 'United States', completed: false },
-  { id: '7', name: 'Emilia Romagna Grand Prix', circuit: 'Autodromo Enzo e Dino Ferrari', date: '2024-05-19', country: 'Italy', completed: false },
-  { id: '8', name: 'Monaco Grand Prix', circuit: 'Circuit de Monaco', date: '2024-05-26', country: 'Monaco', completed: false },
+  { id: '1', name: 'Bahrain Grand Prix', circuit: 'Bahrain International Circuit', date: '2023-03-05', location: 'Sakhir, Bahrain', completed: true, winner: 'Max Verstappen' },
+  { id: '2', name: 'Saudi Arabian Grand Prix', circuit: 'Jeddah Corniche Circuit', date: '2023-03-19', location: 'Jeddah, Saudi Arabia', completed: true, winner: 'Sergio Perez' },
+  { id: '3', name: 'Australian Grand Prix', circuit: 'Albert Park Circuit', date: '2023-04-02', location: 'Melbourne, Australia', completed: true, winner: 'Max Verstappen' },
+  { id: '4', name: 'Azerbaijan Grand Prix', circuit: 'Baku City Circuit', date: '2023-04-30', location: 'Baku, Azerbaijan', completed: false },
+  { id: '5', name: 'Miami Grand Prix', circuit: 'Miami International Autodrome', date: '2023-05-07', location: 'Miami, USA', completed: false },
 ];
 
-const defaultConfig: TournamentConfig = {
-  title: 'F1 New Age',
-  season: 2024,
-  pointsSystem: {
-    '1': 25,
-    '2': 18,
-    '3': 15,
-    '4': 12,
-    '5': 10,
-    '6': 8,
-    '7': 6,
-    '8': 4,
-    '9': 2,
-    '10': 1,
-  }
+const defaultConfig: Config = {
+  title: 'F1 New Age Tournament',
+  season: '2023',
+  streamers: [
+    { username: 'formula1', displayName: 'Official F1' },
+    { username: 'grandprixracing', displayName: 'Grand Prix Racing' }
+  ]
 };
 
+const defaultNews: News[] = [
+  {
+    id: '1',
+    title: 'Hamilton Dominates in Monaco',
+    content: 'Lewis Hamilton takes a commanding win at the Monaco Grand Prix, extending his championship lead.',
+    date: '2023-05-28',
+    image: 'https://images.unsplash.com/photo-1568605117036-5fe5e7bab0b7?q=80&w=2000'
+  },
+  {
+    id: '2',
+    title: 'Verstappen Signs New Contract',
+    content: 'Max Verstappen has signed a new multi-year contract with Red Bull Racing, securing his future with the team.',
+    date: '2023-05-24',
+    image: 'https://images.unsplash.com/photo-1511919884226-fd3cad34687c?q=80&w=2000'
+  },
+];
+
+// Create the context
 const F1DataContext = createContext<F1DataContextType | undefined>(undefined);
 
-const STORAGE_KEYS = {
-  DRIVERS: 'f1-new-age-drivers',
-  TEAMS: 'f1-new-age-teams',
-  RACES: 'f1-new-age-races',
-  CONFIG: 'f1-new-age-config'
-};
-
+// Provider component
 export const F1DataProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  // Load from localStorage if available
   const [drivers, setDrivers] = useState<Driver[]>(() => {
-    const stored = localStorage.getItem(STORAGE_KEYS.DRIVERS);
-    return stored ? JSON.parse(stored) : defaultDrivers;
+    const saved = localStorage.getItem('f1-drivers');
+    return saved ? JSON.parse(saved) : defaultDrivers;
   });
   
   const [teams, setTeams] = useState<Team[]>(() => {
-    const stored = localStorage.getItem(STORAGE_KEYS.TEAMS);
-    return stored ? JSON.parse(stored) : defaultTeams;
+    const saved = localStorage.getItem('f1-teams');
+    return saved ? JSON.parse(saved) : defaultTeams;
   });
   
   const [races, setRaces] = useState<Race[]>(() => {
-    const stored = localStorage.getItem(STORAGE_KEYS.RACES);
-    return stored ? JSON.parse(stored) : defaultRaces;
+    const saved = localStorage.getItem('f1-races');
+    return saved ? JSON.parse(saved) : defaultRaces;
   });
   
-  const [config, setConfig] = useState<TournamentConfig>(() => {
-    const stored = localStorage.getItem(STORAGE_KEYS.CONFIG);
-    return stored ? JSON.parse(stored) : defaultConfig;
+  const [config, setConfig] = useState<Config>(() => {
+    const saved = localStorage.getItem('f1-config');
+    return saved ? JSON.parse(saved) : defaultConfig;
+  });
+  
+  const [news, setNews] = useState<News[]>(() => {
+    const saved = localStorage.getItem('f1-news');
+    return saved ? JSON.parse(saved) : defaultNews;
   });
 
-  const [news, setNews] = useState<NewsItem[]>([
-    {
-      id: "news-1",
-      title: "Season Opener: Exciting Start to the Championship",
-      content: "The new season kicked off with an incredible race that saw multiple lead changes and surprising performances from rookies.",
-      date: "2024-03-15",
-      imageUrl: "https://images.unsplash.com/photo-1568605117036-5fe5e7bab0b7?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3",
-      featured: true,
-    },
-    {
-      id: "news-2",
-      title: "Team Changes: New Technical Directors Announced",
-      content: "Multiple teams have announced changes to their technical leadership as they prepare for next season's regulation changes.",
-      date: "2024-04-02",
-      imageUrl: "https://images.unsplash.com/photo-1511818966892-d7d671e672a2?q=80&w=2071&auto=format&fit=crop&ixlib=rb-4.0.3",
-      featured: false,
-    },
-    {
-      id: "news-3",
-      title: "Driver Market: Contract Negotiations Begin",
-      content: "Several top drivers are entering negotiations for new contracts as the mid-season approaches.",
-      date: "2024-04-10",
-      featured: false,
-    }
-  ]);
-
+  // Save to localStorage when state changes
   useEffect(() => {
-    localStorage.setItem(STORAGE_KEYS.DRIVERS, JSON.stringify(drivers));
+    localStorage.setItem('f1-drivers', JSON.stringify(drivers));
   }, [drivers]);
-  
+
   useEffect(() => {
-    localStorage.setItem(STORAGE_KEYS.TEAMS, JSON.stringify(teams));
+    localStorage.setItem('f1-teams', JSON.stringify(teams));
   }, [teams]);
-  
+
   useEffect(() => {
-    localStorage.setItem(STORAGE_KEYS.RACES, JSON.stringify(races));
+    localStorage.setItem('f1-races', JSON.stringify(races));
   }, [races]);
-  
+
   useEffect(() => {
-    localStorage.setItem(STORAGE_KEYS.CONFIG, JSON.stringify(config));
+    localStorage.setItem('f1-config', JSON.stringify(config));
   }, [config]);
 
-  const updateDriverPoints = (driverId: string, newPoints: number) => {
-    setDrivers(prevDrivers => 
-      prevDrivers.map(driver => 
-        driver.id === driverId 
-          ? { ...driver, points: newPoints } 
-          : driver
-      )
-    );
-    toast.success("Driver points updated successfully");
-  };
+  useEffect(() => {
+    localStorage.setItem('f1-news', JSON.stringify(news));
+  }, [news]);
 
-  const updateTeamPoints = (teamId: string, newPoints: number) => {
-    setTeams(prevTeams => 
-      prevTeams.map(team => 
-        team.id === teamId 
-          ? { ...team, points: newPoints } 
-          : team
-      )
-    );
-    toast.success("Team points updated successfully");
-  };
-
-  const updateRaceDetails = (raceId: string, updatedRace: Partial<Race>) => {
-    setRaces(prevRaces => 
-      prevRaces.map(race => 
-        race.id === raceId 
-          ? { ...race, ...updatedRace } 
-          : race
-      )
-    );
-    toast.success("Race details updated successfully");
-  };
-
-  const updateConfig = (newConfig: Partial<TournamentConfig>) => {
-    setConfig(prevConfig => ({ ...prevConfig, ...newConfig }));
-    toast.success("Tournament configuration updated");
-  };
-
-  const updateDriverName = (driverId: string, newName: string) => {
-    setDrivers(prevDrivers => 
-      prevDrivers.map(driver => 
-        driver.id === driverId 
-          ? { ...driver, name: newName } 
-          : driver
-      )
-    );
-    toast.success("Driver name updated successfully");
-  };
-
-  const addTeam = (team: Omit<Team, 'id'>) => {
-    const newTeam: Team = {
-      ...team,
-      id: (teams.length + 1).toString() // Simple ID generation
-    };
-    setTeams(prevTeams => [...prevTeams, newTeam]);
-    toast.success(`Team ${team.name} added successfully`);
-  };
-
-  const addRace = (race: Omit<Race, 'id'>) => {
-    const newRace: Race = {
-      ...race,
-      id: (races.length + 1).toString() // Simple ID generation
-    };
-    setRaces(prevRaces => [...prevRaces, newRace]);
-    toast.success(`Race ${race.name} added successfully`);
-  };
-
-  const updateDriverDetails = (driverId: string, details: Partial<Driver>) => {
-    setDrivers(prevDrivers => 
-      prevDrivers.map(driver => 
-        driver.id === driverId 
-          ? { ...driver, ...details } 
-          : driver
-      )
-    );
-    toast.success("Driver details updated successfully");
-  };
-
-  const addNewsItem = (newsItem: Omit<NewsItem, 'id'>) => {
-    const newItem = {
-      ...newsItem,
-      id: `news-${Date.now()}`
-    };
-    setNews(prev => [...prev, newItem]);
-  };
-
-  const updateNewsItem = (id: string, updates: Partial<Omit<NewsItem, 'id'>>) => {
-    setNews(prev => 
-      prev.map(item => 
-        item.id === id ? { ...item, ...updates } : item
-      )
-    );
-  };
-
-  const deleteNewsItem = (id: string) => {
-    setNews(prev => prev.filter(item => item.id !== id));
-  };
-
+  // Computed properties
   const sortedDrivers = [...drivers].sort((a, b) => b.points - a.points);
-  
   const sortedTeams = [...teams].sort((a, b) => b.points - a.points);
-
-  const value = {
-    drivers,
-    teams,
-    races,
-    config,
-    news,
-    updateDriverPoints,
-    updateTeamPoints,
-    updateRaceDetails,
-    updateConfig,
-    updateDriverName,
-    addTeam,
-    addRace,
-    updateDriverDetails,
-    addNewsItem,
-    updateNewsItem,
-    deleteNewsItem,
-    sortedDrivers,
-    sortedTeams
-  };
+  
+  const upcomingRaces = [...races]
+    .filter(race => !race.completed)
+    .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+  
+  const completedRaces = [...races]
+    .filter(race => race.completed)
+    .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
 
   return (
-    <F1DataContext.Provider value={value}>
+    <F1DataContext.Provider value={{
+      drivers, setDrivers,
+      teams, setTeams,
+      races, setRaces,
+      config, setConfig,
+      news, setNews,
+      sortedDrivers,
+      sortedTeams,
+      upcomingRaces,
+      completedRaces
+    }}>
       {children}
     </F1DataContext.Provider>
   );
 };
 
+// Custom hook to use the F1 data context
 export const useF1Data = () => {
   const context = useContext(F1DataContext);
   if (context === undefined) {

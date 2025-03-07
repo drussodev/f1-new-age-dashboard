@@ -1,921 +1,830 @@
-
 import React, { useState } from 'react';
 import { Layout } from '../components/layout/Layout';
 import { useF1Data } from '../context/F1DataContext';
-import { Settings, Save, Trophy, Users, Flag, Calendar, PlusCircle, MapPin, Image, FileText, Newspaper, Trash2, Star } from 'lucide-react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Textarea } from '@/components/ui/textarea';
-import { toast } from 'sonner';
-import { Switch } from '@/components/ui/switch';
-import { format } from 'date-fns';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Trophy, Calendar, Users, Settings, Newspaper, Twitch } from 'lucide-react';
+import { toast } from '@/hooks/use-toast';
+import { Label } from '@/components/ui/label';
+import {
+  Table,
+  TableBody,
+  TableCaption,
+  TableCell,
+  TableFooter,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table"
 
 const Config = () => {
   const { 
-    drivers, 
-    teams, 
-    races, 
-    config, 
-    news,
-    updateDriverPoints, 
-    updateTeamPoints, 
-    updateRaceDetails, 
-    updateConfig,
-    updateDriverName,
-    addTeam,
-    addRace,
-    updateDriverDetails,
-    addNewsItem,
-    updateNewsItem,
-    deleteNewsItem
+    config, setConfig,
+    drivers, setDrivers,
+    teams, setTeams,
+    races, setRaces,
+    news, setNews
   } = useF1Data();
-  
-  const [driverPoints, setDriverPoints] = useState<{ [key: string]: number }>(
-    drivers.reduce((acc, driver) => ({ ...acc, [driver.id]: driver.points }), {})
-  );
-  
-  const [teamPoints, setTeamPoints] = useState<{ [key: string]: number }>(
-    teams.reduce((acc, team) => ({ ...acc, [team.id]: team.points }), {})
-  );
-  
-  const [tournamentConfig, setTournamentConfig] = useState({ ...config });
 
-  const [raceDetails, setRaceDetails] = useState<{ [key: string]: { date: string; country: string; completed: boolean } }>(
-    races.reduce((acc, race) => ({ 
-      ...acc, 
-      [race.id]: { 
-        date: race.date, 
-        country: race.country,
-        completed: race.completed 
-      } 
-    }), {})
-  );
+  // Title and season state
+  const [title, setTitle] = useState(config.title);
+  const [season, setSeason] = useState(config.season);
 
-  const [driverNames, setDriverNames] = useState<{ [key: string]: string }>(
-    drivers.reduce((acc, driver) => ({ ...acc, [driver.id]: driver.name }), {})
-  );
+  // New streamer state
+  const [newStreamer, setNewStreamer] = useState('');
 
-  const [driverDetails, setDriverDetails] = useState<{ [key: string]: { country: string; image: string; description: string } }>(
-    drivers.reduce((acc, driver) => ({ 
-      ...acc, 
-      [driver.id]: { 
-        country: driver.country || '',
-        image: driver.image || '',
-        description: driver.description || '' 
-      } 
-    }), {})
-  );
-
-  const [newTeam, setNewTeam] = useState({
-    name: '',
-    points: 0,
-    color: '#000000'
-  });
-
-  const [newRace, setNewRace] = useState({
-    name: '',
-    circuit: '',
-    date: new Date().toISOString().split('T')[0],
-    country: '',
-    completed: false
-  });
-
-  const [newsItems, setNewsItems] = useState(news);
-  const [newNewsItem, setNewNewsItem] = useState({
-    title: '',
-    content: '',
-    date: new Date().toISOString().split('T')[0],
-    imageUrl: '',
-    featured: false
-  });
-
-  const handleDriverPointsChange = (driverId: string, value: string) => {
-    const points = parseInt(value, 10) || 0;
-    setDriverPoints(prev => ({ ...prev, [driverId]: points }));
-  };
-
-  const handleTeamPointsChange = (teamId: string, value: string) => {
-    const points = parseInt(value, 10) || 0;
-    setTeamPoints(prev => ({ ...prev, [teamId]: points }));
-  };
-
-  const handleDriverNameChange = (driverId: string, value: string) => {
-    setDriverNames(prev => ({ ...prev, [driverId]: value }));
-  };
-
-  const handleDriverDetailsChange = (driverId: string, field: 'country' | 'image' | 'description', value: string) => {
-    setDriverDetails(prev => ({
-      ...prev,
-      [driverId]: {
-        ...prev[driverId],
-        [field]: value
-      }
-    }));
-  };
-
-  const saveDriverPoints = () => {
-    Object.entries(driverPoints).forEach(([driverId, points]) => {
-      updateDriverPoints(driverId, points);
+  // Save general settings
+  const saveGeneralSettings = () => {
+    setConfig({
+      ...config,
+      title,
+      season
     });
-    toast.success("All driver points have been updated");
-  };
-
-  const saveTeamPoints = () => {
-    Object.entries(teamPoints).forEach(([teamId, points]) => {
-      updateTeamPoints(teamId, points);
+    toast({
+      title: "Settings saved",
+      description: "Your general settings have been updated",
     });
-    toast.success("All team points have been updated");
   };
 
-  const saveDriverNames = () => {
-    Object.entries(driverNames).forEach(([driverId, name]) => {
-      if (name.trim() !== '') {
-        updateDriverName(driverId, name);
-      }
-    });
-    toast.success("All driver names have been updated");
-  };
-
-  const saveDriverDetails = () => {
-    Object.entries(driverDetails).forEach(([driverId, details]) => {
-      updateDriverDetails(driverId, details);
-    });
-    toast.success("All driver details have been updated");
-  };
-
-  const handleConfigChange = (field: keyof typeof tournamentConfig, value: any) => {
-    setTournamentConfig(prev => ({ ...prev, [field]: value }));
-  };
-
-  const handlePointsSystemChange = (position: string, value: string) => {
-    const points = parseInt(value, 10) || 0;
-    setTournamentConfig(prev => ({
-      ...prev,
-      pointsSystem: {
-        ...prev.pointsSystem,
-        [position]: points
-      }
-    }));
-  };
-
-  const saveTournamentConfig = () => {
-    updateConfig(tournamentConfig);
-  };
-
-  const handleRaceDetailsChange = (raceId: string, field: 'date' | 'country' | 'completed', value: string | boolean) => {
-    setRaceDetails(prev => ({
-      ...prev,
-      [raceId]: {
-        ...prev[raceId],
-        [field]: value
-      }
-    }));
-  };
-
-  const saveRaceDetails = () => {
-    Object.entries(raceDetails).forEach(([raceId, details]) => {
-      updateRaceDetails(raceId, details);
-    });
-    toast.success("All race details have been updated");
-  };
-
-  const handleNewTeamChange = (field: keyof typeof newTeam, value: string | number) => {
-    setNewTeam(prev => ({ ...prev, [field]: value }));
-  };
-
-  const handleNewRaceChange = (field: keyof typeof newRace, value: string | boolean) => {
-    setNewRace(prev => ({ ...prev, [field]: value }));
-  };
-
-  const submitNewTeam = () => {
-    if (newTeam.name.trim() === '') {
-      toast.error("Team name cannot be empty");
+  // Add new streamer
+  const addStreamer = () => {
+    if (!newStreamer.trim()) {
+      toast({
+        title: "Error",
+        description: "Please enter a valid Twitch username",
+        variant: "destructive"
+      });
       return;
     }
-    
-    addTeam(newTeam);
-    
-    setNewTeam({
-      name: '',
-      points: 0,
-      color: '#000000'
-    });
-  };
 
-  const submitNewRace = () => {
-    if (newRace.name.trim() === '' || newRace.circuit.trim() === '' || newRace.country.trim() === '') {
-      toast.error("All race fields must be filled");
+    // Check if streamer already exists
+    if (config.streamers.some(s => s.username.toLowerCase() === newStreamer.toLowerCase())) {
+      toast({
+        title: "Error",
+        description: "This streamer is already in the list",
+        variant: "destructive"
+      });
       return;
     }
+
+    const updatedStreamers = [...config.streamers, { 
+      username: newStreamer.trim(),
+      displayName: newStreamer.trim() 
+    }];
+
+    setConfig({
+      ...config,
+      streamers: updatedStreamers
+    });
+
+    setNewStreamer('');
     
-    addRace(newRace);
-    
-    setNewRace({
-      name: '',
-      circuit: '',
-      date: new Date().toISOString().split('T')[0],
-      country: '',
-      completed: false
+    toast({
+      title: "Streamer added",
+      description: `${newStreamer} has been added to the streamers list`,
     });
   };
 
-  const handleNewsItemChange = (id: string, field: keyof typeof newNewsItem, value: string | boolean) => {
-    setNewsItems(prev => 
-      prev.map(item => 
-        item.id === id ? { ...item, [field]: value } : item
-      )
+  // Remove streamer
+  const removeStreamer = (username: string) => {
+    const updatedStreamers = config.streamers.filter(
+      streamer => streamer.username !== username
     );
-  };
 
-  const handleNewNewsItemChange = (field: keyof typeof newNewsItem, value: string | boolean) => {
-    setNewNewsItem(prev => ({ ...prev, [field]: value }));
-  };
-
-  const saveNewsItems = () => {
-    newsItems.forEach(item => {
-      const originalItem = news.find(n => n.id === item.id);
-      if (originalItem && JSON.stringify(originalItem) !== JSON.stringify(item)) {
-        const { id, ...updates } = item;
-        updateNewsItem(id, updates);
-      }
+    setConfig({
+      ...config,
+      streamers: updatedStreamers
     });
-    toast.success("All news items have been updated");
+
+    toast({
+      title: "Streamer removed",
+      description: `${username} has been removed from the streamers list`,
+    });
   };
 
-  const submitNewNewsItem = () => {
-    if (newNewsItem.title.trim() === '' || newNewsItem.content.trim() === '') {
-      toast.error("Title and content are required");
+  // Driver State
+  const [driverName, setDriverName] = useState('');
+  const [driverNumber, setDriverNumber] = useState('');
+  const [driverTeam, setDriverTeam] = useState('');
+  const [driverCountry, setDriverCountry] = useState('');
+  const [driverPoints, setDriverPoints] = useState('');
+  const [driverColor, setDriverColor] = useState('');
+
+  const addDriver = () => {
+    if (!driverName.trim() || !driverNumber || !driverTeam.trim() || !driverCountry.trim() || !driverPoints || !driverColor.trim()) {
+      toast({
+        title: "Error",
+        description: "Please fill in all driver fields.",
+        variant: "destructive"
+      });
       return;
     }
-    
-    addNewsItem(newNewsItem);
-    setNewsItems([...newsItems, { ...newNewsItem, id: `news-${Date.now()}` }]);
-    
-    setNewNewsItem({
-      title: '',
-      content: '',
-      date: new Date().toISOString().split('T')[0],
-      imageUrl: '',
-      featured: false
+
+    const newDriver = {
+      id: Math.random().toString(36).substring(7),
+      name: driverName,
+      number: parseInt(driverNumber),
+      team: driverTeam,
+      country: driverCountry,
+      points: parseInt(driverPoints),
+      color: driverColor
+    };
+
+    setDrivers([...drivers, newDriver]);
+    setDriverName('');
+    setDriverNumber('');
+    setDriverTeam('');
+    setDriverCountry('');
+    setDriverPoints('');
+    setDriverColor('');
+
+    toast({
+      title: "Driver added",
+      description: `${driverName} has been added to the drivers list`,
     });
-    
-    toast.success("News item added successfully");
   };
 
-  const handleDeleteNewsItem = (id: string) => {
-    deleteNewsItem(id);
-    setNewsItems(prev => prev.filter(item => item.id !== id));
-    toast.success("News item deleted");
+  const removeDriver = (id: string) => {
+    setDrivers(drivers.filter(driver => driver.id !== id));
+    toast({
+      title: "Driver removed",
+      description: `Driver has been removed from the drivers list`,
+    });
   };
+
+  // Team State
+  const [teamName, setTeamName] = useState('');
+  const [teamColor, setTeamColor] = useState('');
+  const [teamPoints, setTeamPoints] = useState('');
+  const [teamBase, setTeamBase] = useState('');
+
+  const addTeam = () => {
+    if (!teamName.trim() || !teamColor.trim() || !teamPoints || !teamBase.trim()) {
+      toast({
+        title: "Error",
+        description: "Please fill in all team fields.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    const newTeam = {
+      id: Math.random().toString(36).substring(7),
+      name: teamName,
+      color: teamColor,
+      points: parseInt(teamPoints),
+      base: teamBase
+    };
+
+    setTeams([...teams, newTeam]);
+    setTeamName('');
+    setTeamColor('');
+    setTeamPoints('');
+    setTeamBase('');
+
+    toast({
+      title: "Team added",
+      description: `${teamName} has been added to the teams list`,
+    });
+  };
+
+  const removeTeam = (id: string) => {
+    setTeams(teams.filter(team => team.id !== id));
+    toast({
+      title: "Team removed",
+      description: `Team has been removed from the teams list`,
+    });
+  };
+
+  // Race State
+  const [raceName, setRaceName] = useState('');
+  const [raceCircuit, setRaceCircuit] = useState('');
+  const [raceDate, setRaceDate] = useState('');
+  const [raceLocation, setRaceLocation] = useState('');
+  const [raceCompleted, setRaceCompleted] = useState(false);
+  const [raceWinner, setRaceWinner] = useState('');
+
+  const addRace = () => {
+    if (!raceName.trim() || !raceCircuit.trim() || !raceDate.trim() || !raceLocation.trim()) {
+      toast({
+        title: "Error",
+        description: "Please fill in all race fields.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    const newRace = {
+      id: Math.random().toString(36).substring(7),
+      name: raceName,
+      circuit: raceCircuit,
+      date: raceDate,
+      location: raceLocation,
+      completed: raceCompleted,
+      winner: raceCompleted ? raceWinner : undefined
+    };
+
+    setRaces([...races, newRace]);
+    setRaceName('');
+    setRaceCircuit('');
+    setRaceDate('');
+    setRaceLocation('');
+    setRaceCompleted(false);
+    setRaceWinner('');
+
+    toast({
+      title: "Race added",
+      description: `${raceName} has been added to the race calendar`,
+    });
+  };
+
+  const removeRace = (id: string) => {
+    setRaces(races.filter(race => race.id !== id));
+    toast({
+      title: "Race removed",
+      description: `Race has been removed from the race calendar`,
+    });
+  };
+
+    // News State
+    const [newsTitle, setNewsTitle] = useState('');
+    const [newsContent, setNewsContent] = useState('');
+    const [newsDate, setNewsDate] = useState('');
+  
+    const addNews = () => {
+      if (!newsTitle.trim() || !newsContent.trim() || !newsDate.trim()) {
+        toast({
+          title: "Error",
+          description: "Please fill in all news fields.",
+          variant: "destructive"
+        });
+        return;
+      }
+  
+      const newNews = {
+        id: Math.random().toString(36).substring(7),
+        title: newsTitle,
+        content: newsContent,
+        date: newsDate
+      };
+  
+      setNews([...news, newNews]);
+      setNewsTitle('');
+      setNewsContent('');
+      setNewsDate('');
+  
+      toast({
+        title: "News added",
+        description: `${newsTitle} has been added to the news list`,
+      });
+    };
+  
+    const removeNews = (id: string) => {
+      setNews(news.filter(newsItem => newsItem.id !== id));
+      toast({
+        title: "News removed",
+        description: `News has been removed from the news list`,
+      });
+    };
 
   return (
     <Layout>
-      <div className="max-w-5xl mx-auto px-4">
-        <div className="flex items-center mb-6">
-          <Settings className="w-6 h-6 text-f1-red mr-2" />
-          <h1 className="text-2xl md:text-3xl font-bold">Tournament Config</h1>
-        </div>
-        
-        <Tabs defaultValue="drivers" className="space-y-6">
-          <div className="overflow-x-auto pb-2">
-            <TabsList className="grid w-full min-w-max grid-cols-3 md:grid-cols-7">
-              <TabsTrigger value="drivers" className="text-sm py-1.5">Drivers</TabsTrigger>
-              <TabsTrigger value="driver-details" className="text-sm py-1.5">Details</TabsTrigger>
-              <TabsTrigger value="teams" className="text-sm py-1.5">Teams</TabsTrigger>
-              <TabsTrigger value="races" className="text-sm py-1.5">Races</TabsTrigger>
-              <TabsTrigger value="news" className="text-sm py-1.5">News</TabsTrigger>
-              <TabsTrigger value="tournament" className="text-sm py-1.5">Settings</TabsTrigger>
-              <TabsTrigger value="add" className="text-sm py-1.5">Add New</TabsTrigger>
-            </TabsList>
-          </div>
-          
+      <div className="container mx-auto px-4 py-8">
+        <h1 className="text-3xl font-bold mb-6 flex items-center">
+          <Settings className="mr-2 h-8 w-8" />
+          Configuration Panel
+        </h1>
+
+        <Tabs defaultValue="general">
+          <TabsList className="grid w-full md:w-auto md:inline-grid grid-cols-1 sm:grid-cols-3 md:grid-cols-5 lg:grid-cols-6 gap-2 mb-6">
+            <TabsTrigger value="general" className="flex items-center">
+              <Settings className="mr-2 h-4 w-4" />
+              General
+            </TabsTrigger>
+            <TabsTrigger value="drivers" className="flex items-center">
+              <Users className="mr-2 h-4 w-4" />
+              Drivers
+            </TabsTrigger>
+            <TabsTrigger value="teams" className="flex items-center">
+              <Trophy className="mr-2 h-4 w-4" />
+              Teams
+            </TabsTrigger>
+            <TabsTrigger value="calendar" className="flex items-center">
+              <Calendar className="mr-2 h-4 w-4" />
+              Calendar
+            </TabsTrigger>
+            <TabsTrigger value="news" className="flex items-center">
+              <Newspaper className="mr-2 h-4 w-4" />
+              News
+            </TabsTrigger>
+            <TabsTrigger value="streaming" className="flex items-center">
+              <Twitch className="mr-2 h-4 w-4" />
+              Streaming
+            </TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="general">
+            <Card>
+              <CardHeader>
+                <CardTitle>General Settings</CardTitle>
+                <CardDescription>
+                  Configure the basic settings for the F1 tournament.
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium mb-1" htmlFor="title">
+                    Tournament Title
+                  </label>
+                  <Input
+                    id="title"
+                    value={title}
+                    onChange={(e) => setTitle(e.target.value)}
+                    placeholder="Enter tournament title"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-1" htmlFor="season">
+                    Season
+                  </label>
+                  <Input
+                    id="season"
+                    value={season}
+                    onChange={(e) => setSeason(e.target.value)}
+                    placeholder="Enter season year"
+                  />
+                </div>
+                <Button onClick={saveGeneralSettings}>Save Settings</Button>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
           <TabsContent value="drivers">
-            <Card className="mb-6">
-              <CardHeader className="pb-2">
-                <CardTitle className="flex items-center text-lg">
-                  <Users className="w-4 h-4 mr-2" />
-                  Driver Names
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-3">
-                  {drivers.map(driver => (
-                    <div key={`name-${driver.id}`} className="flex items-center space-x-3">
-                      <div className="w-1 h-8 rounded-full" style={{ backgroundColor: driver.color }}></div>
-                      <div className="flex-1">
-                        <Input
-                          value={driverNames[driver.id]}
-                          onChange={(e) => handleDriverNameChange(driver.id, e.target.value)}
-                          placeholder="Driver name"
-                          className="text-sm"
-                        />
-                      </div>
-                      <div className="text-xs text-gray-500 hidden sm:block">{driver.team}</div>
-                    </div>
-                  ))}
-                  
-                  <Button 
-                    className="w-full mt-4 text-sm"
-                    onClick={saveDriverNames}
-                    size="sm"
-                  >
-                    <Save className="w-4 h-4 mr-2" />
-                    Save Names
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-            
             <Card>
-              <CardHeader className="pb-2">
-                <CardTitle className="flex items-center text-lg">
-                  <Trophy className="w-4 h-4 mr-2" />
-                  Driver Points
-                </CardTitle>
+              <CardHeader>
+                <CardTitle>Driver Settings</CardTitle>
+                <CardDescription>
+                  Add, remove, and manage drivers in the F1 tournament.
+                </CardDescription>
               </CardHeader>
-              <CardContent>
-                <div className="space-y-3">
-                  {drivers.map(driver => (
-                    <div key={`points-${driver.id}`} className="flex items-center space-x-3">
-                      <div className="w-1 h-8 rounded-full" style={{ backgroundColor: driver.color }}></div>
-                      <div className="flex-1 text-sm truncate">
-                        <div className="font-medium">{driver.name}</div>
-                      </div>
-                      <div className="w-20">
-                        <Input
-                          type="number"
-                          min="0"
-                          value={driverPoints[driver.id]}
-                          onChange={(e) => handleDriverPointsChange(driver.id, e.target.value)}
-                          className="text-right text-sm h-8"
-                        />
-                      </div>
+              <CardContent className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="driverName">Driver Name</Label>
+                    <Input
+                      id="driverName"
+                      value={driverName}
+                      onChange={(e) => setDriverName(e.target.value)}
+                      placeholder="Enter driver name"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="driverNumber">Driver Number</Label>
+                    <Input
+                      id="driverNumber"
+                      type="number"
+                      value={driverNumber}
+                      onChange={(e) => setDriverNumber(e.target.value)}
+                      placeholder="Enter driver number"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="driverTeam">Driver Team</Label>
+                    <Input
+                      id="driverTeam"
+                      value={driverTeam}
+                      onChange={(e) => setDriverTeam(e.target.value)}
+                      placeholder="Enter driver team"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="driverCountry">Driver Country</Label>
+                    <Input
+                      id="driverCountry"
+                      value={driverCountry}
+                      onChange={(e) => setDriverCountry(e.target.value)}
+                      placeholder="Enter driver country"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="driverPoints">Driver Points</Label>
+                    <Input
+                      id="driverPoints"
+                      type="number"
+                      value={driverPoints}
+                      onChange={(e) => setDriverPoints(e.target.value)}
+                      placeholder="Enter driver points"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="driverColor">Driver Color</Label>
+                    <Input
+                      id="driverColor"
+                      type="color"
+                      value={driverColor}
+                      onChange={(e) => setDriverColor(e.target.value)}
+                      placeholder="Enter driver color"
+                    />
+                  </div>
+                </div>
+                <Button onClick={addDriver}>Add Driver</Button>
+
+                <div className="mt-4">
+                  <h3 className="text-sm font-medium mb-2">Current Drivers</h3>
+                  {drivers.length === 0 ? (
+                    <div className="text-center p-8 border border-dashed rounded-lg">
+                      <Users className="w-8 h-8 mx-auto mb-2 text-gray-400" />
+                      <p className="text-gray-500">No drivers added yet</p>
                     </div>
-                  ))}
-                  
-                  <Button 
-                    className="w-full mt-4 text-sm"
-                    onClick={saveDriverPoints}
-                    size="sm"
-                  >
-                    <Save className="w-4 h-4 mr-2" />
-                    Save Points
-                  </Button>
+                  ) : (
+                    <div className="overflow-x-auto">
+                      <Table>
+                        <TableHeader>
+                          <TableRow>
+                            <TableHead className="w-[100px]">Name</TableHead>
+                            <TableHead>Number</TableHead>
+                            <TableHead>Team</TableHead>
+                            <TableHead>Country</TableHead>
+                            <TableHead>Points</TableHead>
+                            <TableHead className="text-right">Actions</TableHead>
+                          </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                          {drivers.map((driver) => (
+                            <TableRow key={driver.id}>
+                              <TableCell className="font-medium">{driver.name}</TableCell>
+                              <TableCell>{driver.number}</TableCell>
+                              <TableCell>{driver.team}</TableCell>
+                              <TableCell>{driver.country}</TableCell>
+                              <TableCell>{driver.points}</TableCell>
+                              <TableCell className="text-right">
+                                <Button variant="destructive" size="sm" onClick={() => removeDriver(driver.id)}>
+                                  Remove
+                                </Button>
+                              </TableCell>
+                            </TableRow>
+                          ))}
+                        </TableBody>
+                      </Table>
+                    </div>
+                  )}
                 </div>
               </CardContent>
             </Card>
           </TabsContent>
-          
-          <TabsContent value="driver-details">
-            <Card>
-              <CardHeader className="pb-2">
-                <CardTitle className="flex items-center text-lg">
-                  <FileText className="w-4 h-4 mr-2" />
-                  Driver Details
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-6">
-                  {drivers.map(driver => (
-                    <div key={`details-${driver.id}`} className="border-b pb-5">
-                      <div className="flex items-center mb-3">
-                        <div className="w-1 h-8 rounded-full mr-2" style={{ backgroundColor: driver.color }}></div>
-                        <div className="font-bold text-sm">{driver.name}</div>
-                      </div>
-                      
-                      <div className="space-y-3">
-                        <div>
-                          <label className="block text-xs font-medium mb-1 flex items-center">
-                            <MapPin className="w-3 h-3 mr-1 text-f1-red" />
-                            Country
-                          </label>
-                          <Input
-                            value={driverDetails[driver.id]?.country || ''}
-                            onChange={(e) => handleDriverDetailsChange(driver.id, 'country', e.target.value)}
-                            placeholder="Driver country"
-                            className="text-sm h-9"
-                          />
-                        </div>
-                        
-                        <div>
-                          <label className="block text-xs font-medium mb-1 flex items-center">
-                            <Image className="w-3 h-3 mr-1 text-f1-red" />
-                            Image URL
-                          </label>
-                          <Input
-                            value={driverDetails[driver.id]?.image || ''}
-                            onChange={(e) => handleDriverDetailsChange(driver.id, 'image', e.target.value)}
-                            placeholder="Image URL or path"
-                            className="text-sm h-9"
-                          />
-                        </div>
-                      
-                        <div>
-                          <label className="block text-xs font-medium mb-1 flex items-center">
-                            <FileText className="w-3 h-3 mr-1 text-f1-red" />
-                            Description
-                          </label>
-                          <Textarea
-                            value={driverDetails[driver.id]?.description || ''}
-                            onChange={(e) => handleDriverDetailsChange(driver.id, 'description', e.target.value)}
-                            placeholder="Brief description of the driver"
-                            className="min-h-[80px] text-sm"
-                          />
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                  
-                  <Button 
-                    className="w-full mt-4 text-sm"
-                    onClick={saveDriverDetails}
-                    size="sm"
-                  >
-                    <Save className="w-4 h-4 mr-2" />
-                    Save Details
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
-          
+
           <TabsContent value="teams">
             <Card>
-              <CardHeader className="pb-2">
-                <CardTitle className="flex items-center text-lg">
-                  <Trophy className="w-4 h-4 mr-2" />
-                  Team Points
-                </CardTitle>
+              <CardHeader>
+                <CardTitle>Team Settings</CardTitle>
+                <CardDescription>
+                  Add, remove, and manage teams in the F1 tournament.
+                </CardDescription>
               </CardHeader>
-              <CardContent>
-                <div className="space-y-3">
-                  {teams.map(team => (
-                    <div key={team.id} className="flex items-center space-x-3">
-                      <div className="w-1 h-8 rounded-full" style={{ backgroundColor: team.color }}></div>
-                      <div className="flex-1 truncate">
-                        <div className="font-medium text-sm">{team.name}</div>
-                      </div>
-                      <div className="w-20">
-                        <Input
-                          type="number"
-                          min="0"
-                          value={teamPoints[team.id]}
-                          onChange={(e) => handleTeamPointsChange(team.id, e.target.value)}
-                          className="text-right text-sm h-8"
-                        />
-                      </div>
-                    </div>
-                  ))}
-                  
-                  <Button 
-                    className="w-full mt-4 text-sm"
-                    onClick={saveTeamPoints}
-                    size="sm"
-                  >
-                    <Save className="w-4 h-4 mr-2" />
-                    Save Points
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
-          
-          <TabsContent value="races">
-            <Card>
-              <CardHeader className="pb-2">
-                <CardTitle className="flex items-center text-lg">
-                  <Calendar className="w-4 h-4 mr-2" />
-                  Race Calendar
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-5">
-                  {races.map(race => (
-                    <div key={race.id} className="border-b pb-4">
-                      <div className="font-medium text-base mb-1">{race.name}</div>
-                      <div className="text-xs text-gray-500 mb-2">{race.circuit}</div>
-                      
-                      <div className="space-y-3">
-                        <div>
-                          <label className="block text-xs font-medium mb-1">Date</label>
-                          <Input
-                            type="date"
-                            value={raceDetails[race.id].date}
-                            onChange={(e) => handleRaceDetailsChange(race.id, 'date', e.target.value)}
-                            className="text-sm h-9"
-                          />
-                        </div>
-                        
-                        <div>
-                          <label className="block text-xs font-medium mb-1">Country</label>
-                          <Input
-                            type="text"
-                            value={raceDetails[race.id].country}
-                            onChange={(e) => handleRaceDetailsChange(race.id, 'country', e.target.value)}
-                            className="text-sm h-9"
-                          />
-                        </div>
-                      
-                        <div className="pt-1">
-                          <label className="flex items-center cursor-pointer">
-                            <input
-                              type="checkbox"
-                              className="form-checkbox h-4 w-4 text-f1-red border-gray-300 rounded mr-2"
-                              checked={raceDetails[race.id].completed}
-                              onChange={(e) => handleRaceDetailsChange(race.id, 'completed', e.target.checked)}
-                            />
-                            <span className="text-xs">Race completed</span>
-                          </label>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                  
-                  <Button 
-                    className="w-full mt-4 text-sm"
-                    onClick={saveRaceDetails}
-                    size="sm"
-                  >
-                    <Save className="w-4 h-4 mr-2" />
-                    Save Calendar
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
-          
-          <TabsContent value="news">
-            <Card className="mb-4">
-              <CardHeader className="pb-2">
-                <CardTitle className="flex items-center text-lg">
-                  <Newspaper className="w-4 h-4 mr-2" />
-                  Add News
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-3">
+              <CardContent className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-xs font-medium mb-1">Title</label>
+                    <Label htmlFor="teamName">Team Name</Label>
                     <Input
-                      value={newNewsItem.title}
-                      onChange={(e) => handleNewNewsItemChange('title', e.target.value)}
-                      placeholder="News title"
-                      className="text-sm h-9"
+                      id="teamName"
+                      value={teamName}
+                      onChange={(e) => setTeamName(e.target.value)}
+                      placeholder="Enter team name"
                     />
                   </div>
-                  
                   <div>
-                    <label className="block text-xs font-medium mb-1">Content</label>
-                    <Textarea
-                      value={newNewsItem.content}
-                      onChange={(e) => handleNewNewsItemChange('content', e.target.value)}
-                      placeholder="News content"
-                      className="min-h-[80px] text-sm"
-                    />
-                  </div>
-                  
-                  <div className="grid grid-cols-1 gap-3">
-                    <div>
-                      <label className="block text-xs font-medium mb-1">Date</label>
-                      <Input
-                        type="date"
-                        value={newNewsItem.date}
-                        onChange={(e) => handleNewNewsItemChange('date', e.target.value)}
-                        className="text-sm h-9"
-                      />
-                    </div>
-                    
-                    <div>
-                      <label className="block text-xs font-medium mb-1">Image URL</label>
-                      <Input
-                        value={newNewsItem.imageUrl}
-                        onChange={(e) => handleNewNewsItemChange('imageUrl', e.target.value)}
-                        placeholder="URL to an image"
-                        className="text-sm h-9"
-                      />
-                    </div>
-                  </div>
-                  
-                  <div className="flex items-center space-x-2 pt-1">
-                    <Switch
-                      id="featured-new"
-                      checked={newNewsItem.featured}
-                      onCheckedChange={(checked) => handleNewNewsItemChange('featured', checked)}
-                    />
-                    <label htmlFor="featured-new" className="text-xs font-medium">
-                      Featured news
-                    </label>
-                  </div>
-                  
-                  <Button 
-                    className="w-full mt-2 text-sm"
-                    onClick={submitNewNewsItem}
-                    size="sm"
-                  >
-                    <PlusCircle className="w-4 h-4 mr-2" />
-                    Add News
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-            
-            <Card>
-              <CardHeader className="pb-2">
-                <CardTitle className="flex items-center text-lg">
-                  <Newspaper className="w-4 h-4 mr-2" />
-                  Manage News
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-5">
-                  {newsItems.length === 0 ? (
-                    <p className="text-center text-gray-500 py-3 text-sm">No news items found</p>
-                  ) : (
-                    newsItems.map((item) => (
-                      <div key={item.id} className="border-b pb-4 mb-4">
-                        <div className="flex justify-between items-center mb-3">
-                          <h3 className="font-bold text-sm truncate pr-2">{item.title}</h3>
-                          <Button
-                            variant="destructive"
-                            size="icon"
-                            className="h-6 w-6"
-                            onClick={() => handleDeleteNewsItem(item.id)}
-                          >
-                            <Trash2 className="w-3 h-3" />
-                          </Button>
-                        </div>
-                        
-                        <div className="space-y-3">
-                          <div>
-                            <label className="block text-xs font-medium mb-1">Title</label>
-                            <Input
-                              value={item.title}
-                              onChange={(e) => handleNewsItemChange(item.id, 'title', e.target.value)}
-                              className="text-sm h-9"
-                            />
-                          </div>
-                          
-                          <div>
-                            <label className="block text-xs font-medium mb-1">Date</label>
-                            <Input
-                              type="date"
-                              value={item.date}
-                              onChange={(e) => handleNewsItemChange(item.id, 'date', e.target.value)}
-                              className="text-sm h-9"
-                            />
-                          </div>
-                        
-                          <div>
-                            <label className="block text-xs font-medium mb-1">Content</label>
-                            <Textarea
-                              value={item.content}
-                              onChange={(e) => handleNewsItemChange(item.id, 'content', e.target.value)}
-                              className="min-h-[80px] text-sm"
-                            />
-                          </div>
-                        
-                          <div>
-                            <label className="block text-xs font-medium mb-1">Image URL</label>
-                            <Input
-                              value={item.imageUrl || ''}
-                              onChange={(e) => handleNewsItemChange(item.id, 'imageUrl', e.target.value)}
-                              placeholder="URL to an image"
-                              className="text-sm h-9"
-                            />
-                          </div>
-                        
-                          <div className="flex items-center space-x-2 pt-1">
-                            <Switch
-                              id={`featured-${item.id}`}
-                              checked={item.featured}
-                              onCheckedChange={(checked) => handleNewsItemChange(item.id, 'featured', checked)}
-                            />
-                            <label htmlFor={`featured-${item.id}`} className="text-xs font-medium">
-                              Featured news
-                            </label>
-                          </div>
-                        </div>
-                      </div>
-                    ))
-                  )}
-                  
-                  {newsItems.length > 0 && (
-                    <Button 
-                      className="w-full mt-2 text-sm"
-                      onClick={saveNewsItems}
-                      size="sm"
-                    >
-                      <Save className="w-4 h-4 mr-2" />
-                      Save Changes
-                    </Button>
-                  )}
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
-          
-          <TabsContent value="tournament">
-            <Card className="mb-4">
-              <CardHeader className="pb-2">
-                <CardTitle className="text-lg">Tournament Details</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-3">
-                  <div>
-                    <label className="block text-xs font-medium mb-1">Tournament Name</label>
+                    <Label htmlFor="teamColor">Team Color</Label>
                     <Input
-                      value={tournamentConfig.title}
-                      onChange={(e) => handleConfigChange('title', e.target.value)}
-                      className="text-sm h-9"
+                      id="teamColor"
+                      type="color"
+                      value={teamColor}
+                      onChange={(e) => setTeamColor(e.target.value)}
+                      placeholder="Enter team color"
                     />
                   </div>
-                  
                   <div>
-                    <label className="block text-xs font-medium mb-1">Season Year</label>
+                    <Label htmlFor="teamPoints">Team Points</Label>
                     <Input
+                      id="teamPoints"
                       type="number"
-                      min="2000"
-                      max="2100"
-                      value={tournamentConfig.season}
-                      onChange={(e) => handleConfigChange('season', parseInt(e.target.value, 10) || 2024)}
-                      className="text-sm h-9"
+                      value={teamPoints}
+                      onChange={(e) => setTeamPoints(e.target.value)}
+                      placeholder="Enter team points"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="teamBase">Team Base</Label>
+                    <Input
+                      id="teamBase"
+                      value={teamBase}
+                      onChange={(e) => setTeamBase(e.target.value)}
+                      placeholder="Enter team base"
                     />
                   </div>
                 </div>
-              </CardContent>
-            </Card>
-            
-            <Card>
-              <CardHeader className="pb-2">
-                <CardTitle className="text-lg">Points System</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-3 gap-2">
-                  {Object.entries(tournamentConfig.pointsSystem).map(([position, points]) => (
-                    <div key={position}>
-                      <label className="block text-xs font-medium mb-1">P{position}</label>
-                      <Input
-                        type="number"
-                        min="0"
-                        value={points}
-                        onChange={(e) => handlePointsSystemChange(position, e.target.value)}
-                        className="text-sm h-8"
-                      />
+                <Button onClick={addTeam}>Add Team</Button>
+
+                <div className="mt-4">
+                  <h3 className="text-sm font-medium mb-2">Current Teams</h3>
+                  {teams.length === 0 ? (
+                    <div className="text-center p-8 border border-dashed rounded-lg">
+                      <Trophy className="w-8 h-8 mx-auto mb-2 text-gray-400" />
+                      <p className="text-gray-500">No teams added yet</p>
                     </div>
-                  ))}
+                  ) : (
+                    <div className="overflow-x-auto">
+                      <Table>
+                        <TableHeader>
+                          <TableRow>
+                            <TableHead className="w-[100px]">Name</TableHead>
+                            <TableHead>Color</TableHead>
+                            <TableHead>Points</TableHead>
+                            <TableHead>Base</TableHead>
+                            <TableHead className="text-right">Actions</TableHead>
+                          </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                          {teams.map((team) => (
+                            <TableRow key={team.id}>
+                              <TableCell className="font-medium">{team.name}</TableCell>
+                              <TableCell>{team.color}</TableCell>
+                              <TableCell>{team.points}</TableCell>
+                              <TableCell>{team.base}</TableCell>
+                              <TableCell className="text-right">
+                                <Button variant="destructive" size="sm" onClick={() => removeTeam(team.id)}>
+                                  Remove
+                                </Button>
+                              </TableCell>
+                            </TableRow>
+                          ))}
+                        </TableBody>
+                      </Table>
+                    </div>
+                  )}
                 </div>
-                
-                <Button 
-                  className="w-full mt-4 text-sm"
-                  onClick={saveTournamentConfig}
-                  size="sm"
-                >
-                  <Save className="w-4 h-4 mr-2" />
-                  Save Settings
-                </Button>
               </CardContent>
             </Card>
           </TabsContent>
-          
-          <TabsContent value="add">
-            <div className="space-y-4">
-              <Card>
-                <CardHeader className="pb-2">
-                  <CardTitle className="flex items-center text-lg">
-                    <Trophy className="w-4 h-4 mr-2" />
-                    Add Team
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-3">
+
+          <TabsContent value="calendar">
+            <Card>
+              <CardHeader>
+                <CardTitle>Calendar Settings</CardTitle>
+                <CardDescription>
+                  Add, remove, and manage races in the F1 calendar.
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="raceName">Race Name</Label>
+                    <Input
+                      id="raceName"
+                      value={raceName}
+                      onChange={(e) => setRaceName(e.target.value)}
+                      placeholder="Enter race name"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="raceCircuit">Race Circuit</Label>
+                    <Input
+                      id="raceCircuit"
+                      value={raceCircuit}
+                      onChange={(e) => setRaceCircuit(e.target.value)}
+                      placeholder="Enter race circuit"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="raceDate">Race Date</Label>
+                    <Input
+                      id="raceDate"
+                      type="date"
+                      value={raceDate}
+                      onChange={(e) => setRaceDate(e.target.value)}
+                      placeholder="Enter race date"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="raceLocation">Race Location</Label>
+                    <Input
+                      id="raceLocation"
+                      value={raceLocation}
+                      onChange={(e) => setRaceLocation(e.target.value)}
+                      placeholder="Enter race location"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="raceCompleted">Race Completed</Label>
+                    <Input
+                      id="raceCompleted"
+                      type="checkbox"
+                      checked={raceCompleted}
+                      onChange={(e) => setRaceCompleted(e.target.checked)}
+                    />
+                  </div>
+                  {raceCompleted && (
                     <div>
-                      <label className="block text-xs font-medium mb-1">Team Name</label>
+                      <Label htmlFor="raceWinner">Race Winner</Label>
                       <Input
-                        value={newTeam.name}
-                        onChange={(e) => handleNewTeamChange('name', e.target.value)}
-                        placeholder="Enter team name"
-                        className="text-sm h-9"
+                        id="raceWinner"
+                        value={raceWinner}
+                        onChange={(e) => setRaceWinner(e.target.value)}
+                        placeholder="Enter race winner"
                       />
                     </div>
-                    
-                    <div>
-                      <label className="block text-xs font-medium mb-1">Initial Points</label>
+                  )}
+                </div>
+                <Button onClick={addRace}>Add Race</Button>
+
+                <div className="mt-4">
+                  <h3 className="text-sm font-medium mb-2">Current Races</h3>
+                  {races.length === 0 ? (
+                    <div className="text-center p-8 border border-dashed rounded-lg">
+                      <Calendar className="w-8 h-8 mx-auto mb-2 text-gray-400" />
+                      <p className="text-gray-500">No races added yet</p>
+                    </div>
+                  ) : (
+                    <div className="overflow-x-auto">
+                      <Table>
+                        <TableHeader>
+                          <TableRow>
+                            <TableHead className="w-[150px]">Name</TableHead>
+                            <TableHead>Circuit</TableHead>
+                            <TableHead>Date</TableHead>
+                            <TableHead>Location</TableHead>
+                            <TableHead>Completed</TableHead>
+                            <TableHead>Winner</TableHead>
+                            <TableHead className="text-right">Actions</TableHead>
+                          </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                          {races.map((race) => (
+                            <TableRow key={race.id}>
+                              <TableCell className="font-medium">{race.name}</TableCell>
+                              <TableCell>{race.circuit}</TableCell>
+                              <TableCell>{race.date}</TableCell>
+                              <TableCell>{race.location}</TableCell>
+                              <TableCell>{race.completed ? 'Yes' : 'No'}</TableCell>
+                              <TableCell>{race.winner}</TableCell>
+                              <TableCell className="text-right">
+                                <Button variant="destructive" size="sm" onClick={() => removeRace(race.id)}>
+                                  Remove
+                                </Button>
+                              </TableCell>
+                            </TableRow>
+                          ))}
+                        </TableBody>
+                      </Table>
+                    </div>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="news">
+            <Card>
+              <CardHeader>
+                <CardTitle>News Settings</CardTitle>
+                <CardDescription>
+                  Add, remove, and manage news articles.
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="newsTitle">News Title</Label>
+                    <Input
+                      id="newsTitle"
+                      value={newsTitle}
+                      onChange={(e) => setNewsTitle(e.target.value)}
+                      placeholder="Enter news title"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="newsContent">News Content</Label>
+                    <Input
+                      id="newsContent"
+                      value={newsContent}
+                      onChange={(e) => setNewsContent(e.target.value)}
+                      placeholder="Enter news content"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="newsDate">News Date</Label>
+                    <Input
+                      id="newsDate"
+                      type="date"
+                      value={newsDate}
+                      onChange={(e) => setNewsDate(e.target.value)}
+                      placeholder="Enter news date"
+                    />
+                  </div>
+                </div>
+                <Button onClick={addNews}>Add News</Button>
+  
+                <div className="mt-4">
+                  <h3 className="text-sm font-medium mb-2">Current News</h3>
+                  {news.length === 0 ? (
+                    <div className="text-center p-8 border border-dashed rounded-lg">
+                      <Newspaper className="w-8 h-8 mx-auto mb-2 text-gray-400" />
+                      <p className="text-gray-500">No news added yet</p>
+                    </div>
+                  ) : (
+                    <div className="overflow-x-auto">
+                      <Table>
+                        <TableHeader>
+                          <TableRow>
+                            <TableHead className="w-[150px]">Title</TableHead>
+                            <TableHead>Content</TableHead>
+                            <TableHead>Date</TableHead>
+                            <TableHead className="text-right">Actions</TableHead>
+                          </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                          {news.map((newsItem) => (
+                            <TableRow key={newsItem.id}>
+                              <TableCell className="font-medium">{newsItem.title}</TableCell>
+                              <TableCell>{newsItem.content}</TableCell>
+                              <TableCell>{newsItem.date}</TableCell>
+                              <TableCell className="text-right">
+                                <Button variant="destructive" size="sm" onClick={() => removeNews(newsItem.id)}>
+                                  Remove
+                                </Button>
+                              </TableCell>
+                            </TableRow>
+                          ))}
+                        </TableBody>
+                      </Table>
+                    </div>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="streaming">
+            <Card>
+              <CardHeader>
+                <CardTitle>Streaming Settings</CardTitle>
+                <CardDescription>
+                  Manage Twitch streamers that will be featured on the Streaming page.
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="flex flex-col space-y-4">
+                  <div className="flex flex-col md:flex-row gap-2">
+                    <div className="flex-1">
                       <Input
-                        type="number"
-                        min="0"
-                        value={newTeam.points}
-                        onChange={(e) => handleNewTeamChange('points', parseInt(e.target.value, 10) || 0)}
-                        className="text-sm h-9"
+                        placeholder="Enter Twitch username"
+                        value={newStreamer}
+                        onChange={(e) => setNewStreamer(e.target.value)}
                       />
                     </div>
+                    <Button 
+                      className="shrink-0" 
+                      onClick={addStreamer}
+                    >
+                      Add Streamer
+                    </Button>
+                  </div>
+                  
+                  <div className="mt-4">
+                    <h3 className="text-sm font-medium mb-2">Current Streamers</h3>
                     
-                    <div>
-                      <label className="block text-xs font-medium mb-1">Team Color</label>
-                      <div className="flex items-center gap-2">
-                        <Input
-                          type="color"
-                          value={newTeam.color}
-                          onChange={(e) => handleNewTeamChange('color', e.target.value)}
-                          className="w-12 h-9 p-1"
-                        />
-                        <Input
-                          type="text"
-                          value={newTeam.color}
-                          onChange={(e) => handleNewTeamChange('color', e.target.value)}
-                          placeholder="#000000"
-                          className="text-sm h-9"
-                        />
+                    {config.streamers.length === 0 ? (
+                      <div className="text-center p-8 border border-dashed rounded-lg">
+                        <Twitch className="w-8 h-8 mx-auto mb-2 text-gray-400" />
+                        <p className="text-gray-500">No streamers added yet</p>
                       </div>
-                    </div>
-                    
-                    <Button 
-                      className="w-full mt-3 text-sm"
-                      onClick={submitNewTeam}
-                      size="sm"
-                    >
-                      <PlusCircle className="w-4 h-4 mr-2" />
-                      Add Team
-                    </Button>
+                    ) : (
+                      <div className="space-y-2">
+                        {config.streamers.map((streamer) => (
+                          <div 
+                            key={streamer.username}
+                            className="flex items-center justify-between p-3 bg-gray-50 rounded-md"
+                          >
+                            <div className="flex items-center">
+                              <Twitch className="w-5 h-5 mr-2 text-purple-600" />
+                              <span>{streamer.username}</span>
+                            </div>
+                            <Button 
+                              variant="destructive" 
+                              size="sm"
+                              onClick={() => removeStreamer(streamer.username)}
+                            >
+                              Remove
+                            </Button>
+                          </div>
+                        ))}
+                      </div>
+                    )}
                   </div>
-                </CardContent>
-              </Card>
-              
-              <Card>
-                <CardHeader className="pb-2">
-                  <CardTitle className="flex items-center text-lg">
-                    <Flag className="w-4 h-4 mr-2" />
-                    Add Race
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-3">
-                    <div>
-                      <label className="block text-xs font-medium mb-1">Race Name</label>
-                      <Input
-                        value={newRace.name}
-                        onChange={(e) => handleNewRaceChange('name', e.target.value)}
-                        placeholder="E.g. Monaco Grand Prix"
-                        className="text-sm h-9"
-                      />
-                    </div>
-                    
-                    <div>
-                      <label className="block text-xs font-medium mb-1">Circuit</label>
-                      <Input
-                        value={newRace.circuit}
-                        onChange={(e) => handleNewRaceChange('circuit', e.target.value)}
-                        placeholder="E.g. Circuit de Monaco"
-                        className="text-sm h-9"
-                      />
-                    </div>
-                    
-                    <div>
-                      <label className="block text-xs font-medium mb-1">Country</label>
-                      <Input
-                        value={newRace.country}
-                        onChange={(e) => handleNewRaceChange('country', e.target.value)}
-                        placeholder="E.g. Monaco"
-                        className="text-sm h-9"
-                      />
-                    </div>
-                    
-                    <div>
-                      <label className="block text-xs font-medium mb-1">Date</label>
-                      <Input
-                        type="date"
-                        value={newRace.date}
-                        onChange={(e) => handleNewRaceChange('date', e.target.value)}
-                        className="text-sm h-9"
-                      />
-                    </div>
-                    
-                    <div className="pt-1">
-                      <label className="flex items-center cursor-pointer">
-                        <input
-                          type="checkbox"
-                          className="form-checkbox h-4 w-4 text-f1-red border-gray-300 rounded mr-2"
-                          checked={newRace.completed}
-                          onChange={(e) => handleNewRaceChange('completed', e.target.checked)}
-                        />
-                        <span className="text-xs">Race completed</span>
-                      </label>
-                    </div>
-                    
-                    <Button 
-                      className="w-full mt-3 text-sm"
-                      onClick={submitNewRace}
-                      size="sm"
-                    >
-                      <PlusCircle className="w-4 h-4 mr-2" />
-                      Add Race
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
+                </div>
+              </CardContent>
+            </Card>
           </TabsContent>
         </Tabs>
       </div>
