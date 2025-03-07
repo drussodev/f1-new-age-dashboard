@@ -1,16 +1,22 @@
 
 import React from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useF1Data } from '../../context/F1DataContext';
 import { useAuth } from '../../context/AuthContext';
-import { Trophy, Users, Calendar, Settings, LogIn, LogOut } from 'lucide-react';
+import { Trophy, Users, Calendar, Settings, LogIn, LogOut, UserCircle } from 'lucide-react';
 
 export const Navbar: React.FC = () => {
   const { config } = useF1Data();
-  const { user, isAdmin, logout } = useAuth();
+  const { user, isAdmin, isRoot, logout } = useAuth();
   const location = useLocation();
+  const navigate = useNavigate();
 
   const isActive = (path: string) => location.pathname === path;
+
+  const handleLogout = () => {
+    logout();
+    navigate('/login');
+  };
 
   return (
     <header className="bg-white shadow-md sticky top-0 z-50">
@@ -43,15 +49,27 @@ export const Navbar: React.FC = () => {
                 <span>Config</span>
               </NavLink>
             )}
+            {isRoot && (
+              <NavLink to="/accounts" active={isActive('/accounts')}>
+                <UserCircle className="w-5 h-5 mr-1" />
+                <span>Accounts</span>
+              </NavLink>
+            )}
             
             {user ? (
-              <button 
-                onClick={logout}
-                className="flex items-center px-3 py-2 rounded-md transition-colors text-gray-700 hover:bg-gray-100"
-              >
-                <LogOut className="w-5 h-5 mr-1" />
-                <span>Logout</span>
-              </button>
+              <div className="flex items-center space-x-3">
+                <span className="text-sm text-gray-600">
+                  <span className="font-medium">{user.username}</span>
+                  <span className="text-xs ml-1 text-gray-500">({user.role})</span>
+                </span>
+                <button 
+                  onClick={handleLogout}
+                  className="flex items-center px-3 py-2 rounded-md transition-colors text-gray-700 hover:bg-gray-100"
+                >
+                  <LogOut className="w-5 h-5 mr-1" />
+                  <span>Logout</span>
+                </button>
+              </div>
             ) : (
               <NavLink to="/login" active={isActive('/login')}>
                 <LogIn className="w-5 h-5 mr-1" />
@@ -93,10 +111,17 @@ const NavLink: React.FC<NavLinkProps> = ({ to, active, children }) => {
 const MobileMenu: React.FC = () => {
   const [isOpen, setIsOpen] = React.useState(false);
   const location = useLocation();
-  const { user, isAdmin, logout } = useAuth();
+  const navigate = useNavigate();
+  const { user, isAdmin, isRoot, logout } = useAuth();
 
   const toggleMenu = () => setIsOpen(!isOpen);
   const closeMenu = () => setIsOpen(false);
+
+  const handleLogout = () => {
+    logout();
+    navigate('/login');
+    closeMenu();
+  };
 
   const isActive = (path: string) => location.pathname === path;
 
@@ -116,7 +141,14 @@ const MobileMenu: React.FC = () => {
       </button>
 
       {isOpen && (
-        <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-50">
+        <div className="absolute right-0 mt-2 w-64 bg-white rounded-md shadow-lg py-1 z-50">
+          {user && (
+            <div className="px-4 py-2 border-b border-gray-100">
+              <p className="font-medium">{user.username}</p>
+              <p className="text-sm text-gray-500">Role: {user.role}</p>
+            </div>
+          )}
+          
           <NavItem to="/" active={isActive('/')} onClick={closeMenu}>
             <Trophy className="w-5 h-5 mr-2" />
             Standings
@@ -135,14 +167,17 @@ const MobileMenu: React.FC = () => {
               Config
             </NavItem>
           )}
+          {isRoot && (
+            <NavItem to="/accounts" active={isActive('/accounts')} onClick={closeMenu}>
+              <UserCircle className="w-5 h-5 mr-2" />
+              Accounts
+            </NavItem>
+          )}
           
           {user ? (
             <div
               className={`flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 cursor-pointer`}
-              onClick={() => {
-                logout();
-                closeMenu();
-              }}
+              onClick={handleLogout}
             >
               <LogOut className="w-5 h-5 mr-2" />
               Logout
