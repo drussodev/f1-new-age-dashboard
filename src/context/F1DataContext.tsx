@@ -9,6 +9,7 @@ interface Driver {
   points: number;
   color: string;
   image?: string;
+  description?: string;
 }
 
 interface Team {
@@ -26,6 +27,7 @@ interface Race {
   circuit: string;
   date: string;
   location: string;
+  country: string;
   completed: boolean;
   winner?: string;
 }
@@ -86,11 +88,11 @@ const defaultTeams: Team[] = [
 ];
 
 const defaultRaces: Race[] = [
-  { id: '1', name: 'Bahrain Grand Prix', circuit: 'Bahrain International Circuit', date: '2023-03-05', location: 'Sakhir, Bahrain', completed: true, winner: 'Max Verstappen' },
-  { id: '2', name: 'Saudi Arabian Grand Prix', circuit: 'Jeddah Corniche Circuit', date: '2023-03-19', location: 'Jeddah, Saudi Arabia', completed: true, winner: 'Sergio Perez' },
-  { id: '3', name: 'Australian Grand Prix', circuit: 'Albert Park Circuit', date: '2023-04-02', location: 'Melbourne, Australia', completed: true, winner: 'Max Verstappen' },
-  { id: '4', name: 'Azerbaijan Grand Prix', circuit: 'Baku City Circuit', date: '2023-04-30', location: 'Baku, Azerbaijan', completed: false },
-  { id: '5', name: 'Miami Grand Prix', circuit: 'Miami International Autodrome', date: '2023-05-07', location: 'Miami, USA', completed: false },
+  { id: '1', name: 'Bahrain Grand Prix', circuit: 'Bahrain International Circuit', date: '2023-03-05', location: 'Sakhir, Bahrain', country: 'Bahrain', completed: true, winner: 'Max Verstappen' },
+  { id: '2', name: 'Saudi Arabian Grand Prix', circuit: 'Jeddah Corniche Circuit', date: '2023-03-19', location: 'Jeddah, Saudi Arabia', country: 'Saudi Arabia', completed: true, winner: 'Sergio Perez' },
+  { id: '3', name: 'Australian Grand Prix', circuit: 'Albert Park Circuit', date: '2023-04-02', location: 'Melbourne, Australia', country: 'Australia', completed: true, winner: 'Max Verstappen' },
+  { id: '4', name: 'Azerbaijan Grand Prix', circuit: 'Baku City Circuit', date: '2023-04-30', location: 'Baku, Azerbaijan', country: 'Azerbaijan', completed: false },
+  { id: '5', name: 'Miami Grand Prix', circuit: 'Miami International Autodrome', date: '2023-05-07', location: 'Miami, USA', country: 'USA', completed: false },
 ];
 
 const defaultConfig: Config = {
