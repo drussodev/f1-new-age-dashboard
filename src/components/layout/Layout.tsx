@@ -10,7 +10,6 @@ interface LayoutProps {
 export const Layout: React.FC<LayoutProps> = ({ children }) => {
   const location = useLocation();
   const isAdmin = location.pathname === '/config';
-  const isIndex = location.pathname === '/' || location.pathname === '/index';
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
@@ -25,24 +24,13 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
         <div className="speed-line top-[80%] w-[75%]"></div>
       </div>
 
-      {/* F1 Wallpaper - only shown on index page */}
-      {isIndex && (
-        <div 
-          className="fixed inset-0 bg-cover bg-center bg-no-repeat opacity-10 pointer-events-none z-0" 
-          style={{ 
-            backgroundImage: "url('https://images.unsplash.com/photo-1504707748692-419802cf939d?q=80&w=2000')",
-          }}
-          id="f1-wallpaper"
-        ></div>
-      )}
-
       <Navbar />
       
-      <main className={`flex-1 ${isAdmin ? 'container mx-auto px-4 py-8' : ''} relative z-10`}>
+      <main className={`flex-1 ${isAdmin ? 'container mx-auto px-4 py-8' : ''}`}>
         {children}
       </main>
       
-      <footer className="bg-gray-800 text-white p-4 text-center relative z-10">
+      <footer className="bg-gray-800 text-white p-4 text-center">
         <div className="container mx-auto">
           <p className="text-sm">&copy; {new Date().getFullYear()} F1 New Age Tournament. All rights reserved.</p>
         </div>
