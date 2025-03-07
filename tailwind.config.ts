@@ -1,3 +1,4 @@
+
 import type { Config } from "tailwindcss";
 
 export default {
@@ -52,15 +53,11 @@ export default {
 					DEFAULT: 'hsl(var(--card))',
 					foreground: 'hsl(var(--card-foreground))'
 				},
-				sidebar: {
-					DEFAULT: 'hsl(var(--sidebar-background))',
-					foreground: 'hsl(var(--sidebar-foreground))',
-					primary: 'hsl(var(--sidebar-primary))',
-					'primary-foreground': 'hsl(var(--sidebar-primary-foreground))',
-					accent: 'hsl(var(--sidebar-accent))',
-					'accent-foreground': 'hsl(var(--sidebar-accent-foreground))',
-					border: 'hsl(var(--sidebar-border))',
-					ring: 'hsl(var(--sidebar-ring))'
+				f1: {
+					red: '#ea384c',
+					DEFAULT: '#ea384c',
+					dark: '#d11c31',
+					light: '#ff5e6d'
 				}
 			},
 			borderRadius: {
@@ -84,11 +81,19 @@ export default {
 					to: {
 						height: '0'
 					}
+				},
+				'speed-lines': {
+					'0%': { transform: 'translateX(100%)' },
+					'100%': { transform: 'translateX(-100%)' }
 				}
 			},
 			animation: {
 				'accordion-down': 'accordion-down 0.2s ease-out',
-				'accordion-up': 'accordion-up 0.2s ease-out'
+				'accordion-up': 'accordion-up 0.2s ease-out',
+				'speed-lines': 'speed-lines 3s linear infinite'
+			},
+			backgroundImage: {
+				'checkered-pattern': 'repeating-conic-gradient(#f5f5f5 0% 25%, transparent 0% 50%) 50% / 20px 20px'
 			}
 		}
 	},
