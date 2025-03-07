@@ -1,7 +1,8 @@
+
 import React, { useState } from 'react';
 import { Layout } from '../components/layout/Layout';
 import { useF1Data } from '../context/F1DataContext';
-import { Settings, Save, Trophy, Users, Flag, Calendar } from 'lucide-react';
+import { Settings, Save, Trophy, Users, Flag, Calendar, PlusCircle } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -10,7 +11,19 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { toast } from 'sonner';
 
 const Config = () => {
-  const { drivers, teams, races, config, updateDriverPoints, updateTeamPoints, updateRaceDetails, updateConfig } = useF1Data();
+  const { 
+    drivers, 
+    teams, 
+    races, 
+    config, 
+    updateDriverPoints, 
+    updateTeamPoints, 
+    updateRaceDetails, 
+    updateConfig,
+    updateDriverName,
+    addTeam,
+    addRace
+  } = useF1Data();
   
   const [driverPoints, setDriverPoints] = useState<{ [key: string]: number }>(
     drivers.reduce((acc, driver) => ({ ...acc, [driver.id]: driver.points }), {})
@@ -33,6 +46,27 @@ const Config = () => {
     }), {})
   );
 
+  // Add state for driver name editing
+  const [driverNames, setDriverNames] = useState<{ [key: string]: string }>(
+    drivers.reduce((acc, driver) => ({ ...acc, [driver.id]: driver.name }), {})
+  );
+
+  // Add state for new team
+  const [newTeam, setNewTeam] = useState({
+    name: '',
+    points: 0,
+    color: '#000000'
+  });
+
+  // Add state for new race
+  const [newRace, setNewRace] = useState({
+    name: '',
+    circuit: '',
+    date: new Date().toISOString().split('T')[0],
+    country: '',
+    completed: false
+  });
+
   const handleDriverPointsChange = (driverId: string, value: string) => {
     const points = parseInt(value, 10) || 0;
     setDriverPoints(prev => ({ ...prev, [driverId]: points }));
@@ -41,6 +75,11 @@ const Config = () => {
   const handleTeamPointsChange = (teamId: string, value: string) => {
     const points = parseInt(value, 10) || 0;
     setTeamPoints(prev => ({ ...prev, [teamId]: points }));
+  };
+
+  // Handler for driver name changes
+  const handleDriverNameChange = (driverId: string, value: string) => {
+    setDriverNames(prev => ({ ...prev, [driverId]: value }));
   };
 
   const saveDriverPoints = () => {
@@ -55,6 +94,16 @@ const Config = () => {
       updateTeamPoints(teamId, points);
     });
     toast.success("All team points have been updated");
+  };
+
+  // Save driver names
+  const saveDriverNames = () => {
+    Object.entries(driverNames).forEach(([driverId, name]) => {
+      if (name.trim() !== '') {
+        updateDriverName(driverId, name);
+      }
+    });
+    toast.success("All driver names have been updated");
   };
 
   const handleConfigChange = (field: keyof typeof tournamentConfig, value: any) => {
@@ -93,6 +142,52 @@ const Config = () => {
     toast.success("All race details have been updated");
   };
 
+  // Handler for new team input changes
+  const handleNewTeamChange = (field: keyof typeof newTeam, value: string | number) => {
+    setNewTeam(prev => ({ ...prev, [field]: value }));
+  };
+
+  // Handler for new race input changes
+  const handleNewRaceChange = (field: keyof typeof newRace, value: string | boolean) => {
+    setNewRace(prev => ({ ...prev, [field]: value }));
+  };
+
+  // Submit new team
+  const submitNewTeam = () => {
+    if (newTeam.name.trim() === '') {
+      toast.error("Team name cannot be empty");
+      return;
+    }
+    
+    addTeam(newTeam);
+    
+    // Reset form
+    setNewTeam({
+      name: '',
+      points: 0,
+      color: '#000000'
+    });
+  };
+
+  // Submit new race
+  const submitNewRace = () => {
+    if (newRace.name.trim() === '' || newRace.circuit.trim() === '' || newRace.country.trim() === '') {
+      toast.error("All race fields must be filled");
+      return;
+    }
+    
+    addRace(newRace);
+    
+    // Reset form
+    setNewRace({
+      name: '',
+      circuit: '',
+      date: new Date().toISOString().split('T')[0],
+      country: '',
+      completed: false
+    });
+  };
+
   return (
     <Layout>
       <div className="max-w-5xl mx-auto">
@@ -102,14 +197,49 @@ const Config = () => {
         </div>
         
         <Tabs defaultValue="drivers">
-          <TabsList className="grid w-full grid-cols-4 mb-8">
+          <TabsList className="grid w-full grid-cols-5 mb-8">
             <TabsTrigger value="drivers">Driver Points</TabsTrigger>
             <TabsTrigger value="teams">Team Points</TabsTrigger>
             <TabsTrigger value="races">Race Calendar</TabsTrigger>
             <TabsTrigger value="tournament">Tournament Settings</TabsTrigger>
+            <TabsTrigger value="add">Add New</TabsTrigger>
           </TabsList>
           
           <TabsContent value="drivers">
+            <Card className="mb-6">
+              <CardHeader>
+                <CardTitle className="flex items-center">
+                  <Users className="w-5 h-5 mr-2" />
+                  Update Driver Names
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  {drivers.map(driver => (
+                    <div key={`name-${driver.id}`} className="flex items-center space-x-4">
+                      <div className="w-1 h-10 rounded-full" style={{ backgroundColor: driver.color }}></div>
+                      <div className="flex-1">
+                        <Input
+                          value={driverNames[driver.id]}
+                          onChange={(e) => handleDriverNameChange(driver.id, e.target.value)}
+                          placeholder="Driver name"
+                        />
+                      </div>
+                      <div className="text-sm text-gray-500">{driver.team}</div>
+                    </div>
+                  ))}
+                  
+                  <Button 
+                    className="w-full mt-6"
+                    onClick={saveDriverNames}
+                  >
+                    <Save className="w-4 h-4 mr-2" />
+                    Save Driver Names
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+            
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center">
@@ -120,7 +250,7 @@ const Config = () => {
               <CardContent>
                 <div className="space-y-4">
                   {drivers.map(driver => (
-                    <div key={driver.id} className="flex items-center space-x-4">
+                    <div key={`points-${driver.id}`} className="flex items-center space-x-4">
                       <div className="w-1 h-10 rounded-full" style={{ backgroundColor: driver.color }}></div>
                       <div className="flex-1">
                         <div className="font-medium">{driver.name}</div>
@@ -308,6 +438,135 @@ const Config = () => {
                 </Button>
               </CardContent>
             </Card>
+          </TabsContent>
+          
+          <TabsContent value="add">
+            <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center">
+                    <Trophy className="w-5 h-5 mr-2" />
+                    Add New Team
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    <div>
+                      <label className="block text-sm font-medium mb-1">Team Name</label>
+                      <Input
+                        value={newTeam.name}
+                        onChange={(e) => handleNewTeamChange('name', e.target.value)}
+                        placeholder="Enter team name"
+                      />
+                    </div>
+                    
+                    <div>
+                      <label className="block text-sm font-medium mb-1">Initial Points</label>
+                      <Input
+                        type="number"
+                        min="0"
+                        value={newTeam.points}
+                        onChange={(e) => handleNewTeamChange('points', parseInt(e.target.value, 10) || 0)}
+                      />
+                    </div>
+                    
+                    <div>
+                      <label className="block text-sm font-medium mb-1">Team Color</label>
+                      <div className="flex items-center gap-2">
+                        <Input
+                          type="color"
+                          value={newTeam.color}
+                          onChange={(e) => handleNewTeamChange('color', e.target.value)}
+                          className="w-16 h-10 p-1"
+                        />
+                        <Input
+                          type="text"
+                          value={newTeam.color}
+                          onChange={(e) => handleNewTeamChange('color', e.target.value)}
+                          placeholder="#000000"
+                        />
+                      </div>
+                    </div>
+                    
+                    <Button 
+                      className="w-full mt-4"
+                      onClick={submitNewTeam}
+                    >
+                      <PlusCircle className="w-4 h-4 mr-2" />
+                      Add Team
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+              
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center">
+                    <Flag className="w-5 h-5 mr-2" />
+                    Add New Race
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    <div>
+                      <label className="block text-sm font-medium mb-1">Race Name</label>
+                      <Input
+                        value={newRace.name}
+                        onChange={(e) => handleNewRaceChange('name', e.target.value)}
+                        placeholder="E.g. Monaco Grand Prix"
+                      />
+                    </div>
+                    
+                    <div>
+                      <label className="block text-sm font-medium mb-1">Circuit</label>
+                      <Input
+                        value={newRace.circuit}
+                        onChange={(e) => handleNewRaceChange('circuit', e.target.value)}
+                        placeholder="E.g. Circuit de Monaco"
+                      />
+                    </div>
+                    
+                    <div>
+                      <label className="block text-sm font-medium mb-1">Country</label>
+                      <Input
+                        value={newRace.country}
+                        onChange={(e) => handleNewRaceChange('country', e.target.value)}
+                        placeholder="E.g. Monaco"
+                      />
+                    </div>
+                    
+                    <div>
+                      <label className="block text-sm font-medium mb-1">Date</label>
+                      <Input
+                        type="date"
+                        value={newRace.date}
+                        onChange={(e) => handleNewRaceChange('date', e.target.value)}
+                      />
+                    </div>
+                    
+                    <div>
+                      <label className="flex items-center cursor-pointer">
+                        <input
+                          type="checkbox"
+                          className="form-checkbox h-4 w-4 text-f1-red border-gray-300 rounded mr-2"
+                          checked={newRace.completed}
+                          onChange={(e) => handleNewRaceChange('completed', e.target.checked)}
+                        />
+                        <span className="text-sm">Race completed</span>
+                      </label>
+                    </div>
+                    
+                    <Button 
+                      className="w-full mt-4"
+                      onClick={submitNewRace}
+                    >
+                      <PlusCircle className="w-4 h-4 mr-2" />
+                      Add Race
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
           </TabsContent>
         </Tabs>
       </div>

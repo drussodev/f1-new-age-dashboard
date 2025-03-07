@@ -1,3 +1,4 @@
+
 import React, { createContext, useState, useContext, useEffect } from 'react';
 import { toast } from "sonner";
 
@@ -45,6 +46,9 @@ interface F1DataContextType {
   updateTeamPoints: (teamId: string, newPoints: number) => void;
   updateRaceDetails: (raceId: string, updatedRace: Partial<Race>) => void;
   updateConfig: (newConfig: Partial<TournamentConfig>) => void;
+  updateDriverName: (driverId: string, newName: string) => void;
+  addTeam: (team: Omit<Team, 'id'>) => void;
+  addRace: (race: Omit<Race, 'id'>) => void;
   sortedDrivers: Driver[];
   sortedTeams: Team[];
 }
@@ -190,6 +194,38 @@ export const F1DataProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     toast.success("Tournament configuration updated");
   };
 
+  // New function to update driver name
+  const updateDriverName = (driverId: string, newName: string) => {
+    setDrivers(prevDrivers => 
+      prevDrivers.map(driver => 
+        driver.id === driverId 
+          ? { ...driver, name: newName } 
+          : driver
+      )
+    );
+    toast.success("Driver name updated successfully");
+  };
+
+  // New function to add a team
+  const addTeam = (team: Omit<Team, 'id'>) => {
+    const newTeam: Team = {
+      ...team,
+      id: (teams.length + 1).toString() // Simple ID generation
+    };
+    setTeams(prevTeams => [...prevTeams, newTeam]);
+    toast.success(`Team ${team.name} added successfully`);
+  };
+
+  // New function to add a race
+  const addRace = (race: Omit<Race, 'id'>) => {
+    const newRace: Race = {
+      ...race,
+      id: (races.length + 1).toString() // Simple ID generation
+    };
+    setRaces(prevRaces => [...prevRaces, newRace]);
+    toast.success(`Race ${race.name} added successfully`);
+  };
+
   // Sorted drivers by points (for leaderboard)
   const sortedDrivers = [...drivers].sort((a, b) => b.points - a.points);
   
@@ -206,6 +242,9 @@ export const F1DataProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     updateTeamPoints,
     updateRaceDetails,
     updateConfig,
+    updateDriverName,
+    addTeam,
+    addRace,
     sortedDrivers,
     sortedTeams
   };
