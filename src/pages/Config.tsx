@@ -47,12 +47,10 @@ const Config = () => {
     }), {})
   );
 
-  // Add state for driver name editing
   const [driverNames, setDriverNames] = useState<{ [key: string]: string }>(
     drivers.reduce((acc, driver) => ({ ...acc, [driver.id]: driver.name }), {})
   );
 
-  // Add state for driver details editing
   const [driverDetails, setDriverDetails] = useState<{ [key: string]: { country: string; image: string; description: string } }>(
     drivers.reduce((acc, driver) => ({ 
       ...acc, 
@@ -64,14 +62,12 @@ const Config = () => {
     }), {})
   );
 
-  // Add state for new team
   const [newTeam, setNewTeam] = useState({
     name: '',
     points: 0,
     color: '#000000'
   });
 
-  // Add state for new race
   const [newRace, setNewRace] = useState({
     name: '',
     circuit: '',
@@ -90,12 +86,10 @@ const Config = () => {
     setTeamPoints(prev => ({ ...prev, [teamId]: points }));
   };
 
-  // Handler for driver name changes
   const handleDriverNameChange = (driverId: string, value: string) => {
     setDriverNames(prev => ({ ...prev, [driverId]: value }));
   };
 
-  // Handler for driver details changes
   const handleDriverDetailsChange = (driverId: string, field: 'country' | 'image' | 'description', value: string) => {
     setDriverDetails(prev => ({
       ...prev,
@@ -120,7 +114,6 @@ const Config = () => {
     toast.success("All team points have been updated");
   };
 
-  // Save driver names
   const saveDriverNames = () => {
     Object.entries(driverNames).forEach(([driverId, name]) => {
       if (name.trim() !== '') {
@@ -173,17 +166,14 @@ const Config = () => {
     toast.success("All race details have been updated");
   };
 
-  // Handler for new team input changes
   const handleNewTeamChange = (field: keyof typeof newTeam, value: string | number) => {
     setNewTeam(prev => ({ ...prev, [field]: value }));
   };
 
-  // Handler for new race input changes
   const handleNewRaceChange = (field: keyof typeof newRace, value: string | boolean) => {
     setNewRace(prev => ({ ...prev, [field]: value }));
   };
 
-  // Submit new team
   const submitNewTeam = () => {
     if (newTeam.name.trim() === '') {
       toast.error("Team name cannot be empty");
@@ -192,7 +182,6 @@ const Config = () => {
     
     addTeam(newTeam);
     
-    // Reset form
     setNewTeam({
       name: '',
       points: 0,
@@ -200,7 +189,6 @@ const Config = () => {
     });
   };
 
-  // Submit new race
   const submitNewRace = () => {
     if (newRace.name.trim() === '' || newRace.circuit.trim() === '' || newRace.country.trim() === '') {
       toast.error("All race fields must be filled");
@@ -209,7 +197,6 @@ const Config = () => {
     
     addRace(newRace);
     
-    // Reset form
     setNewRace({
       name: '',
       circuit: '',
@@ -228,8 +215,9 @@ const Config = () => {
         </div>
         
         <Tabs defaultValue="drivers">
-          <TabsList className="grid w-full grid-cols-5 mb-8">
-            <TabsTrigger value="drivers">Driver Details</TabsTrigger>
+          <TabsList className="grid w-full grid-cols-6 mb-8">
+            <TabsTrigger value="drivers">Driver Names</TabsTrigger>
+            <TabsTrigger value="driver-details">Driver Details</TabsTrigger>
             <TabsTrigger value="teams">Team Points</TabsTrigger>
             <TabsTrigger value="races">Race Calendar</TabsTrigger>
             <TabsTrigger value="tournament">Tournament Settings</TabsTrigger>
@@ -271,7 +259,48 @@ const Config = () => {
               </CardContent>
             </Card>
             
-            <Card className="mb-6">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center">
+                  <Trophy className="w-5 h-5 mr-2" />
+                  Update Driver Points
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  {drivers.map(driver => (
+                    <div key={`points-${driver.id}`} className="flex items-center space-x-4">
+                      <div className="w-1 h-10 rounded-full" style={{ backgroundColor: driver.color }}></div>
+                      <div className="flex-1">
+                        <div className="font-medium">{driver.name}</div>
+                        <div className="text-sm text-gray-500">{driver.team}</div>
+                      </div>
+                      <div className="w-24">
+                        <Input
+                          type="number"
+                          min="0"
+                          value={driverPoints[driver.id]}
+                          onChange={(e) => handleDriverPointsChange(driver.id, e.target.value)}
+                          className="text-right"
+                        />
+                      </div>
+                    </div>
+                  ))}
+                  
+                  <Button 
+                    className="w-full mt-6"
+                    onClick={saveDriverPoints}
+                  >
+                    <Save className="w-4 h-4 mr-2" />
+                    Save Driver Points
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+          
+          <TabsContent value="driver-details">
+            <Card>
               <CardHeader>
                 <CardTitle className="flex items-center">
                   <FileText className="w-5 h-5 mr-2" />
@@ -334,45 +363,6 @@ const Config = () => {
                   >
                     <Save className="w-4 h-4 mr-2" />
                     Save Driver Details
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-            
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center">
-                  <Trophy className="w-5 h-5 mr-2" />
-                  Update Driver Points
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  {drivers.map(driver => (
-                    <div key={`points-${driver.id}`} className="flex items-center space-x-4">
-                      <div className="w-1 h-10 rounded-full" style={{ backgroundColor: driver.color }}></div>
-                      <div className="flex-1">
-                        <div className="font-medium">{driver.name}</div>
-                        <div className="text-sm text-gray-500">{driver.team}</div>
-                      </div>
-                      <div className="w-24">
-                        <Input
-                          type="number"
-                          min="0"
-                          value={driverPoints[driver.id]}
-                          onChange={(e) => handleDriverPointsChange(driver.id, e.target.value)}
-                          className="text-right"
-                        />
-                      </div>
-                    </div>
-                  ))}
-                  
-                  <Button 
-                    className="w-full mt-6"
-                    onClick={saveDriverPoints}
-                  >
-                    <Save className="w-4 h-4 mr-2" />
-                    Save Driver Points
                   </Button>
                 </div>
               </CardContent>
