@@ -2,7 +2,8 @@
 import React, { useState } from 'react';
 import { Layout } from '../components/layout/Layout';
 import { useF1Data } from '../context/F1DataContext';
-import { Users, MapPin, Trophy, ChevronDown, ChevronUp, Edit, Check, X } from 'lucide-react';
+import { useAuth } from '../context/AuthContext';
+import { Users, MapPin, Trophy, ChevronDown, ChevronUp, Edit, Check, X, ShieldAlert } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -10,6 +11,7 @@ import { toast } from 'sonner';
 
 const Drivers = () => {
   const { drivers, setDrivers } = useF1Data();
+  const { isAdmin } = useAuth();
   const [expandedDriverId, setExpandedDriverId] = useState<string | null>(null);
   const [editingDriverId, setEditingDriverId] = useState<string | null>(null);
   const [editFormData, setEditFormData] = useState({
@@ -27,6 +29,11 @@ const Drivers = () => {
   };
 
   const startEditing = (driver: any) => {
+    if (!isAdmin) {
+      toast.error("Only administrators can edit driver profiles");
+      return;
+    }
+    
     setEditingDriverId(driver.id);
     setEditFormData({
       name: driver.name,
@@ -56,7 +63,7 @@ const Drivers = () => {
       driver.id === driverId ? { ...driver, ...editFormData } : driver
     ));
     setEditingDriverId(null);
-    toast("Driver information updated successfully");
+    toast.success("Driver information updated successfully");
   };
 
   return (
@@ -66,6 +73,13 @@ const Drivers = () => {
           <div className="flex items-center mb-8">
             <Users className="w-8 h-8 text-f1-red mr-3" />
             <h1 className="text-3xl font-bold">Driver Profiles</h1>
+            
+            {!isAdmin && (
+              <div className="ml-auto flex items-center text-gray-500 text-sm">
+                <ShieldAlert className="w-4 h-4 mr-2" />
+                <span>Administrator access required to edit drivers</span>
+              </div>
+            )}
           </div>
           
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
@@ -193,15 +207,17 @@ const Drivers = () => {
                         </div>
                         <div className="flex-1">
                           <h2 className="font-bold text-xl">{driver.name}</h2>
-                          <Button 
-                            size="sm" 
-                            variant="ghost" 
-                            onClick={() => startEditing(driver)}
-                            className="mt-1 h-7 px-2 text-xs"
-                          >
-                            <Edit className="w-3 h-3 mr-1" />
-                            Edit
-                          </Button>
+                          {isAdmin && (
+                            <Button 
+                              size="sm" 
+                              variant="ghost" 
+                              onClick={() => startEditing(driver)}
+                              className="mt-1 h-7 px-2 text-xs"
+                            >
+                              <Edit className="w-3 h-3 mr-1" />
+                              Edit
+                            </Button>
+                          )}
                         </div>
                       </div>
                       
