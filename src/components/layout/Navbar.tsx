@@ -2,10 +2,12 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useF1Data } from '../../context/F1DataContext';
-import { Trophy, Users, Calendar, Settings } from 'lucide-react';
+import { useAuth } from '../../context/AuthContext';
+import { Trophy, Users, Calendar, Settings, LogIn, LogOut } from 'lucide-react';
 
 export const Navbar: React.FC = () => {
   const { config } = useF1Data();
+  const { user, isAdmin, logout } = useAuth();
   const location = useLocation();
 
   const isActive = (path: string) => location.pathname === path;
@@ -35,10 +37,27 @@ export const Navbar: React.FC = () => {
               <Calendar className="w-5 h-5 mr-1" />
               <span>Calendar</span>
             </NavLink>
-            <NavLink to="/config" active={isActive('/config')}>
-              <Settings className="w-5 h-5 mr-1" />
-              <span>Config</span>
-            </NavLink>
+            {isAdmin && (
+              <NavLink to="/config" active={isActive('/config')}>
+                <Settings className="w-5 h-5 mr-1" />
+                <span>Config</span>
+              </NavLink>
+            )}
+            
+            {user ? (
+              <button 
+                onClick={logout}
+                className="flex items-center px-3 py-2 rounded-md transition-colors text-gray-700 hover:bg-gray-100"
+              >
+                <LogOut className="w-5 h-5 mr-1" />
+                <span>Logout</span>
+              </button>
+            ) : (
+              <NavLink to="/login" active={isActive('/login')}>
+                <LogIn className="w-5 h-5 mr-1" />
+                <span>Login</span>
+              </NavLink>
+            )}
           </nav>
           
           <div className="md:hidden">
@@ -74,6 +93,7 @@ const NavLink: React.FC<NavLinkProps> = ({ to, active, children }) => {
 const MobileMenu: React.FC = () => {
   const [isOpen, setIsOpen] = React.useState(false);
   const location = useLocation();
+  const { user, isAdmin, logout } = useAuth();
 
   const toggleMenu = () => setIsOpen(!isOpen);
   const closeMenu = () => setIsOpen(false);
@@ -109,10 +129,30 @@ const MobileMenu: React.FC = () => {
             <Calendar className="w-5 h-5 mr-2" />
             Calendar
           </NavItem>
-          <NavItem to="/config" active={isActive('/config')} onClick={closeMenu}>
-            <Settings className="w-5 h-5 mr-2" />
-            Config
-          </NavItem>
+          {isAdmin && (
+            <NavItem to="/config" active={isActive('/config')} onClick={closeMenu}>
+              <Settings className="w-5 h-5 mr-2" />
+              Config
+            </NavItem>
+          )}
+          
+          {user ? (
+            <div
+              className={`flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 cursor-pointer`}
+              onClick={() => {
+                logout();
+                closeMenu();
+              }}
+            >
+              <LogOut className="w-5 h-5 mr-2" />
+              Logout
+            </div>
+          ) : (
+            <NavItem to="/login" active={isActive('/login')} onClick={closeMenu}>
+              <LogIn className="w-5 h-5 mr-2" />
+              Login
+            </NavItem>
+          )}
         </div>
       )}
     </div>

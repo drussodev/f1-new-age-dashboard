@@ -13,6 +13,13 @@ export interface Driver {
   color: string;
 }
 
+export interface Team {
+  id: string;
+  name: string;
+  points: number;
+  color: string;
+}
+
 export interface Race {
   id: string;
   name: string;
@@ -32,11 +39,14 @@ export interface TournamentConfig {
 
 interface F1DataContextType {
   drivers: Driver[];
+  teams: Team[];
   races: Race[];
   config: TournamentConfig;
   updateDriverPoints: (driverId: string, newPoints: number) => void;
+  updateTeamPoints: (teamId: string, newPoints: number) => void;
   updateConfig: (newConfig: Partial<TournamentConfig>) => void;
   sortedDrivers: Driver[];
+  sortedTeams: Team[];
 }
 
 // Initial data
@@ -49,6 +59,14 @@ const defaultDrivers: Driver[] = [
   { id: '6', name: 'Oscar Piastri', team: 'McLaren', points: 165, country: 'Australia', number: 81, image: '/placeholder.svg', color: '#FF9800' },
   { id: '7', name: 'Sergio Perez', team: 'Red Bull Racing', points: 155, country: 'Mexico', number: 11, image: '/placeholder.svg', color: '#0600EF' },
   { id: '8', name: 'George Russell', team: 'Mercedes', points: 155, country: 'United Kingdom', number: 63, image: '/placeholder.svg', color: '#00D2BE' },
+];
+
+// Teams calculated based on existing drivers
+const defaultTeams: Team[] = [
+  { id: '1', name: 'Red Bull Racing', points: 467, color: '#0600EF' },
+  { id: '2', name: 'Mercedes', points: 351, color: '#00D2BE' },
+  { id: '3', name: 'McLaren', points: 360, color: '#FF9800' },
+  { id: '4', name: 'Ferrari', points: 345, color: '#DC0000' },
 ];
 
 const defaultRaces: Race[] = [
@@ -85,6 +103,7 @@ const F1DataContext = createContext<F1DataContextType | undefined>(undefined);
 // Storage keys
 const STORAGE_KEYS = {
   DRIVERS: 'f1-new-age-drivers',
+  TEAMS: 'f1-new-age-teams',
   RACES: 'f1-new-age-races',
   CONFIG: 'f1-new-age-config'
 };
@@ -95,6 +114,11 @@ export const F1DataProvider: React.FC<{ children: React.ReactNode }> = ({ childr
   const [drivers, setDrivers] = useState<Driver[]>(() => {
     const stored = localStorage.getItem(STORAGE_KEYS.DRIVERS);
     return stored ? JSON.parse(stored) : defaultDrivers;
+  });
+  
+  const [teams, setTeams] = useState<Team[]>(() => {
+    const stored = localStorage.getItem(STORAGE_KEYS.TEAMS);
+    return stored ? JSON.parse(stored) : defaultTeams;
   });
   
   const [races, setRaces] = useState<Race[]>(() => {
@@ -111,6 +135,10 @@ export const F1DataProvider: React.FC<{ children: React.ReactNode }> = ({ childr
   useEffect(() => {
     localStorage.setItem(STORAGE_KEYS.DRIVERS, JSON.stringify(drivers));
   }, [drivers]);
+  
+  useEffect(() => {
+    localStorage.setItem(STORAGE_KEYS.TEAMS, JSON.stringify(teams));
+  }, [teams]);
   
   useEffect(() => {
     localStorage.setItem(STORAGE_KEYS.RACES, JSON.stringify(races));
@@ -132,6 +160,18 @@ export const F1DataProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     toast.success("Driver points updated successfully");
   };
 
+  // Update team points
+  const updateTeamPoints = (teamId: string, newPoints: number) => {
+    setTeams(prevTeams => 
+      prevTeams.map(team => 
+        team.id === teamId 
+          ? { ...team, points: newPoints } 
+          : team
+      )
+    );
+    toast.success("Team points updated successfully");
+  };
+
   // Update config
   const updateConfig = (newConfig: Partial<TournamentConfig>) => {
     setConfig(prevConfig => ({ ...prevConfig, ...newConfig }));
@@ -140,15 +180,21 @@ export const F1DataProvider: React.FC<{ children: React.ReactNode }> = ({ childr
 
   // Sorted drivers by points (for leaderboard)
   const sortedDrivers = [...drivers].sort((a, b) => b.points - a.points);
+  
+  // Sorted teams by points
+  const sortedTeams = [...teams].sort((a, b) => b.points - a.points);
 
   // Context value
   const value = {
     drivers,
+    teams,
     races,
     config,
     updateDriverPoints,
+    updateTeamPoints,
     updateConfig,
-    sortedDrivers
+    sortedDrivers,
+    sortedTeams
   };
 
   return (
