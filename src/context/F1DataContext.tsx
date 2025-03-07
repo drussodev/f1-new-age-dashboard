@@ -1,4 +1,3 @@
-
 import React, { createContext, useState, useContext, useEffect } from 'react';
 import { toast } from "sonner";
 
@@ -11,6 +10,7 @@ export interface Driver {
   number: number;
   image: string;
   color: string;
+  description?: string;
 }
 
 export interface Team {
@@ -49,23 +49,22 @@ interface F1DataContextType {
   updateDriverName: (driverId: string, newName: string) => void;
   addTeam: (team: Omit<Team, 'id'>) => void;
   addRace: (race: Omit<Race, 'id'>) => void;
+  updateDriverDetails: (driverId: string, details: Partial<Driver>) => void;
   sortedDrivers: Driver[];
   sortedTeams: Team[];
 }
 
-// Initial data
 const defaultDrivers: Driver[] = [
-  { id: '1', name: 'Max Verstappen', team: 'Red Bull Racing', points: 312, country: 'Netherlands', number: 1, image: '/placeholder.svg', color: '#0600EF' },
-  { id: '2', name: 'Lewis Hamilton', team: 'Mercedes', points: 196, country: 'United Kingdom', number: 44, image: '/placeholder.svg', color: '#00D2BE' },
-  { id: '3', name: 'Lando Norris', team: 'McLaren', points: 195, country: 'United Kingdom', number: 4, image: '/placeholder.svg', color: '#FF9800' },
-  { id: '4', name: 'Charles Leclerc', team: 'Ferrari', points: 175, country: 'Monaco', number: 16, image: '/placeholder.svg', color: '#DC0000' },
-  { id: '5', name: 'Carlos Sainz', team: 'Ferrari', points: 170, country: 'Spain', number: 55, image: '/placeholder.svg', color: '#DC0000' },
-  { id: '6', name: 'Oscar Piastri', team: 'McLaren', points: 165, country: 'Australia', number: 81, image: '/placeholder.svg', color: '#FF9800' },
-  { id: '7', name: 'Sergio Perez', team: 'Red Bull Racing', points: 155, country: 'Mexico', number: 11, image: '/placeholder.svg', color: '#0600EF' },
-  { id: '8', name: 'George Russell', team: 'Mercedes', points: 155, country: 'United Kingdom', number: 63, image: '/placeholder.svg', color: '#00D2BE' },
+  { id: '1', name: 'Max Verstappen', team: 'Red Bull Racing', points: 312, country: 'Netherlands', number: 1, image: '/placeholder.svg', color: '#0600EF', description: 'Reigning World Champion known for his aggressive driving style.' },
+  { id: '2', name: 'Lewis Hamilton', team: 'Mercedes', points: 196, country: 'United Kingdom', number: 44, image: '/placeholder.svg', color: '#00D2BE', description: 'Seven-time World Champion and one of the most successful F1 drivers in history.' },
+  { id: '3', name: 'Lando Norris', team: 'McLaren', points: 195, country: 'United Kingdom', number: 4, image: '/placeholder.svg', color: '#FF9800', description: 'Rising star known for his consistency and skill in wet conditions.' },
+  { id: '4', name: 'Charles Leclerc', team: 'Ferrari', points: 175, country: 'Monaco', number: 16, image: '/placeholder.svg', color: '#DC0000', description: 'Ferrari\'s lead driver known for his qualifying pace and race craft.' },
+  { id: '5', name: 'Carlos Sainz', team: 'Ferrari', points: 170, country: 'Spain', number: 55, image: '/placeholder.svg', color: '#DC0000', description: 'Consistent performer who has driven for multiple teams throughout his career.' },
+  { id: '6', name: 'Oscar Piastri', team: 'McLaren', points: 165, country: 'Australia', number: 81, image: '/placeholder.svg', color: '#FF9800', description: 'Rookie sensation who was highly sought after following his junior formula success.' },
+  { id: '7', name: 'Sergio Perez', team: 'Red Bull Racing', points: 155, country: 'Mexico', number: 11, image: '/placeholder.svg', color: '#0600EF', description: 'Known as the \"tire whisperer\" for his ability to manage tire wear during races.' },
+  { id: '8', name: 'George Russell', team: 'Mercedes', points: 155, country: 'United Kingdom', number: 63, image: '/placeholder.svg', color: '#00D2BE', description: 'Former Williams driver who earned his promotion to Mercedes through consistent performances.' },
 ];
 
-// Teams calculated based on existing drivers
 const defaultTeams: Team[] = [
   { id: '1', name: 'Red Bull Racing', points: 467, color: '#0600EF' },
   { id: '2', name: 'Mercedes', points: 351, color: '#00D2BE' },
@@ -101,10 +100,8 @@ const defaultConfig: TournamentConfig = {
   }
 };
 
-// Create context
 const F1DataContext = createContext<F1DataContextType | undefined>(undefined);
 
-// Storage keys
 const STORAGE_KEYS = {
   DRIVERS: 'f1-new-age-drivers',
   TEAMS: 'f1-new-age-teams',
@@ -112,9 +109,7 @@ const STORAGE_KEYS = {
   CONFIG: 'f1-new-age-config'
 };
 
-// Provider component
 export const F1DataProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  // Initialize state from localStorage or defaults
   const [drivers, setDrivers] = useState<Driver[]>(() => {
     const stored = localStorage.getItem(STORAGE_KEYS.DRIVERS);
     return stored ? JSON.parse(stored) : defaultDrivers;
@@ -135,7 +130,6 @@ export const F1DataProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     return stored ? JSON.parse(stored) : defaultConfig;
   });
 
-  // Save to localStorage whenever state changes
   useEffect(() => {
     localStorage.setItem(STORAGE_KEYS.DRIVERS, JSON.stringify(drivers));
   }, [drivers]);
@@ -152,7 +146,6 @@ export const F1DataProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     localStorage.setItem(STORAGE_KEYS.CONFIG, JSON.stringify(config));
   }, [config]);
 
-  // Update driver points
   const updateDriverPoints = (driverId: string, newPoints: number) => {
     setDrivers(prevDrivers => 
       prevDrivers.map(driver => 
@@ -164,7 +157,6 @@ export const F1DataProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     toast.success("Driver points updated successfully");
   };
 
-  // Update team points
   const updateTeamPoints = (teamId: string, newPoints: number) => {
     setTeams(prevTeams => 
       prevTeams.map(team => 
@@ -176,7 +168,6 @@ export const F1DataProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     toast.success("Team points updated successfully");
   };
 
-  // Update race details
   const updateRaceDetails = (raceId: string, updatedRace: Partial<Race>) => {
     setRaces(prevRaces => 
       prevRaces.map(race => 
@@ -188,13 +179,11 @@ export const F1DataProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     toast.success("Race details updated successfully");
   };
 
-  // Update config
   const updateConfig = (newConfig: Partial<TournamentConfig>) => {
     setConfig(prevConfig => ({ ...prevConfig, ...newConfig }));
     toast.success("Tournament configuration updated");
   };
 
-  // New function to update driver name
   const updateDriverName = (driverId: string, newName: string) => {
     setDrivers(prevDrivers => 
       prevDrivers.map(driver => 
@@ -206,7 +195,6 @@ export const F1DataProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     toast.success("Driver name updated successfully");
   };
 
-  // New function to add a team
   const addTeam = (team: Omit<Team, 'id'>) => {
     const newTeam: Team = {
       ...team,
@@ -216,7 +204,6 @@ export const F1DataProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     toast.success(`Team ${team.name} added successfully`);
   };
 
-  // New function to add a race
   const addRace = (race: Omit<Race, 'id'>) => {
     const newRace: Race = {
       ...race,
@@ -226,13 +213,21 @@ export const F1DataProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     toast.success(`Race ${race.name} added successfully`);
   };
 
-  // Sorted drivers by points (for leaderboard)
+  const updateDriverDetails = (driverId: string, details: Partial<Driver>) => {
+    setDrivers(prevDrivers => 
+      prevDrivers.map(driver => 
+        driver.id === driverId 
+          ? { ...driver, ...details } 
+          : driver
+      )
+    );
+    toast.success("Driver details updated successfully");
+  };
+
   const sortedDrivers = [...drivers].sort((a, b) => b.points - a.points);
   
-  // Sorted teams by points
   const sortedTeams = [...teams].sort((a, b) => b.points - a.points);
 
-  // Context value
   const value = {
     drivers,
     teams,
@@ -245,6 +240,7 @@ export const F1DataProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     updateDriverName,
     addTeam,
     addRace,
+    updateDriverDetails,
     sortedDrivers,
     sortedTeams
   };
@@ -256,7 +252,6 @@ export const F1DataProvider: React.FC<{ children: React.ReactNode }> = ({ childr
   );
 };
 
-// Custom hook to use the context
 export const useF1Data = () => {
   const context = useContext(F1DataContext);
   if (context === undefined) {

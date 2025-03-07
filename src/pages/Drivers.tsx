@@ -73,6 +73,11 @@ const Drivers = () => {
                             <span className="text-gray-600">Country:</span>
                             <span className="font-medium">{driver.country}</span>
                           </div>
+                          {driver.description && (
+                            <div className="mt-2 text-sm text-gray-700">
+                              {driver.description}
+                            </div>
+                          )}
                         </div>
                         
                         <div className="aspect-square rounded-md overflow-hidden bg-gray-100">

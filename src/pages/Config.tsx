@@ -1,13 +1,13 @@
-
 import React, { useState } from 'react';
 import { Layout } from '../components/layout/Layout';
 import { useF1Data } from '../context/F1DataContext';
-import { Settings, Save, Trophy, Users, Flag, Calendar, PlusCircle } from 'lucide-react';
+import { Settings, Save, Trophy, Users, Flag, Calendar, PlusCircle, MapPin, Image, FileText } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Textarea } from '@/components/ui/textarea';
 import { toast } from 'sonner';
 
 const Config = () => {
@@ -22,7 +22,8 @@ const Config = () => {
     updateConfig,
     updateDriverName,
     addTeam,
-    addRace
+    addRace,
+    updateDriverDetails
   } = useF1Data();
   
   const [driverPoints, setDriverPoints] = useState<{ [key: string]: number }>(
@@ -49,6 +50,18 @@ const Config = () => {
   // Add state for driver name editing
   const [driverNames, setDriverNames] = useState<{ [key: string]: string }>(
     drivers.reduce((acc, driver) => ({ ...acc, [driver.id]: driver.name }), {})
+  );
+
+  // Add state for driver details editing
+  const [driverDetails, setDriverDetails] = useState<{ [key: string]: { country: string; image: string; description: string } }>(
+    drivers.reduce((acc, driver) => ({ 
+      ...acc, 
+      [driver.id]: { 
+        country: driver.country || '',
+        image: driver.image || '',
+        description: driver.description || '' 
+      } 
+    }), {})
   );
 
   // Add state for new team
@@ -82,6 +95,17 @@ const Config = () => {
     setDriverNames(prev => ({ ...prev, [driverId]: value }));
   };
 
+  // Handler for driver details changes
+  const handleDriverDetailsChange = (driverId: string, field: 'country' | 'image' | 'description', value: string) => {
+    setDriverDetails(prev => ({
+      ...prev,
+      [driverId]: {
+        ...prev[driverId],
+        [field]: value
+      }
+    }));
+  };
+
   const saveDriverPoints = () => {
     Object.entries(driverPoints).forEach(([driverId, points]) => {
       updateDriverPoints(driverId, points);
@@ -104,6 +128,13 @@ const Config = () => {
       }
     });
     toast.success("All driver names have been updated");
+  };
+
+  const saveDriverDetails = () => {
+    Object.entries(driverDetails).forEach(([driverId, details]) => {
+      updateDriverDetails(driverId, details);
+    });
+    toast.success("All driver details have been updated");
   };
 
   const handleConfigChange = (field: keyof typeof tournamentConfig, value: any) => {
@@ -198,7 +229,7 @@ const Config = () => {
         
         <Tabs defaultValue="drivers">
           <TabsList className="grid w-full grid-cols-5 mb-8">
-            <TabsTrigger value="drivers">Driver Points</TabsTrigger>
+            <TabsTrigger value="drivers">Driver Details</TabsTrigger>
             <TabsTrigger value="teams">Team Points</TabsTrigger>
             <TabsTrigger value="races">Race Calendar</TabsTrigger>
             <TabsTrigger value="tournament">Tournament Settings</TabsTrigger>
@@ -240,10 +271,78 @@ const Config = () => {
               </CardContent>
             </Card>
             
+            <Card className="mb-6">
+              <CardHeader>
+                <CardTitle className="flex items-center">
+                  <FileText className="w-5 h-5 mr-2" />
+                  Update Driver Details
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-8">
+                  {drivers.map(driver => (
+                    <div key={`details-${driver.id}`} className="border-b pb-6">
+                      <div className="flex items-center mb-4">
+                        <div className="w-1 h-10 rounded-full mr-3" style={{ backgroundColor: driver.color }}></div>
+                        <div className="font-bold text-lg">{driver.name}</div>
+                      </div>
+                      
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                        <div>
+                          <label className="block text-sm font-medium mb-1 flex items-center">
+                            <MapPin className="w-4 h-4 mr-1 text-f1-red" />
+                            Country
+                          </label>
+                          <Input
+                            value={driverDetails[driver.id]?.country || ''}
+                            onChange={(e) => handleDriverDetailsChange(driver.id, 'country', e.target.value)}
+                            placeholder="Driver country"
+                          />
+                        </div>
+                        
+                        <div>
+                          <label className="block text-sm font-medium mb-1 flex items-center">
+                            <Image className="w-4 h-4 mr-1 text-f1-red" />
+                            Image URL
+                          </label>
+                          <Input
+                            value={driverDetails[driver.id]?.image || ''}
+                            onChange={(e) => handleDriverDetailsChange(driver.id, 'image', e.target.value)}
+                            placeholder="Image URL or path"
+                          />
+                        </div>
+                      </div>
+                      
+                      <div>
+                        <label className="block text-sm font-medium mb-1 flex items-center">
+                          <FileText className="w-4 h-4 mr-1 text-f1-red" />
+                          Driver Description
+                        </label>
+                        <Textarea
+                          value={driverDetails[driver.id]?.description || ''}
+                          onChange={(e) => handleDriverDetailsChange(driver.id, 'description', e.target.value)}
+                          placeholder="Brief description of the driver's career or notable achievements"
+                          className="min-h-[100px]"
+                        />
+                      </div>
+                    </div>
+                  ))}
+                  
+                  <Button 
+                    className="w-full mt-6"
+                    onClick={saveDriverDetails}
+                  >
+                    <Save className="w-4 h-4 mr-2" />
+                    Save Driver Details
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+            
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center">
-                  <Users className="w-5 h-5 mr-2" />
+                  <Trophy className="w-5 h-5 mr-2" />
                   Update Driver Points
                 </CardTitle>
               </CardHeader>
