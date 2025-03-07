@@ -6,6 +6,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { F1DataProvider } from "./context/F1DataContext";
 import { AuthProvider } from "./context/AuthContext";
+import { ThemeProvider } from "./context/ThemeContext";
 import ProtectedRoute from "./components/auth/ProtectedRoute";
 
 // Pages
@@ -23,32 +24,34 @@ const queryClient = new QueryClient();
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <BrowserRouter>
-      <AuthProvider>
-        <F1DataProvider>
-          <TooltipProvider>
-            <Toaster />
-            <Sonner />
-            <Routes>
-              <Route path="/" element={<Index />} />
-              <Route path="/drivers" element={<Drivers />} />
-              <Route path="/calendar" element={<Calendar />} />
-              <Route path="/news" element={<News />} />
-              <Route path="/config" element={
-                <ProtectedRoute requireAdmin>
-                  <Config />
-                </ProtectedRoute>
-              } />
-              <Route path="/login" element={<Login />} />
-              <Route path="/accounts" element={
-                <ProtectedRoute requireRoot>
-                  <AccountsManagement />
-                </ProtectedRoute>
-              } />
-              <Route path="*" element={<NotFound />} />
-            </Routes>
-          </TooltipProvider>
-        </F1DataProvider>
-      </AuthProvider>
+      <ThemeProvider>
+        <AuthProvider>
+          <F1DataProvider>
+            <TooltipProvider>
+              <Toaster />
+              <Sonner />
+              <Routes>
+                <Route path="/" element={<Index />} />
+                <Route path="/drivers" element={<Drivers />} />
+                <Route path="/calendar" element={<Calendar />} />
+                <Route path="/news" element={<News />} />
+                <Route path="/config" element={
+                  <ProtectedRoute requireAdmin>
+                    <Config />
+                  </ProtectedRoute>
+                } />
+                <Route path="/login" element={<Login />} />
+                <Route path="/accounts" element={
+                  <ProtectedRoute requireRoot>
+                    <AccountsManagement />
+                  </ProtectedRoute>
+                } />
+                <Route path="*" element={<NotFound />} />
+              </Routes>
+            </TooltipProvider>
+          </F1DataProvider>
+        </AuthProvider>
+      </ThemeProvider>
     </BrowserRouter>
   </QueryClientProvider>
 );
