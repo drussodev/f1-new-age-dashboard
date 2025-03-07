@@ -33,7 +33,7 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
       
       <footer className="bg-secondary text-secondary-foreground p-4 text-center">
         <div className="container mx-auto flex items-center justify-between">
-          <p className="text-sm">&copy; {new Date().getFullYear()} F1 New Age Tournament. All rights reserved.</p>
+          <p className="text-sm dark:text-gray-300">&copy; {new Date().getFullYear()} F1 New Age Tournament. All rights reserved.</p>
           <ThemeToggle />
         </div>
       </footer>

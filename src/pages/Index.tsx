@@ -11,10 +11,12 @@ const Index = () => {
 
   return (
     <Layout>
-      <div className="bg-f1-red bg-opacity-5 py-16">
+      <div className="bg-f1-red bg-opacity-5 dark:bg-f1-red dark:bg-opacity-10 py-16">
         <div className="container mx-auto text-center px-4">
-          <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">F1 New Age Tournament</h1>
-          <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+          <h1 className="text-4xl md:text-5xl font-bold text-gray-900 dark:text-gray-50 mb-4">
+            F1 New Age Tournament
+          </h1>
+          <p className="text-xl text-gray-600 dark:text-gray-300 max-w-3xl mx-auto">
             Follow the latest standings, driver profiles, and race calendar for the F1 New Age Tournament
           </p>
         </div>
@@ -39,7 +41,7 @@ const Index = () => {
                 <div className="overflow-x-auto">
                   <table className="w-full">
                     <thead>
-                      <tr className="border-b">
+                      <tr className="border-b dark:border-gray-700">
                         <th className="px-4 py-3 text-left">Pos</th>
                         <th className="px-4 py-3 text-left">Driver</th>
                         <th className="px-4 py-3 text-left">Team</th>
@@ -48,14 +50,14 @@ const Index = () => {
                     </thead>
                     <tbody>
                       {sortedDrivers.map((driver, index) => (
-                        <tr key={driver.id} className="border-b hover:bg-gray-50">
+                        <tr key={driver.id} className="border-b dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800/50">
                           <td className="px-4 py-3">{index + 1}</td>
                           <td className="px-4 py-3">
                             <div className="flex items-center">
                               <div className="w-1 h-8 rounded-full mr-3" style={{ backgroundColor: driver.color }}></div>
                               <div>
                                 <div className="font-medium">{driver.name}</div>
-                                <div className="text-xs text-gray-500">{driver.country}</div>
+                                <div className="text-xs text-gray-500 dark:text-gray-400">{driver.country}</div>
                               </div>
                             </div>
                           </td>
@@ -82,7 +84,7 @@ const Index = () => {
                 <div className="overflow-x-auto">
                   <table className="w-full">
                     <thead>
-                      <tr className="border-b">
+                      <tr className="border-b dark:border-gray-700">
                         <th className="px-4 py-3 text-left">Pos</th>
                         <th className="px-4 py-3 text-left">Team</th>
                         <th className="px-4 py-3 text-right">Points</th>
@@ -90,7 +92,7 @@ const Index = () => {
                     </thead>
                     <tbody>
                       {sortedTeams.map((team, index) => (
-                        <tr key={team.id} className="border-b hover:bg-gray-50">
+                        <tr key={team.id} className="border-b dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800/50">
                           <td className="px-4 py-3">{index + 1}</td>
                           <td className="px-4 py-3">
                             <div className="flex items-center">
