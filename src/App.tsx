@@ -15,6 +15,7 @@ import Calendar from "./pages/Calendar";
 import Config from "./pages/Config";
 import NotFound from "./pages/NotFound";
 import Login from "./pages/Login";
+import AccountsManagement from "./pages/AccountsManagement";
 
 const queryClient = new QueryClient();
 
@@ -36,6 +37,11 @@ const App = () => (
                 </ProtectedRoute>
               } />
               <Route path="/login" element={<Login />} />
+              <Route path="/accounts" element={
+                <ProtectedRoute requireAdmin>
+                  <AccountsManagement />
+                </ProtectedRoute>
+              } />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </BrowserRouter>

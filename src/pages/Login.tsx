@@ -1,22 +1,29 @@
 
 import React, { useState } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { Layout } from '../components/layout/Layout';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { LockKeyhole } from 'lucide-react';
+import { LockKeyhole, UserPlus } from 'lucide-react';
 
 const Login = () => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
-  const { login } = useAuth();
+  const { login, isAuthenticated, isRoot } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   
   // Get the redirect path from the location state, or default to home
   const from = location.state?.from?.pathname || '/';
+
+  // If already authenticated, redirect
+  React.useEffect(() => {
+    if (isAuthenticated) {
+      navigate(from, { replace: true });
+    }
+  }, [isAuthenticated, navigate, from]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -25,6 +32,10 @@ const Login = () => {
       navigate(from, { replace: true });
     }
   };
+
+  if (isAuthenticated) {
+    return null; // Redirect will happen due to useEffect
+  }
 
   return (
     <Layout>
@@ -67,8 +78,15 @@ const Login = () => {
                 Sign In
               </Button>
               <p className="text-xs text-center text-gray-500 mt-4">
-                For demo: Use "admin" / "f1admin" for admin access
+                For demo: Use "admin" / "f1admin" for admin access or "root" / "f1root" for root access
               </p>
+              {isRoot && (
+                <div className="text-center mt-4">
+                  <Link to="/accounts" className="text-sm text-f1-red hover:underline">
+                    Manage Accounts
+                  </Link>
+                </div>
+              )}
             </form>
           </CardContent>
         </Card>
