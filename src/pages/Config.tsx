@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { Layout } from '../components/layout/Layout';
 import { useF1Data } from '../context/F1DataContext';
+import { useAuth } from '../context/AuthContext';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Trophy, Calendar, Users, Settings, Newspaper, Twitch, Star, Image, Video } from 'lucide-react';
+import { Trophy, Calendar, Users, Settings, Newspaper, Twitch, Star, Image, Video, Lock } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import { Label } from '@/components/ui/label';
 import {
@@ -35,6 +36,8 @@ const Config = () => {
     races, setRaces,
     news, setNews
   } = useF1Data();
+  
+  const { isRoot } = useAuth();
 
   // Title and season state
   const [title, setTitle] = useState(config.title);
@@ -337,10 +340,18 @@ const Config = () => {
               <Users className="mr-2 h-4 w-4" />
               Drivers
             </TabsTrigger>
-            <TabsTrigger value="teams" className="flex items-center">
-              <Trophy className="mr-2 h-4 w-4" />
-              Teams
-            </TabsTrigger>
+            {isRoot && (
+              <TabsTrigger value="teams" className="flex items-center">
+                <Trophy className="mr-2 h-4 w-4" />
+                Teams
+              </TabsTrigger>
+            )}
+            {!isRoot && (
+              <div className="flex items-center justify-center px-3 py-2 text-sm text-gray-400 bg-gray-100 rounded-md cursor-not-allowed">
+                <Lock className="mr-2 h-4 w-4" />
+                Teams (Root Only)
+              </div>
+            )}
             <TabsTrigger value="calendar" className="flex items-center">
               <Calendar className="mr-2 h-4 w-4" />
               Calendar
@@ -540,87 +551,89 @@ const Config = () => {
             </Card>
           </TabsContent>
 
-          <TabsContent value="teams">
-            <Card>
-              <CardHeader>
-                <CardTitle>Team Settings</CardTitle>
-                <CardDescription>
-                  Add, remove, and manage teams in the F1 tournament.
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <Label htmlFor="teamName">Team Name</Label>
-                    <Input
-                      id="teamName"
-                      value={teamName}
-                      onChange={(e) => setTeamName(e.target.value)}
-                      placeholder="Enter team name"
-                    />
+          {isRoot && (
+            <TabsContent value="teams">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Team Settings</CardTitle>
+                  <CardDescription>
+                    Add, remove, and manage teams in the F1 tournament.
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <Label htmlFor="teamName">Team Name</Label>
+                      <Input
+                        id="teamName"
+                        value={teamName}
+                        onChange={(e) => setTeamName(e.target.value)}
+                        placeholder="Enter team name"
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="teamColor">Team Color</Label>
+                      <Input
+                        id="teamColor"
+                        type="color"
+                        value={teamColor}
+                        onChange={(e) => setTeamColor(e.target.value)}
+                        placeholder="Enter team color"
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="teamPoints">Team Points</Label>
+                      <Input
+                        id="teamPoints"
+                        type="number"
+                        value={teamPoints}
+                        onChange={(e) => setTeamPoints(e.target.value)}
+                        placeholder="Enter team points"
+                      />
+                    </div>
                   </div>
-                  <div>
-                    <Label htmlFor="teamColor">Team Color</Label>
-                    <Input
-                      id="teamColor"
-                      type="color"
-                      value={teamColor}
-                      onChange={(e) => setTeamColor(e.target.value)}
-                      placeholder="Enter team color"
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="teamPoints">Team Points</Label>
-                    <Input
-                      id="teamPoints"
-                      type="number"
-                      value={teamPoints}
-                      onChange={(e) => setTeamPoints(e.target.value)}
-                      placeholder="Enter team points"
-                    />
-                  </div>
-                </div>
-                <Button onClick={addTeam}>Add Team</Button>
+                  <Button onClick={addTeam}>Add Team</Button>
 
-                <div className="mt-4">
-                  <h3 className="text-sm font-medium mb-2">Current Teams</h3>
-                  {teams.length === 0 ? (
-                    <div className="text-center p-8 border border-dashed rounded-lg">
-                      <Trophy className="w-8 h-8 mx-auto mb-2 text-gray-400" />
-                      <p className="text-gray-500">No teams added yet</p>
-                    </div>
-                  ) : (
-                    <div className="overflow-x-auto">
-                      <Table>
-                        <TableHeader>
-                          <TableRow>
-                            <TableHead className="w-[100px]">Name</TableHead>
-                            <TableHead>Color</TableHead>
-                            <TableHead>Points</TableHead>
-                            <TableHead className="text-right">Actions</TableHead>
-                          </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                          {teams.map((team) => (
-                            <TableRow key={team.id}>
-                              <TableCell className="font-medium">{team.name}</TableCell>
-                              <TableCell>{team.color}</TableCell>
-                              <TableCell>{team.points}</TableCell>
-                              <TableCell className="text-right">
-                                <Button variant="destructive" size="sm" onClick={() => removeTeam(team.id)}>
-                                  Remove
-                                </Button>
-                              </TableCell>
+                  <div className="mt-4">
+                    <h3 className="text-sm font-medium mb-2">Current Teams</h3>
+                    {teams.length === 0 ? (
+                      <div className="text-center p-8 border border-dashed rounded-lg">
+                        <Trophy className="w-8 h-8 mx-auto mb-2 text-gray-400" />
+                        <p className="text-gray-500">No teams added yet</p>
+                      </div>
+                    ) : (
+                      <div className="overflow-x-auto">
+                        <Table>
+                          <TableHeader>
+                            <TableRow>
+                              <TableHead className="w-[100px]">Name</TableHead>
+                              <TableHead>Color</TableHead>
+                              <TableHead>Points</TableHead>
+                              <TableHead className="text-right">Actions</TableHead>
                             </TableRow>
-                          ))}
-                        </TableBody>
-                      </Table>
-                    </div>
-                  )}
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
+                          </TableHeader>
+                          <TableBody>
+                            {teams.map((team) => (
+                              <TableRow key={team.id}>
+                                <TableCell className="font-medium">{team.name}</TableCell>
+                                <TableCell>{team.color}</TableCell>
+                                <TableCell>{team.points}</TableCell>
+                                <TableCell className="text-right">
+                                  <Button variant="destructive" size="sm" onClick={() => removeTeam(team.id)}>
+                                    Remove
+                                  </Button>
+                                </TableCell>
+                              </TableRow>
+                            ))}
+                          </TableBody>
+                        </Table>
+                      </div>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+            </TabsContent>
+          )}
 
           <TabsContent value="calendar">
             <Card>
