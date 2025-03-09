@@ -499,9 +499,6 @@ const Config = () => {
                         ))}
                       </SelectContent>
                     </Select>
-                    <div className="text-xs text-gray-500 mt-1">
-                      Team color is selected by default
-                    </div>
                   </div>
                 </div>
                 <Button onClick={addDriver}>Add Driver</Button>
