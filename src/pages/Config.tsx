@@ -114,7 +114,6 @@ const Config = () => {
 
   // Driver State
   const [driverName, setDriverName] = useState('');
-  const [driverNumber, setDriverNumber] = useState('');
   const [driverTeam, setDriverTeam] = useState('');
   const [driverCountry, setDriverCountry] = useState('');
   const [driverPoints, setDriverPoints] = useState('');
@@ -132,7 +131,7 @@ const Config = () => {
   };
 
   const addDriver = () => {
-    if (!driverName.trim() || !driverNumber || !driverTeam.trim() || !driverCountry.trim() || !driverPoints || !driverColor.trim()) {
+    if (!driverName.trim() || !driverTeam.trim() || !driverCountry.trim() || !driverPoints || !driverColor.trim()) {
       toast({
         title: "Error",
         description: "Please fill in all driver fields.",
@@ -144,7 +143,6 @@ const Config = () => {
     const newDriver = {
       id: Math.random().toString(36).substring(7),
       name: driverName,
-      number: parseInt(driverNumber),
       team: driverTeam,
       country: driverCountry,
       points: parseInt(driverPoints),
@@ -153,7 +151,6 @@ const Config = () => {
 
     setDrivers([...drivers, newDriver]);
     setDriverName('');
-    setDriverNumber('');
     setDriverTeam('');
     setDriverCountry('');
     setDriverPoints('');
@@ -414,16 +411,6 @@ const Config = () => {
                     />
                   </div>
                   <div>
-                    <Label htmlFor="driverNumber">Driver Number</Label>
-                    <Input
-                      id="driverNumber"
-                      type="number"
-                      value={driverNumber}
-                      onChange={(e) => setDriverNumber(e.target.value)}
-                      placeholder="Enter driver number"
-                    />
-                  </div>
-                  <div>
                     <Label htmlFor="driverTeam">Driver Team</Label>
                     <Select onValueChange={handleTeamSelect} value={driverTeam}>
                       <SelectTrigger id="driverTeam">
@@ -516,7 +503,6 @@ const Config = () => {
                         <TableHeader>
                           <TableRow>
                             <TableHead className="w-[100px]">Name</TableHead>
-                            <TableHead>Number</TableHead>
                             <TableHead>Team</TableHead>
                             <TableHead>Country</TableHead>
                             <TableHead>Points</TableHead>
@@ -528,7 +514,6 @@ const Config = () => {
                           {drivers.map((driver) => (
                             <TableRow key={driver.id}>
                               <TableCell className="font-medium">{driver.name}</TableCell>
-                              <TableCell>{driver.number}</TableCell>
                               <TableCell>{driver.team}</TableCell>
                               <TableCell>{driver.country}</TableCell>
                               <TableCell>{driver.points}</TableCell>

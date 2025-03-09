@@ -3,7 +3,6 @@ import React, { createContext, useContext, useState, useEffect } from 'react';
 interface Driver {
   id: string;
   name: string;
-  number: number;
   team: string;
   country: string;
   points: number;
@@ -68,12 +67,12 @@ interface F1DataContextType {
 }
 
 const defaultDrivers: Driver[] = [
-  { id: '1', name: 'Lewis Hamilton', number: 44, team: 'Mercedes', country: 'United Kingdom', points: 180, color: '#00D2BE' },
-  { id: '2', name: 'Max Verstappen', number: 33, team: 'Red Bull Racing', country: 'Netherlands', points: 220, color: '#0600EF' },
-  { id: '3', name: 'Charles Leclerc', number: 16, team: 'Ferrari', country: 'Monaco', points: 150, color: '#DC0000' },
-  { id: '4', name: 'Lando Norris', number: 4, team: 'McLaren', country: 'United Kingdom', points: 130, color: '#FF8700' },
-  { id: '5', name: 'Carlos Sainz', number: 55, team: 'Ferrari', country: 'Spain', points: 140, color: '#DC0000' },
-  { id: '6', name: 'Sergio Perez', number: 11, team: 'Red Bull Racing', country: 'Mexico', points: 190, color: '#0600EF' },
+  { id: '1', name: 'Lewis Hamilton', team: 'Mercedes', country: 'United Kingdom', points: 180, color: '#00D2BE' },
+  { id: '2', name: 'Max Verstappen', team: 'Red Bull Racing', country: 'Netherlands', points: 220, color: '#0600EF' },
+  { id: '3', name: 'Charles Leclerc', team: 'Ferrari', country: 'Monaco', points: 150, color: '#DC0000' },
+  { id: '4', name: 'Lando Norris', team: 'McLaren', country: 'United Kingdom', points: 130, color: '#FF8700' },
+  { id: '5', name: 'Carlos Sainz', team: 'Ferrari', country: 'Spain', points: 140, color: '#DC0000' },
+  { id: '6', name: 'Sergio Perez', team: 'Red Bull Racing', country: 'Mexico', points: 190, color: '#0600EF' },
 ];
 
 const defaultTeams: Team[] = [

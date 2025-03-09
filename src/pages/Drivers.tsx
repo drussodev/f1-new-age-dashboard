@@ -16,7 +16,6 @@ const Drivers = () => {
   const [editingDriverId, setEditingDriverId] = useState<string | null>(null);
   const [editFormData, setEditFormData] = useState({
     name: '',
-    number: 0,
     team: '',
     country: '',
     points: 0,
@@ -37,7 +36,6 @@ const Drivers = () => {
     setEditingDriverId(driver.id);
     setEditFormData({
       name: driver.name,
-      number: driver.number,
       team: driver.team,
       country: driver.country,
       points: driver.points,
@@ -54,7 +52,7 @@ const Drivers = () => {
     const { name, value } = e.target;
     setEditFormData({
       ...editFormData,
-      [name]: name === 'number' || name === 'points' ? parseInt(value, 10) || 0 : value,
+      [name]: name === 'points' ? parseInt(value, 10) || 0 : value,
     });
   };
 
@@ -114,15 +112,6 @@ const Drivers = () => {
                       </div>
                       
                       <div className="grid grid-cols-2 gap-2">
-                        <div>
-                          <label className="text-xs text-gray-500">Number</label>
-                          <Input 
-                            name="number"
-                            type="number"
-                            value={editFormData.number}
-                            onChange={handleInputChange}
-                          />
-                        </div>
                         <div>
                           <label className="text-xs text-gray-500">Points</label>
                           <Input 
@@ -202,9 +191,6 @@ const Drivers = () => {
                     // View Mode
                     <>
                       <div className="flex items-center mb-4">
-                        <div className="w-16 h-16 bg-gray-200 rounded-full mr-4 flex items-center justify-center text-2xl font-bold">
-                          {driver.number}
-                        </div>
                         <div className="flex-1">
                           <h2 className="font-bold text-xl">{driver.name}</h2>
                           {isAdmin && (
