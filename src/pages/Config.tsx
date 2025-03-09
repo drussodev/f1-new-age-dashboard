@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Layout } from '../components/layout/Layout';
 import { useF1Data } from '../context/F1DataContext';
@@ -178,10 +177,9 @@ const Config = () => {
   const [teamName, setTeamName] = useState('');
   const [teamColor, setTeamColor] = useState('');
   const [teamPoints, setTeamPoints] = useState('');
-  const [teamBase, setTeamBase] = useState('');
 
   const addTeam = () => {
-    if (!teamName.trim() || !teamColor.trim() || !teamPoints || !teamBase.trim()) {
+    if (!teamName.trim() || !teamColor.trim() || !teamPoints) {
       toast({
         title: "Error",
         description: "Please fill in all team fields.",
@@ -194,15 +192,13 @@ const Config = () => {
       id: Math.random().toString(36).substring(7),
       name: teamName,
       color: teamColor,
-      points: parseInt(teamPoints),
-      base: teamBase
+      points: parseInt(teamPoints)
     };
 
     setTeams([...teams, newTeam]);
     setTeamName('');
     setTeamColor('');
     setTeamPoints('');
-    setTeamBase('');
 
     toast({
       title: "Team added",
@@ -601,15 +597,6 @@ const Config = () => {
                       placeholder="Enter team points"
                     />
                   </div>
-                  <div>
-                    <Label htmlFor="teamBase">Team Base</Label>
-                    <Input
-                      id="teamBase"
-                      value={teamBase}
-                      onChange={(e) => setTeamBase(e.target.value)}
-                      placeholder="Enter team base"
-                    />
-                  </div>
                 </div>
                 <Button onClick={addTeam}>Add Team</Button>
 
@@ -628,7 +615,6 @@ const Config = () => {
                             <TableHead className="w-[100px]">Name</TableHead>
                             <TableHead>Color</TableHead>
                             <TableHead>Points</TableHead>
-                            <TableHead>Base</TableHead>
                             <TableHead className="text-right">Actions</TableHead>
                           </TableRow>
                         </TableHeader>
@@ -638,7 +624,6 @@ const Config = () => {
                               <TableCell className="font-medium">{team.name}</TableCell>
                               <TableCell>{team.color}</TableCell>
                               <TableCell>{team.points}</TableCell>
-                              <TableCell>{team.base}</TableCell>
                               <TableCell className="text-right">
                                 <Button variant="destructive" size="sm" onClick={() => removeTeam(team.id)}>
                                   Remove

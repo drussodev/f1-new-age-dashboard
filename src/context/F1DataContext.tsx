@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState, useEffect } from 'react';
 
 interface Driver {
@@ -17,7 +16,6 @@ interface Team {
   name: string;
   color: string;
   points: number;
-  base: string;
   logo?: string;
 }
 
@@ -79,16 +77,16 @@ const defaultDrivers: Driver[] = [
 ];
 
 const defaultTeams: Team[] = [
-  { id: '1', name: 'Mercedes', color: '#00D2BE', points: 280, base: 'Brackley, United Kingdom' },
-  { id: '2', name: 'Red Bull Racing', color: '#0600EF', points: 410, base: 'Milton Keynes, United Kingdom' },
-  { id: '3', name: 'Ferrari', color: '#DC0000', points: 290, base: 'Maranello, Italy' },
-  { id: '4', name: 'McLaren', color: '#FF8700', points: 240, base: 'Woking, United Kingdom' },
-  { id: '5', name: 'Aston Martin', color: '#006F62', points: 160, base: 'Silverstone, United Kingdom' },
-  { id: '6', name: 'Alpine', color: '#0090FF', points: 100, base: 'Enstone, United Kingdom' },
-  { id: '7', name: 'Williams', color: '#005AFF', points: 40, base: 'Grove, United Kingdom' },
-  { id: '8', name: 'AlphaTauri', color: '#2B4562', points: 30, base: 'Faenza, Italy' },
-  { id: '9', name: 'Sauber', color: '#900000', points: 20, base: 'Hinwil, Switzerland' },
-  { id: '10', name: 'Haas F1 Team', color: '#FFFFFF', points: 15, base: 'Kannapolis, United States' },
+  { id: '1', name: 'Mercedes', color: '#00D2BE', points: 280 },
+  { id: '2', name: 'Red Bull Racing', color: '#0600EF', points: 410 },
+  { id: '3', name: 'Ferrari', color: '#DC0000', points: 290 },
+  { id: '4', name: 'McLaren', color: '#FF8700', points: 240 },
+  { id: '5', name: 'Aston Martin', color: '#006F62', points: 160 },
+  { id: '6', name: 'Alpine', color: '#0090FF', points: 100 },
+  { id: '7', name: 'Williams', color: '#005AFF', points: 40 },
+  { id: '8', name: 'AlphaTauri', color: '#2B4562', points: 30 },
+  { id: '9', name: 'Sauber', color: '#900000', points: 20 },
+  { id: '10', name: 'Haas F1 Team', color: '#FFFFFF', points: 15 },
 ];
 
 const defaultRaces: Race[] = [
