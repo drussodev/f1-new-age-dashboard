@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect, useMemo } from 'react';
+import React, { createContext, useContext, useState, useEffect } from 'react';
 
 interface Driver {
   id: string;
@@ -66,29 +66,22 @@ interface F1DataContextType {
   sortedTeams: Team[];
   upcomingRaces: Race[];
   completedRaces: Race[];
-  getTeamNames: () => string[];
 }
 
 const defaultDrivers: Driver[] = [
-  { id: '1', name: 'Lewis Hamilton', number: 44, team: 'Ferrari', country: 'United Kingdom', points: 180, color: '#DC0000' },
+  { id: '1', name: 'Lewis Hamilton', number: 44, team: 'Mercedes', country: 'United Kingdom', points: 180, color: '#00D2BE' },
   { id: '2', name: 'Max Verstappen', number: 33, team: 'Red Bull Racing', country: 'Netherlands', points: 220, color: '#0600EF' },
   { id: '3', name: 'Charles Leclerc', number: 16, team: 'Ferrari', country: 'Monaco', points: 150, color: '#DC0000' },
   { id: '4', name: 'Lando Norris', number: 4, team: 'McLaren', country: 'United Kingdom', points: 130, color: '#FF8700' },
-  { id: '5', name: 'Carlos Sainz', number: 55, team: 'Racing Bulls', country: 'Spain', points: 140, color: '#469BFF' },
+  { id: '5', name: 'Carlos Sainz', number: 55, team: 'Ferrari', country: 'Spain', points: 140, color: '#DC0000' },
   { id: '6', name: 'Sergio Perez', number: 11, team: 'Red Bull Racing', country: 'Mexico', points: 190, color: '#0600EF' },
 ];
 
 const defaultTeams: Team[] = [
-  { id: '1', name: 'Red Bull Racing', color: '#0600EF', points: 0, base: 'Milton Keynes, United Kingdom' },
-  { id: '2', name: 'Ferrari', color: '#DC0000', points: 0, base: 'Maranello, Italy' },
-  { id: '3', name: 'Mercedes', color: '#00D2BE', points: 0, base: 'Brackley, United Kingdom' },
-  { id: '4', name: 'McLaren', color: '#FF8700', points: 0, base: 'Woking, United Kingdom' },
-  { id: '5', name: 'Aston Martin', color: '#006F62', points: 0, base: 'Silverstone, United Kingdom' },
-  { id: '6', name: 'Alpine', color: '#0090FF', points: 0, base: 'Enstone, United Kingdom' },
-  { id: '7', name: 'Williams', color: '#005AFF', points: 0, base: 'Grove, United Kingdom' },
-  { id: '8', name: 'Racing Bulls', color: '#002776', points: 0, base: 'Faenza, Italy' },
-  { id: '9', name: 'Stake F1 Team', color: '#52E252', points: 0, base: 'Hinwil, Switzerland' },
-  { id: '10', name: 'Haas F1 Team', color: '#FFFFFF', points: 0, base: 'Kannapolis, United States' },
+  { id: '1', name: 'Mercedes', color: '#00D2BE', points: 280, base: 'Brackley, United Kingdom' },
+  { id: '2', name: 'Red Bull Racing', color: '#0600EF', points: 410, base: 'Milton Keynes, United Kingdom' },
+  { id: '3', name: 'Ferrari', color: '#DC0000', points: 290, base: 'Maranello, Italy' },
+  { id: '4', name: 'McLaren', color: '#FF8700', points: 240, base: 'Woking, United Kingdom' },
 ];
 
 const defaultRaces: Race[] = [
@@ -155,22 +148,6 @@ export const F1DataProvider: React.FC<{ children: React.ReactNode }> = ({ childr
   });
 
   useEffect(() => {
-    const teamPointsMap = new Map<string, number>();
-    
-    drivers.forEach(driver => {
-      const currentPoints = teamPointsMap.get(driver.team) || 0;
-      teamPointsMap.set(driver.team, currentPoints + driver.points);
-    });
-    
-    const updatedTeams = teams.map(team => ({
-      ...team,
-      points: teamPointsMap.get(team.name) || 0
-    }));
-    
-    setTeams(updatedTeams);
-  }, [drivers]);
-
-  useEffect(() => {
     localStorage.setItem('f1-drivers', JSON.stringify(drivers));
   }, [drivers]);
 
@@ -201,10 +178,6 @@ export const F1DataProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     .filter(race => race.completed)
     .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
 
-  const getTeamNames = () => {
-    return teams.map(team => team.name);
-  };
-
   return (
     <F1DataContext.Provider value={{
       drivers, setDrivers,
@@ -215,8 +188,7 @@ export const F1DataProvider: React.FC<{ children: React.ReactNode }> = ({ childr
       sortedDrivers,
       sortedTeams,
       upcomingRaces,
-      completedRaces,
-      getTeamNames
+      completedRaces
     }}>
       {children}
     </F1DataContext.Provider>

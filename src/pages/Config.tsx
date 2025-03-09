@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Layout } from '../components/layout/Layout';
 import { useF1Data } from '../context/F1DataContext';
@@ -20,13 +19,6 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Checkbox } from "@/components/ui/checkbox";
-import { 
-  Select, 
-  SelectContent, 
-  SelectItem, 
-  SelectTrigger, 
-  SelectValue 
-} from "@/components/ui/select";
 
 const Config = () => {
   const { 
@@ -34,8 +26,7 @@ const Config = () => {
     drivers, setDrivers,
     teams, setTeams,
     races, setRaces,
-    news, setNews,
-    getTeamNames
+    news, setNews
   } = useF1Data();
 
   // Title and season state
@@ -121,25 +112,12 @@ const Config = () => {
   const [driverCountry, setDriverCountry] = useState('');
   const [driverPoints, setDriverPoints] = useState('');
   const [driverColor, setDriverColor] = useState('');
-  const [driverImage, setDriverImage] = useState('');
-
-  // Get team color based on selected team
-  const getTeamColor = (teamName: string) => {
-    const team = teams.find(t => t.name === teamName);
-    return team ? team.color : '';
-  };
-
-  // Update driver color when team changes
-  const handleTeamChange = (value: string) => {
-    setDriverTeam(value);
-    setDriverColor(getTeamColor(value));
-  };
 
   const addDriver = () => {
-    if (!driverName.trim() || !driverNumber || !driverTeam.trim() || !driverCountry.trim() || !driverPoints) {
+    if (!driverName.trim() || !driverNumber || !driverTeam.trim() || !driverCountry.trim() || !driverPoints || !driverColor.trim()) {
       toast({
         title: "Error",
-        description: "Please fill in all required driver fields.",
+        description: "Please fill in all driver fields.",
         variant: "destructive"
       });
       return;
@@ -152,8 +130,7 @@ const Config = () => {
       team: driverTeam,
       country: driverCountry,
       points: parseInt(driverPoints),
-      color: driverColor || getTeamColor(driverTeam),
-      image: driverImage || undefined
+      color: driverColor
     };
 
     setDrivers([...drivers, newDriver]);
@@ -163,7 +140,6 @@ const Config = () => {
     setDriverCountry('');
     setDriverPoints('');
     setDriverColor('');
-    setDriverImage('');
 
     toast({
       title: "Driver added",
@@ -176,6 +152,50 @@ const Config = () => {
     toast({
       title: "Driver removed",
       description: `Driver has been removed from the drivers list`,
+    });
+  };
+
+  // Team State
+  const [teamName, setTeamName] = useState('');
+  const [teamColor, setTeamColor] = useState('');
+  const [teamPoints, setTeamPoints] = useState('');
+  const [teamBase, setTeamBase] = useState('');
+
+  const addTeam = () => {
+    if (!teamName.trim() || !teamColor.trim() || !teamPoints || !teamBase.trim()) {
+      toast({
+        title: "Error",
+        description: "Please fill in all team fields.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    const newTeam = {
+      id: Math.random().toString(36).substring(7),
+      name: teamName,
+      color: teamColor,
+      points: parseInt(teamPoints),
+      base: teamBase
+    };
+
+    setTeams([...teams, newTeam]);
+    setTeamName('');
+    setTeamColor('');
+    setTeamPoints('');
+    setTeamBase('');
+
+    toast({
+      title: "Team added",
+      description: `${teamName} has been added to the teams list`,
+    });
+  };
+
+  const removeTeam = (id: string) => {
+    setTeams(teams.filter(team => team.id !== id));
+    toast({
+      title: "Team removed",
+      description: `Team has been removed from the teams list`,
     });
   };
 
@@ -287,9 +307,6 @@ const Config = () => {
     });
   };
 
-  // Get available team names
-  const teamNames = getTeamNames();
-
   return (
     <Layout>
       <div className="container mx-auto px-4 py-8">
@@ -299,7 +316,7 @@ const Config = () => {
         </h1>
 
         <Tabs defaultValue="general">
-          <TabsList className="grid w-full md:w-auto md:inline-grid grid-cols-1 sm:grid-cols-3 md:grid-cols-4 gap-2 mb-6">
+          <TabsList className="grid w-full md:w-auto md:inline-grid grid-cols-1 sm:grid-cols-3 md:grid-cols-5 lg:grid-cols-6 gap-2 mb-6">
             <TabsTrigger value="general" className="flex items-center">
               <Settings className="mr-2 h-4 w-4" />
               General
@@ -307,6 +324,10 @@ const Config = () => {
             <TabsTrigger value="drivers" className="flex items-center">
               <Users className="mr-2 h-4 w-4" />
               Drivers
+            </TabsTrigger>
+            <TabsTrigger value="teams" className="flex items-center">
+              <Trophy className="mr-2 h-4 w-4" />
+              Teams
             </TabsTrigger>
             <TabsTrigger value="calendar" className="flex items-center">
               <Calendar className="mr-2 h-4 w-4" />
@@ -389,18 +410,12 @@ const Config = () => {
                   </div>
                   <div>
                     <Label htmlFor="driverTeam">Driver Team</Label>
-                    <Select value={driverTeam} onValueChange={handleTeamChange}>
-                      <SelectTrigger className="w-full">
-                        <SelectValue placeholder="Select a team" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {teamNames.map((teamName) => (
-                          <SelectItem key={teamName} value={teamName}>
-                            {teamName}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
+                    <Input
+                      id="driverTeam"
+                      value={driverTeam}
+                      onChange={(e) => setDriverTeam(e.target.value)}
+                      placeholder="Enter driver team"
+                    />
                   </div>
                   <div>
                     <Label htmlFor="driverCountry">Driver Country</Label>
@@ -422,33 +437,13 @@ const Config = () => {
                     />
                   </div>
                   <div>
-                    <Label htmlFor="driverColor">Driver Color (Team Color)</Label>
-                    <div className="flex gap-2">
-                      <Input
-                        id="driverColor"
-                        type="text"
-                        value={driverColor}
-                        onChange={(e) => setDriverColor(e.target.value)}
-                        placeholder="Hex color code (e.g. #FF0000)"
-                        className="flex-1"
-                      />
-                      <div 
-                        className="w-10 h-10 rounded border" 
-                        style={{ backgroundColor: driverColor || (driverTeam ? getTeamColor(driverTeam) : '') }}
-                      ></div>
-                    </div>
-                    <p className="text-xs text-gray-500 mt-1">
-                      Default color is set based on team selection
-                    </p>
-                  </div>
-                  <div>
-                    <Label htmlFor="driverImage">Driver Image URL (Optional)</Label>
+                    <Label htmlFor="driverColor">Driver Color</Label>
                     <Input
-                      id="driverImage"
-                      type="text"
-                      value={driverImage}
-                      onChange={(e) => setDriverImage(e.target.value)}
-                      placeholder="Enter image URL (optional)"
+                      id="driverColor"
+                      type="color"
+                      value={driverColor}
+                      onChange={(e) => setDriverColor(e.target.value)}
+                      placeholder="Enter driver color"
                     />
                   </div>
                 </div>
@@ -471,7 +466,6 @@ const Config = () => {
                             <TableHead>Team</TableHead>
                             <TableHead>Country</TableHead>
                             <TableHead>Points</TableHead>
-                            <TableHead>Color</TableHead>
                             <TableHead className="text-right">Actions</TableHead>
                           </TableRow>
                         </TableHeader>
@@ -483,17 +477,101 @@ const Config = () => {
                               <TableCell>{driver.team}</TableCell>
                               <TableCell>{driver.country}</TableCell>
                               <TableCell>{driver.points}</TableCell>
-                              <TableCell>
-                                <div className="flex items-center gap-2">
-                                  <div 
-                                    className="w-6 h-6 rounded-full border" 
-                                    style={{ backgroundColor: driver.color }}
-                                  ></div>
-                                  <span className="text-xs">{driver.color}</span>
-                                </div>
-                              </TableCell>
                               <TableCell className="text-right">
                                 <Button variant="destructive" size="sm" onClick={() => removeDriver(driver.id)}>
+                                  Remove
+                                </Button>
+                              </TableCell>
+                            </TableRow>
+                          ))}
+                        </TableBody>
+                      </Table>
+                    </div>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="teams">
+            <Card>
+              <CardHeader>
+                <CardTitle>Team Settings</CardTitle>
+                <CardDescription>
+                  Add, remove, and manage teams in the F1 tournament.
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="teamName">Team Name</Label>
+                    <Input
+                      id="teamName"
+                      value={teamName}
+                      onChange={(e) => setTeamName(e.target.value)}
+                      placeholder="Enter team name"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="teamColor">Team Color</Label>
+                    <Input
+                      id="teamColor"
+                      type="color"
+                      value={teamColor}
+                      onChange={(e) => setTeamColor(e.target.value)}
+                      placeholder="Enter team color"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="teamPoints">Team Points</Label>
+                    <Input
+                      id="teamPoints"
+                      type="number"
+                      value={teamPoints}
+                      onChange={(e) => setTeamPoints(e.target.value)}
+                      placeholder="Enter team points"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="teamBase">Team Base</Label>
+                    <Input
+                      id="teamBase"
+                      value={teamBase}
+                      onChange={(e) => setTeamBase(e.target.value)}
+                      placeholder="Enter team base"
+                    />
+                  </div>
+                </div>
+                <Button onClick={addTeam}>Add Team</Button>
+
+                <div className="mt-4">
+                  <h3 className="text-sm font-medium mb-2">Current Teams</h3>
+                  {teams.length === 0 ? (
+                    <div className="text-center p-8 border border-dashed rounded-lg">
+                      <Trophy className="w-8 h-8 mx-auto mb-2 text-gray-400" />
+                      <p className="text-gray-500">No teams added yet</p>
+                    </div>
+                  ) : (
+                    <div className="overflow-x-auto">
+                      <Table>
+                        <TableHeader>
+                          <TableRow>
+                            <TableHead className="w-[100px]">Name</TableHead>
+                            <TableHead>Color</TableHead>
+                            <TableHead>Points</TableHead>
+                            <TableHead>Base</TableHead>
+                            <TableHead className="text-right">Actions</TableHead>
+                          </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                          {teams.map((team) => (
+                            <TableRow key={team.id}>
+                              <TableCell className="font-medium">{team.name}</TableCell>
+                              <TableCell>{team.color}</TableCell>
+                              <TableCell>{team.points}</TableCell>
+                              <TableCell>{team.base}</TableCell>
+                              <TableCell className="text-right">
+                                <Button variant="destructive" size="sm" onClick={() => removeTeam(team.id)}>
                                   Remove
                                 </Button>
                               </TableCell>
