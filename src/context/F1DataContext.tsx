@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useMemo } from 'react';
 
 interface Driver {
   id: string;
@@ -66,6 +66,7 @@ interface F1DataContextType {
   sortedTeams: Team[];
   upcomingRaces: Race[];
   completedRaces: Race[];
+  getTeamNames: () => string[];
 }
 
 const defaultDrivers: Driver[] = [
@@ -78,10 +79,10 @@ const defaultDrivers: Driver[] = [
 ];
 
 const defaultTeams: Team[] = [
-  { id: '1', name: 'Mercedes', color: '#00D2BE', points: 280, base: 'Brackley, United Kingdom' },
-  { id: '2', name: 'Red Bull Racing', color: '#0600EF', points: 410, base: 'Milton Keynes, United Kingdom' },
-  { id: '3', name: 'Ferrari', color: '#DC0000', points: 290, base: 'Maranello, Italy' },
-  { id: '4', name: 'McLaren', color: '#FF8700', points: 240, base: 'Woking, United Kingdom' },
+  { id: '1', name: 'Mercedes', color: '#00D2BE', points: 0, base: 'Brackley, United Kingdom' },
+  { id: '2', name: 'Red Bull Racing', color: '#0600EF', points: 0, base: 'Milton Keynes, United Kingdom' },
+  { id: '3', name: 'Ferrari', color: '#DC0000', points: 0, base: 'Maranello, Italy' },
+  { id: '4', name: 'McLaren', color: '#FF8700', points: 0, base: 'Woking, United Kingdom' },
 ];
 
 const defaultRaces: Race[] = [
@@ -148,6 +149,22 @@ export const F1DataProvider: React.FC<{ children: React.ReactNode }> = ({ childr
   });
 
   useEffect(() => {
+    const teamPointsMap = new Map<string, number>();
+    
+    drivers.forEach(driver => {
+      const currentPoints = teamPointsMap.get(driver.team) || 0;
+      teamPointsMap.set(driver.team, currentPoints + driver.points);
+    });
+    
+    const updatedTeams = teams.map(team => ({
+      ...team,
+      points: teamPointsMap.get(team.name) || 0
+    }));
+    
+    setTeams(updatedTeams);
+  }, [drivers]);
+
+  useEffect(() => {
     localStorage.setItem('f1-drivers', JSON.stringify(drivers));
   }, [drivers]);
 
@@ -178,6 +195,10 @@ export const F1DataProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     .filter(race => race.completed)
     .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
 
+  const getTeamNames = () => {
+    return teams.map(team => team.name);
+  };
+
   return (
     <F1DataContext.Provider value={{
       drivers, setDrivers,
@@ -188,7 +209,8 @@ export const F1DataProvider: React.FC<{ children: React.ReactNode }> = ({ childr
       sortedDrivers,
       sortedTeams,
       upcomingRaces,
-      completedRaces
+      completedRaces,
+      getTeamNames
     }}>
       {children}
     </F1DataContext.Provider>
