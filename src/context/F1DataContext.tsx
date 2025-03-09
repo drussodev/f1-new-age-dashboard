@@ -83,12 +83,12 @@ const defaultTeams: Team[] = [
   { id: '2', name: 'Ferrari', color: '#DC0000', points: 0, base: 'Maranello, Italy' },
   { id: '3', name: 'Mercedes', color: '#00D2BE', points: 0, base: 'Brackley, United Kingdom' },
   { id: '4', name: 'McLaren', color: '#FF8700', points: 0, base: 'Woking, United Kingdom' },
-  { id: '5', name: 'Aston Martin', color: '#358C75', points: 0, base: 'Silverstone, United Kingdom' },
-  { id: '6', name: 'Alpine', color: '#2293D1', points: 0, base: 'Enstone, United Kingdom' },
-  { id: '7', name: 'Williams', color: '#3D68B0', points: 0, base: 'Grove, United Kingdom' },
-  { id: '8', name: 'Racing Bulls', color: '#469BFF', points: 0, base: 'Faenza, Italy' },
-  { id: '9', name: 'Stake F1 Team', color: '#B10000', points: 0, base: 'Hinwil, Switzerland' },
-  { id: '10', name: 'Haas F1 Team', color: '#B6BABD', points: 0, base: 'Kannapolis, United States' },
+  { id: '5', name: 'Aston Martin', color: '#006F62', points: 0, base: 'Silverstone, United Kingdom' },
+  { id: '6', name: 'Alpine', color: '#0090FF', points: 0, base: 'Enstone, United Kingdom' },
+  { id: '7', name: 'Williams', color: '#005AFF', points: 0, base: 'Grove, United Kingdom' },
+  { id: '8', name: 'Racing Bulls', color: '#002776', points: 0, base: 'Faenza, Italy' },
+  { id: '9', name: 'Stake F1 Team', color: '#52E252', points: 0, base: 'Hinwil, Switzerland' },
+  { id: '10', name: 'Haas F1 Team', color: '#FFFFFF', points: 0, base: 'Kannapolis, United States' },
 ];
 
 const defaultRaces: Race[] = [
