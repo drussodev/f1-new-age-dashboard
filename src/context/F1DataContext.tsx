@@ -1,3 +1,4 @@
+
 import React, { createContext, useContext, useState, useEffect } from 'react';
 
 interface Driver {
@@ -82,6 +83,12 @@ const defaultTeams: Team[] = [
   { id: '2', name: 'Red Bull Racing', color: '#0600EF', points: 410, base: 'Milton Keynes, United Kingdom' },
   { id: '3', name: 'Ferrari', color: '#DC0000', points: 290, base: 'Maranello, Italy' },
   { id: '4', name: 'McLaren', color: '#FF8700', points: 240, base: 'Woking, United Kingdom' },
+  { id: '5', name: 'Aston Martin', color: '#006F62', points: 160, base: 'Silverstone, United Kingdom' },
+  { id: '6', name: 'Alpine', color: '#0090FF', points: 100, base: 'Enstone, United Kingdom' },
+  { id: '7', name: 'Williams', color: '#005AFF', points: 40, base: 'Grove, United Kingdom' },
+  { id: '8', name: 'AlphaTauri', color: '#2B4562', points: 30, base: 'Faenza, Italy' },
+  { id: '9', name: 'Sauber', color: '#900000', points: 20, base: 'Hinwil, Switzerland' },
+  { id: '10', name: 'Haas F1 Team', color: '#FFFFFF', points: 15, base: 'Kannapolis, United States' },
 ];
 
 const defaultRaces: Race[] = [

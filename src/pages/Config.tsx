@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+
+import React, { useState, useEffect } from 'react';
 import { Layout } from '../components/layout/Layout';
 import { useF1Data } from '../context/F1DataContext';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -18,6 +19,13 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
 
 const Config = () => {
@@ -112,6 +120,17 @@ const Config = () => {
   const [driverCountry, setDriverCountry] = useState('');
   const [driverPoints, setDriverPoints] = useState('');
   const [driverColor, setDriverColor] = useState('');
+
+  // Handle team selection
+  const handleTeamSelect = (teamId: string) => {
+    setDriverTeam(teamId);
+    
+    // Find the selected team and set its color
+    const selectedTeam = teams.find(team => team.id === teamId);
+    if (selectedTeam) {
+      setDriverColor(selectedTeam.color);
+    }
+  };
 
   const addDriver = () => {
     if (!driverName.trim() || !driverNumber || !driverTeam.trim() || !driverCountry.trim() || !driverPoints || !driverColor.trim()) {
@@ -410,12 +429,24 @@ const Config = () => {
                   </div>
                   <div>
                     <Label htmlFor="driverTeam">Driver Team</Label>
-                    <Input
-                      id="driverTeam"
-                      value={driverTeam}
-                      onChange={(e) => setDriverTeam(e.target.value)}
-                      placeholder="Enter driver team"
-                    />
+                    <Select onValueChange={handleTeamSelect} value={driverTeam}>
+                      <SelectTrigger id="driverTeam">
+                        <SelectValue placeholder="Select team" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {teams.map((team) => (
+                          <SelectItem key={team.id} value={team.id}>
+                            <div className="flex items-center">
+                              <div 
+                                className="w-3 h-3 rounded-full mr-2" 
+                                style={{ backgroundColor: team.color }}
+                              ></div>
+                              {team.name}
+                            </div>
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                   </div>
                   <div>
                     <Label htmlFor="driverCountry">Driver Country</Label>
@@ -437,14 +468,44 @@ const Config = () => {
                     />
                   </div>
                   <div>
-                    <Label htmlFor="driverColor">Driver Color</Label>
-                    <Input
-                      id="driverColor"
-                      type="color"
+                    <Label htmlFor="driverColor" className="flex items-center">
+                      Driver Color 
+                      {driverColor && (
+                        <div 
+                          className="w-4 h-4 rounded-full ml-2" 
+                          style={{ backgroundColor: driverColor }}
+                        ></div>
+                      )}
+                    </Label>
+                    <Select 
+                      onValueChange={setDriverColor} 
                       value={driverColor}
-                      onChange={(e) => setDriverColor(e.target.value)}
-                      placeholder="Enter driver color"
-                    />
+                      defaultValue={driverTeam ? teams.find(t => t.id === driverTeam)?.color : ""}
+                    >
+                      <SelectTrigger id="driverColor" style={{ backgroundColor: driverColor, color: driverColor ? '#fff' : 'inherit' }}>
+                        <SelectValue placeholder="Select color" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {teams.map((team) => (
+                          <SelectItem 
+                            key={team.id + "-color"} 
+                            value={team.color}
+                            className="flex items-center"
+                          >
+                            <div className="flex items-center">
+                              <div 
+                                className="w-4 h-4 rounded-full mr-2" 
+                                style={{ backgroundColor: team.color }}
+                              ></div>
+                              {team.name}
+                            </div>
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <div className="text-xs text-gray-500 mt-1">
+                      Team color is selected by default
+                    </div>
                   </div>
                 </div>
                 <Button onClick={addDriver}>Add Driver</Button>
@@ -466,6 +527,7 @@ const Config = () => {
                             <TableHead>Team</TableHead>
                             <TableHead>Country</TableHead>
                             <TableHead>Points</TableHead>
+                            <TableHead>Color</TableHead>
                             <TableHead className="text-right">Actions</TableHead>
                           </TableRow>
                         </TableHeader>
@@ -477,6 +539,13 @@ const Config = () => {
                               <TableCell>{driver.team}</TableCell>
                               <TableCell>{driver.country}</TableCell>
                               <TableCell>{driver.points}</TableCell>
+                              <TableCell>
+                                <div 
+                                  className="w-6 h-6 rounded-full" 
+                                  style={{ backgroundColor: driver.color }}
+                                  title={driver.color}
+                                ></div>
+                              </TableCell>
                               <TableCell className="text-right">
                                 <Button variant="destructive" size="sm" onClick={() => removeDriver(driver.id)}>
                                   Remove
