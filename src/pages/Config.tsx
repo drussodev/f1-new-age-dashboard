@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Layout } from '../components/layout/Layout';
 import { useF1Data } from '../context/F1DataContext';
@@ -120,12 +121,25 @@ const Config = () => {
   const [driverCountry, setDriverCountry] = useState('');
   const [driverPoints, setDriverPoints] = useState('');
   const [driverColor, setDriverColor] = useState('');
+  const [driverImage, setDriverImage] = useState('');
+
+  // Get team color based on selected team
+  const getTeamColor = (teamName: string) => {
+    const team = teams.find(t => t.name === teamName);
+    return team ? team.color : '';
+  };
+
+  // Update driver color when team changes
+  const handleTeamChange = (value: string) => {
+    setDriverTeam(value);
+    setDriverColor(getTeamColor(value));
+  };
 
   const addDriver = () => {
-    if (!driverName.trim() || !driverNumber || !driverTeam.trim() || !driverCountry.trim() || !driverPoints || !driverColor.trim()) {
+    if (!driverName.trim() || !driverNumber || !driverTeam.trim() || !driverCountry.trim() || !driverPoints) {
       toast({
         title: "Error",
-        description: "Please fill in all driver fields.",
+        description: "Please fill in all required driver fields.",
         variant: "destructive"
       });
       return;
@@ -138,7 +152,8 @@ const Config = () => {
       team: driverTeam,
       country: driverCountry,
       points: parseInt(driverPoints),
-      color: driverColor
+      color: driverColor || getTeamColor(driverTeam),
+      image: driverImage || undefined
     };
 
     setDrivers([...drivers, newDriver]);
@@ -148,6 +163,7 @@ const Config = () => {
     setDriverCountry('');
     setDriverPoints('');
     setDriverColor('');
+    setDriverImage('');
 
     toast({
       title: "Driver added",
@@ -283,7 +299,7 @@ const Config = () => {
         </h1>
 
         <Tabs defaultValue="general">
-          <TabsList className="grid w-full md:w-auto md:inline-grid grid-cols-1 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-2 mb-6">
+          <TabsList className="grid w-full md:w-auto md:inline-grid grid-cols-1 sm:grid-cols-3 md:grid-cols-4 gap-2 mb-6">
             <TabsTrigger value="general" className="flex items-center">
               <Settings className="mr-2 h-4 w-4" />
               General
@@ -373,8 +389,8 @@ const Config = () => {
                   </div>
                   <div>
                     <Label htmlFor="driverTeam">Driver Team</Label>
-                    <Select value={driverTeam} onValueChange={setDriverTeam}>
-                      <SelectTrigger>
+                    <Select value={driverTeam} onValueChange={handleTeamChange}>
+                      <SelectTrigger className="w-full">
                         <SelectValue placeholder="Select a team" />
                       </SelectTrigger>
                       <SelectContent>
@@ -406,13 +422,33 @@ const Config = () => {
                     />
                   </div>
                   <div>
-                    <Label htmlFor="driverColor">Driver Color</Label>
+                    <Label htmlFor="driverColor">Driver Color (Team Color)</Label>
+                    <div className="flex gap-2">
+                      <Input
+                        id="driverColor"
+                        type="text"
+                        value={driverColor}
+                        onChange={(e) => setDriverColor(e.target.value)}
+                        placeholder="Hex color code (e.g. #FF0000)"
+                        className="flex-1"
+                      />
+                      <div 
+                        className="w-10 h-10 rounded border" 
+                        style={{ backgroundColor: driverColor || (driverTeam ? getTeamColor(driverTeam) : '') }}
+                      ></div>
+                    </div>
+                    <p className="text-xs text-gray-500 mt-1">
+                      Default color is set based on team selection
+                    </p>
+                  </div>
+                  <div>
+                    <Label htmlFor="driverImage">Driver Image URL (Optional)</Label>
                     <Input
-                      id="driverColor"
-                      type="color"
-                      value={driverColor}
-                      onChange={(e) => setDriverColor(e.target.value)}
-                      placeholder="Enter driver color"
+                      id="driverImage"
+                      type="text"
+                      value={driverImage}
+                      onChange={(e) => setDriverImage(e.target.value)}
+                      placeholder="Enter image URL (optional)"
                     />
                   </div>
                 </div>
@@ -435,6 +471,7 @@ const Config = () => {
                             <TableHead>Team</TableHead>
                             <TableHead>Country</TableHead>
                             <TableHead>Points</TableHead>
+                            <TableHead>Color</TableHead>
                             <TableHead className="text-right">Actions</TableHead>
                           </TableRow>
                         </TableHeader>
@@ -446,6 +483,15 @@ const Config = () => {
                               <TableCell>{driver.team}</TableCell>
                               <TableCell>{driver.country}</TableCell>
                               <TableCell>{driver.points}</TableCell>
+                              <TableCell>
+                                <div className="flex items-center gap-2">
+                                  <div 
+                                    className="w-6 h-6 rounded-full border" 
+                                    style={{ backgroundColor: driver.color }}
+                                  ></div>
+                                  <span className="text-xs">{driver.color}</span>
+                                </div>
+                              </TableCell>
                               <TableCell className="text-right">
                                 <Button variant="destructive" size="sm" onClick={() => removeDriver(driver.id)}>
                                   Remove
