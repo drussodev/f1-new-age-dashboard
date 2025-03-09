@@ -70,19 +70,25 @@ interface F1DataContextType {
 }
 
 const defaultDrivers: Driver[] = [
-  { id: '1', name: 'Lewis Hamilton', number: 44, team: 'Mercedes', country: 'United Kingdom', points: 180, color: '#00D2BE' },
+  { id: '1', name: 'Lewis Hamilton', number: 44, team: 'Ferrari', country: 'United Kingdom', points: 180, color: '#DC0000' },
   { id: '2', name: 'Max Verstappen', number: 33, team: 'Red Bull Racing', country: 'Netherlands', points: 220, color: '#0600EF' },
   { id: '3', name: 'Charles Leclerc', number: 16, team: 'Ferrari', country: 'Monaco', points: 150, color: '#DC0000' },
   { id: '4', name: 'Lando Norris', number: 4, team: 'McLaren', country: 'United Kingdom', points: 130, color: '#FF8700' },
-  { id: '5', name: 'Carlos Sainz', number: 55, team: 'Ferrari', country: 'Spain', points: 140, color: '#DC0000' },
+  { id: '5', name: 'Carlos Sainz', number: 55, team: 'Racing Bulls', country: 'Spain', points: 140, color: '#469BFF' },
   { id: '6', name: 'Sergio Perez', number: 11, team: 'Red Bull Racing', country: 'Mexico', points: 190, color: '#0600EF' },
 ];
 
 const defaultTeams: Team[] = [
-  { id: '1', name: 'Mercedes', color: '#00D2BE', points: 0, base: 'Brackley, United Kingdom' },
-  { id: '2', name: 'Red Bull Racing', color: '#0600EF', points: 0, base: 'Milton Keynes, United Kingdom' },
-  { id: '3', name: 'Ferrari', color: '#DC0000', points: 0, base: 'Maranello, Italy' },
+  { id: '1', name: 'Red Bull Racing', color: '#0600EF', points: 0, base: 'Milton Keynes, United Kingdom' },
+  { id: '2', name: 'Ferrari', color: '#DC0000', points: 0, base: 'Maranello, Italy' },
+  { id: '3', name: 'Mercedes', color: '#00D2BE', points: 0, base: 'Brackley, United Kingdom' },
   { id: '4', name: 'McLaren', color: '#FF8700', points: 0, base: 'Woking, United Kingdom' },
+  { id: '5', name: 'Aston Martin', color: '#358C75', points: 0, base: 'Silverstone, United Kingdom' },
+  { id: '6', name: 'Alpine', color: '#2293D1', points: 0, base: 'Enstone, United Kingdom' },
+  { id: '7', name: 'Williams', color: '#3D68B0', points: 0, base: 'Grove, United Kingdom' },
+  { id: '8', name: 'Racing Bulls', color: '#469BFF', points: 0, base: 'Faenza, Italy' },
+  { id: '9', name: 'Stake F1 Team', color: '#B10000', points: 0, base: 'Hinwil, Switzerland' },
+  { id: '10', name: 'Haas F1 Team', color: '#B6BABD', points: 0, base: 'Kannapolis, United States' },
 ];
 
 const defaultRaces: Race[] = [
