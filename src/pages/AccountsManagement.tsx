@@ -5,21 +5,12 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter }
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { LockKeyhole, UserPlus, Trash2, Shield } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
 
 const AccountsManagement = () => {
-  const { accounts, addAccount, removeAccount, isRoot, user } = useAuth();
+  const { accounts, addAccount, removeAccount, user } = useAuth();
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [role, setRole] = useState<'admin' | 'user' | 'root'>('user');
-  const navigate = useNavigate();
-
-  // If not root, redirect to home
-  React.useEffect(() => {
-    if (!isRoot) {
-      navigate('/');
-    }
-  }, [isRoot, navigate]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -39,10 +30,6 @@ const AccountsManagement = () => {
     }
     removeAccount(username);
   };
-
-  if (!isRoot) {
-    return null; // Redirect will happen due to useEffect
-  }
 
   return (
     <Layout>

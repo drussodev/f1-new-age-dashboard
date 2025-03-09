@@ -6,7 +6,7 @@ import { Layout } from '../components/layout/Layout';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { LockKeyhole, UserPlus } from 'lucide-react';
+import { LockKeyhole } from 'lucide-react';
 
 const Login = () => {
   const [username, setUsername] = useState('');
