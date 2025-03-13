@@ -121,6 +121,7 @@ const Config = () => {
   const [driverCountry, setDriverCountry] = useState('');
   const [driverPoints, setDriverPoints] = useState('');
   const [driverColor, setDriverColor] = useState('');
+  const [selectedTeamName, setSelectedTeamName] = useState('');
 
   // Handle team selection
   const handleTeamSelect = (teamId: string) => {
@@ -130,6 +131,7 @@ const Config = () => {
     const selectedTeam = teams.find(team => team.id === teamId);
     if (selectedTeam) {
       setDriverColor(selectedTeam.color);
+      setSelectedTeamName(selectedTeam.name);
     }
   };
 
@@ -146,7 +148,7 @@ const Config = () => {
     const newDriver = {
       id: Math.random().toString(36).substring(7),
       name: driverName,
-      team: driverTeam,
+      team: selectedTeamName,
       country: driverCountry,
       points: parseInt(driverPoints),
       color: driverColor
@@ -155,6 +157,7 @@ const Config = () => {
     setDrivers([...drivers, newDriver]);
     setDriverName('');
     setDriverTeam('');
+    setSelectedTeamName('');
     setDriverCountry('');
     setDriverPoints('');
     setDriverColor('');
@@ -463,7 +466,7 @@ const Config = () => {
                   </div>
                   <div>
                     <Label htmlFor="driverColor" className="flex items-center">
-                      Driver Color 
+                      Team Color 
                       {driverColor && (
                         <div 
                           className="w-4 h-4 rounded-full ml-2" 
@@ -471,32 +474,23 @@ const Config = () => {
                         ></div>
                       )}
                     </Label>
-                    <Select 
-                      onValueChange={setDriverColor} 
-                      value={driverColor}
-                      defaultValue={driverTeam ? teams.find(t => t.id === driverTeam)?.color : ""}
-                    >
-                      <SelectTrigger id="driverColor" style={{ backgroundColor: driverColor, color: driverColor ? '#fff' : 'inherit' }}>
-                        <SelectValue placeholder="Select color" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {teams.map((team) => (
-                          <SelectItem 
-                            key={team.id + "-color"} 
-                            value={team.color}
-                            className="flex items-center"
-                          >
-                            <div className="flex items-center">
-                              <div 
-                                className="w-4 h-4 rounded-full mr-2" 
-                                style={{ backgroundColor: team.color }}
-                              ></div>
-                              {team.name}
-                            </div>
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
+                    <div className="flex items-center h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm">
+                      {driverTeam ? (
+                        <div className="flex items-center">
+                          <div 
+                            className="w-4 h-4 rounded-full mr-2" 
+                            style={{ backgroundColor: driverColor }}
+                          ></div>
+                          <span>
+                            {selectedTeamName ? `${selectedTeamName} (${driverColor})` : 'Select a team first'}
+                          </span>
+                        </div>
+                      ) : (
+                        <span className="text-muted-foreground">
+                          Select a team to set the color
+                        </span>
+                      )}
+                    </div>
                   </div>
                 </div>
                 <Button onClick={addDriver}>Add Driver</Button>

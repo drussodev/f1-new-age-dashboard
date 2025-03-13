@@ -8,15 +8,23 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { toast } from 'sonner';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 const Drivers = () => {
-  const { drivers, setDrivers } = useF1Data();
+  const { drivers, setDrivers, teams } = useF1Data();
   const { isAdmin } = useAuth();
   const [expandedDriverId, setExpandedDriverId] = useState<string | null>(null);
   const [editingDriverId, setEditingDriverId] = useState<string | null>(null);
   const [editFormData, setEditFormData] = useState({
     name: '',
     team: '',
+    teamId: '',
     country: '',
     points: 0,
     color: '',
@@ -33,10 +41,15 @@ const Drivers = () => {
       return;
     }
     
+    // Find team ID based on team name
+    const teamFound = teams.find(team => team.name === driver.team);
+    const teamId = teamFound ? teamFound.id : '';
+    
     setEditingDriverId(driver.id);
     setEditFormData({
       name: driver.name,
       team: driver.team,
+      teamId: teamId,
       country: driver.country,
       points: driver.points,
       color: driver.color,
@@ -54,6 +67,18 @@ const Drivers = () => {
       ...editFormData,
       [name]: name === 'points' ? parseInt(value, 10) || 0 : value,
     });
+  };
+
+  const handleTeamChange = (teamId: string) => {
+    const selectedTeam = teams.find(team => team.id === teamId);
+    if (selectedTeam) {
+      setEditFormData({
+        ...editFormData,
+        teamId: teamId,
+        team: selectedTeam.name,
+        color: selectedTeam.color
+      });
+    }
   };
 
   const saveDriverChanges = (driverId: string) => {
@@ -134,11 +159,27 @@ const Drivers = () => {
                       
                       <div>
                         <label className="text-xs text-gray-500">Team</label>
-                        <Input 
-                          name="team"
-                          value={editFormData.team}
-                          onChange={handleInputChange}
-                        />
+                        <Select 
+                          value={editFormData.teamId}
+                          onValueChange={handleTeamChange}
+                        >
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select team" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {teams.map((team) => (
+                              <SelectItem key={team.id} value={team.id}>
+                                <div className="flex items-center">
+                                  <div 
+                                    className="w-3 h-3 rounded-full mr-2"
+                                    style={{ backgroundColor: team.color }}
+                                  ></div>
+                                  {team.name}
+                                </div>
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
                       </div>
                       
                       <div>
@@ -151,17 +192,15 @@ const Drivers = () => {
                       </div>
                       
                       <div>
-                        <label className="text-xs text-gray-500">Color (Hex)</label>
-                        <div className="flex gap-2">
-                          <Input 
-                            name="color"
-                            value={editFormData.color}
-                            onChange={handleInputChange}
-                          />
+                        <label className="text-xs text-gray-500">Team Color</label>
+                        <div className="flex items-center h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm">
                           <div 
-                            className="w-10 h-10 rounded border" 
+                            className="w-4 h-4 rounded-full mr-2" 
                             style={{ backgroundColor: editFormData.color }}
                           ></div>
+                          <span>
+                            {editFormData.team ? `${editFormData.team} (${editFormData.color})` : 'Select a team first'}
+                          </span>
                         </div>
                       </div>
                       
