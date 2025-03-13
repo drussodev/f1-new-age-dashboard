@@ -8,7 +8,7 @@ import { Newspaper, Star, Image, Video } from 'lucide-react';
 import MediaPopup from '../components/news/MediaPopup';
 
 const News = () => {
-  const { news } = useF1Data();
+  const { news, loading } = useF1Data();
   const [popupMedia, setPopupMedia] = useState<{
     isOpen: boolean;
     type: 'image' | 'video';
@@ -86,78 +86,84 @@ const News = () => {
           <h1 className="text-3xl font-bold">Latest News</h1>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {sortedNews.map((newsItem) => (
-            <Card key={newsItem.id} className="h-full flex flex-col overflow-hidden hover:shadow-lg transition-shadow">
-              {newsItem.imageUrl && !newsItem.videoUrl && (
-                <div 
-                  className="relative h-48 overflow-hidden cursor-pointer"
-                  onClick={() => openImagePopup(newsItem.imageUrl, newsItem.title)}
-                >
-                  <div className="absolute top-2 left-2 bg-black/50 text-white p-1 rounded-md">
-                    <Image className="w-4 h-4" />
-                  </div>
-                  <img 
-                    src={newsItem.imageUrl} 
-                    alt={newsItem.title} 
-                    className="w-full h-full object-cover"
-                  />
-                  {newsItem.featured && (
-                    <div className="absolute top-2 right-2 bg-f1-red text-white p-1 rounded-md flex items-center">
-                      <Star className="w-4 h-4 mr-1" />
-                      <span className="text-xs font-medium">Featured</span>
+        {loading ? (
+          <div className="flex justify-center items-center py-16">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900"></div>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {sortedNews.map((newsItem) => (
+              <Card key={newsItem.id} className="h-full flex flex-col overflow-hidden hover:shadow-lg transition-shadow">
+                {newsItem.imageUrl && !newsItem.videoUrl && (
+                  <div 
+                    className="relative h-48 overflow-hidden cursor-pointer"
+                    onClick={() => openImagePopup(newsItem.imageUrl, newsItem.title)}
+                  >
+                    <div className="absolute top-2 left-2 bg-black/50 text-white p-1 rounded-md">
+                      <Image className="w-4 h-4" />
                     </div>
-                  )}
-                </div>
-              )}
-              
-              {newsItem.videoUrl && (
-                <div 
-                  className="relative h-48 overflow-hidden cursor-pointer"
-                  onClick={() => openVideoPopup(newsItem.videoUrl, newsItem.title)}
-                >
-                  <div className="absolute top-2 left-2 bg-black/50 text-white p-1 rounded-md z-10">
-                    <Video className="w-4 h-4" />
+                    <img 
+                      src={newsItem.imageUrl} 
+                      alt={newsItem.title} 
+                      className="w-full h-full object-cover"
+                    />
+                    {newsItem.featured && (
+                      <div className="absolute top-2 right-2 bg-f1-red text-white p-1 rounded-md flex items-center">
+                        <Star className="w-4 h-4 mr-1" />
+                        <span className="text-xs font-medium">Featured</span>
+                      </div>
+                    )}
                   </div>
-                  <div className="w-full h-full">
-                    <iframe 
-                      src={getEmbedUrl(newsItem.videoUrl)} 
-                      title={newsItem.title}
-                      className="w-full h-full"
-                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                      allowFullScreen
-                      referrerPolicy="origin"
-                    ></iframe>
-                  </div>
-                  {newsItem.featured && (
-                    <div className="absolute top-2 right-2 bg-f1-red text-white p-1 rounded-md flex items-center z-10">
-                      <Star className="w-4 h-4 mr-1" />
-                      <span className="text-xs font-medium">Featured</span>
+                )}
+                
+                {newsItem.videoUrl && (
+                  <div 
+                    className="relative h-48 overflow-hidden cursor-pointer"
+                    onClick={() => openVideoPopup(newsItem.videoUrl, newsItem.title)}
+                  >
+                    <div className="absolute top-2 left-2 bg-black/50 text-white p-1 rounded-md z-10">
+                      <Video className="w-4 h-4" />
                     </div>
-                  )}
-                </div>
-              )}
-              
-              <CardHeader className={newsItem.imageUrl || newsItem.videoUrl ? "" : "pb-2"}>
-                <div className="flex justify-between items-start">
-                  <CardTitle className="text-xl">{newsItem.title}</CardTitle>
-                  {!newsItem.imageUrl && !newsItem.videoUrl && newsItem.featured && (
-                    <Star className="w-5 h-5 text-f1-red" />
-                  )}
-                </div>
-                <CardDescription>{format(new Date(newsItem.date), 'MMMM dd, yyyy')}</CardDescription>
-              </CardHeader>
-              
-              <CardContent className="flex-grow">
-                <p>{newsItem.content}</p>
-              </CardContent>
-              
-              <CardFooter className="pt-2 text-sm text-gray-500">
-                <p>#{newsItem.id}</p>
-              </CardFooter>
-            </Card>
-          ))}
-        </div>
+                    <div className="w-full h-full">
+                      <iframe 
+                        src={getEmbedUrl(newsItem.videoUrl)} 
+                        title={newsItem.title}
+                        className="w-full h-full"
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                        allowFullScreen
+                        referrerPolicy="origin"
+                      ></iframe>
+                    </div>
+                    {newsItem.featured && (
+                      <div className="absolute top-2 right-2 bg-f1-red text-white p-1 rounded-md flex items-center z-10">
+                        <Star className="w-4 h-4 mr-1" />
+                        <span className="text-xs font-medium">Featured</span>
+                      </div>
+                    )}
+                  </div>
+                )}
+                
+                <CardHeader className={newsItem.imageUrl || newsItem.videoUrl ? "" : "pb-2"}>
+                  <div className="flex justify-between items-start">
+                    <CardTitle className="text-xl">{newsItem.title}</CardTitle>
+                    {!newsItem.imageUrl && !newsItem.videoUrl && newsItem.featured && (
+                      <Star className="w-5 h-5 text-f1-red" />
+                    )}
+                  </div>
+                  <CardDescription>{format(new Date(newsItem.date), 'MMMM dd, yyyy')}</CardDescription>
+                </CardHeader>
+                
+                <CardContent className="flex-grow">
+                  <p>{newsItem.content}</p>
+                </CardContent>
+                
+                <CardFooter className="pt-2 text-sm text-gray-500">
+                  <p>#{newsItem.id}</p>
+                </CardFooter>
+              </Card>
+            ))}
+          </div>
+        )}
       </div>
 
       <MediaPopup 

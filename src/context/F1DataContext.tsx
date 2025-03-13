@@ -1,4 +1,7 @@
+
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
 
 interface Driver {
   id: string;
@@ -65,37 +68,8 @@ interface F1DataContextType {
   upcomingRaces: Race[];
   completedRaces: Race[];
   updateDriverPoints: (driverId: string, points: number) => void;
+  loading: boolean;
 }
-
-const defaultDrivers: Driver[] = [
-  { id: '1', name: 'Lewis Hamilton', team: 'Mercedes', country: 'United Kingdom', points: 180, color: '#00D2BE' },
-  { id: '2', name: 'Max Verstappen', team: 'Red Bull Racing', country: 'Netherlands', points: 220, color: '#0600EF' },
-  { id: '3', name: 'Charles Leclerc', team: 'Ferrari', country: 'Monaco', points: 150, color: '#DC0000' },
-  { id: '4', name: 'Lando Norris', team: 'McLaren', country: 'United Kingdom', points: 130, color: '#FF8700' },
-  { id: '5', name: 'Carlos Sainz', team: 'Ferrari', country: 'Spain', points: 140, color: '#DC0000' },
-  { id: '6', name: 'Sergio Perez', team: 'Red Bull Racing', country: 'Mexico', points: 190, color: '#0600EF' },
-];
-
-const defaultTeams: Team[] = [
-  { id: '1', name: 'Mercedes', color: '#00D2BE', points: 280 },
-  { id: '2', name: 'Red Bull Racing', color: '#0600EF', points: 410 },
-  { id: '3', name: 'Ferrari', color: '#DC0000', points: 290 },
-  { id: '4', name: 'McLaren', color: '#FF8700', points: 240 },
-  { id: '5', name: 'Aston Martin', color: '#006F62', points: 160 },
-  { id: '6', name: 'Alpine', color: '#0090FF', points: 100 },
-  { id: '7', name: 'Williams', color: '#005AFF', points: 40 },
-  { id: '8', name: 'AlphaTauri', color: '#2B4562', points: 30 },
-  { id: '9', name: 'Sauber', color: '#900000', points: 20 },
-  { id: '10', name: 'Haas F1 Team', color: '#FFFFFF', points: 15 },
-];
-
-const defaultRaces: Race[] = [
-  { id: '1', name: 'Bahrain Grand Prix', circuit: 'Bahrain International Circuit', date: '2023-03-05', location: 'Sakhir, Bahrain', completed: true, winner: 'Max Verstappen' },
-  { id: '2', name: 'Saudi Arabian Grand Prix', circuit: 'Jeddah Corniche Circuit', date: '2023-03-19', location: 'Jeddah, Saudi Arabia', completed: true, winner: 'Sergio Perez' },
-  { id: '3', name: 'Australian Grand Prix', circuit: 'Albert Park Circuit', date: '2023-04-02', location: 'Melbourne, Australia', completed: true, winner: 'Max Verstappen' },
-  { id: '4', name: 'Azerbaijan Grand Prix', circuit: 'Baku City Circuit', date: '2023-04-30', location: 'Baku, Azerbaijan', completed: false },
-  { id: '5', name: 'Miami Grand Prix', circuit: 'Miami International Autodrome', date: '2023-05-07', location: 'Miami, USA', completed: false },
-];
 
 const defaultConfig: Config = {
   title: 'F1 New Age Tournament',
@@ -106,72 +80,170 @@ const defaultConfig: Config = {
   ]
 };
 
-const defaultNews: News[] = [
-  {
-    id: '1',
-    title: 'Hamilton Dominates in Monaco',
-    content: 'Lewis Hamilton takes a commanding win at the Monaco Grand Prix, extending his championship lead.',
-    date: '2023-05-28',
-    imageUrl: 'https://images.unsplash.com/photo-1568605117036-5fe5e7bab0b7?q=80&w=2000',
-    featured: true
-  },
-  {
-    id: '2',
-    title: 'Verstappen Signs New Contract',
-    content: 'Max Verstappen has signed a new multi-year contract with Red Bull Racing, securing his future with the team.',
-    date: '2023-05-24',
-    imageUrl: 'https://images.unsplash.com/photo-1511919884226-fd3cad34687c?q=80&w=2000'
-  },
-];
-
 const F1DataContext = createContext<F1DataContextType | undefined>(undefined);
 
 export const F1DataProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [drivers, setDrivers] = useState<Driver[]>(() => {
-    const saved = localStorage.getItem('f1-drivers');
-    return saved ? JSON.parse(saved) : defaultDrivers;
-  });
-  
-  const [teams, setTeams] = useState<Team[]>(() => {
-    const saved = localStorage.getItem('f1-teams');
-    return saved ? JSON.parse(saved) : defaultTeams;
-  });
-  
-  const [races, setRaces] = useState<Race[]>(() => {
-    const saved = localStorage.getItem('f1-races');
-    return saved ? JSON.parse(saved) : defaultRaces;
-  });
-  
-  const [config, setConfig] = useState<Config>(() => {
-    const saved = localStorage.getItem('f1-config');
-    return saved ? JSON.parse(saved) : defaultConfig;
-  });
-  
-  const [news, setNews] = useState<News[]>(() => {
-    const saved = localStorage.getItem('f1-news');
-    return saved ? JSON.parse(saved) : defaultNews;
-  });
+  const [drivers, setDrivers] = useState<Driver[]>([]);
+  const [teams, setTeams] = useState<Team[]>([]);
+  const [races, setRaces] = useState<Race[]>([]);
+  const [config, setConfig] = useState<Config>(defaultConfig);
+  const [news, setNews] = useState<News[]>([]);
+  const [loading, setLoading] = useState(true);
 
+  // Function to fetch all data from Supabase
+  const fetchAllData = async () => {
+    setLoading(true);
+    try {
+      // Fetch drivers
+      const { data: driversData, error: driversError } = await supabase
+        .from('drivers')
+        .select('*');
+
+      if (driversError) throw driversError;
+      
+      // Map Supabase data to our application data model
+      const mappedDrivers = driversData.map(driver => ({
+        id: driver.id,
+        name: driver.name,
+        team: driver.team,
+        country: driver.country,
+        points: driver.points,
+        color: driver.color,
+        image: driver.image_url
+      }));
+      setDrivers(mappedDrivers);
+
+      // Fetch teams
+      const { data: teamsData, error: teamsError } = await supabase
+        .from('teams')
+        .select('*');
+
+      if (teamsError) throw teamsError;
+      
+      const mappedTeams = teamsData.map(team => ({
+        id: team.id,
+        name: team.name,
+        color: team.color,
+        points: team.points,
+        logo: team.logo_url
+      }));
+      setTeams(mappedTeams);
+
+      // Fetch races
+      const { data: racesData, error: racesError } = await supabase
+        .from('races')
+        .select('*');
+
+      if (racesError) throw racesError;
+      
+      const mappedRaces = racesData.map(race => ({
+        id: race.id,
+        name: race.name,
+        circuit: race.circuit,
+        date: race.date,
+        location: race.location,
+        completed: race.completed,
+        winner: race.winner
+      }));
+      setRaces(mappedRaces);
+
+      // Fetch config and streamers
+      const { data: configData, error: configError } = await supabase
+        .from('config')
+        .select('*')
+        .single();
+
+      if (configError && configError.code !== 'PGRST116') throw configError;
+
+      // Fetch streamers related to config
+      const { data: streamersData, error: streamersError } = await supabase
+        .from('streamers')
+        .select('*')
+        .eq('config_id', configData?.id);
+
+      if (streamersError) throw streamersError;
+      
+      const mappedStreamers = streamersData.map(streamer => ({
+        username: streamer.username,
+        displayName: streamer.display_name
+      }));
+
+      setConfig({
+        title: configData?.title || defaultConfig.title,
+        season: configData?.season || defaultConfig.season,
+        streamers: mappedStreamers.length > 0 ? mappedStreamers : defaultConfig.streamers
+      });
+
+      // Fetch news
+      const { data: newsData, error: newsError } = await supabase
+        .from('news')
+        .select('*');
+
+      if (newsError) throw newsError;
+      
+      const mappedNews = newsData.map(item => ({
+        id: item.id,
+        title: item.title,
+        content: item.content,
+        date: item.date,
+        imageUrl: item.image_url,
+        videoUrl: item.video_url,
+        featured: item.featured
+      }));
+      setNews(mappedNews);
+
+    } catch (error) {
+      console.error('Error fetching data from Supabase:', error);
+      toast.error('Failed to load data from the database. Using default data instead.');
+      
+      // If there's an error, load data from localStorage as fallback
+      const savedDrivers = localStorage.getItem('f1-drivers');
+      const savedTeams = localStorage.getItem('f1-teams');
+      const savedRaces = localStorage.getItem('f1-races');
+      const savedConfig = localStorage.getItem('f1-config');
+      const savedNews = localStorage.getItem('f1-news');
+      
+      if (savedDrivers) setDrivers(JSON.parse(savedDrivers));
+      if (savedTeams) setTeams(JSON.parse(savedTeams));
+      if (savedRaces) setRaces(JSON.parse(savedRaces));
+      if (savedConfig) setConfig(JSON.parse(savedConfig));
+      if (savedNews) setNews(JSON.parse(savedNews));
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Initial data load from Supabase
   useEffect(() => {
-    localStorage.setItem('f1-drivers', JSON.stringify(drivers));
-  }, [drivers]);
+    fetchAllData();
+  }, []);
 
-  useEffect(() => {
-    localStorage.setItem('f1-teams', JSON.stringify(teams));
-  }, [teams]);
+  // Update driver points in Supabase and local state
+  const updateDriverPoints = async (driverId: string, points: number) => {
+    try {
+      // Update in Supabase
+      const { error } = await supabase
+        .from('drivers')
+        .update({ points })
+        .eq('id', driverId);
+      
+      if (error) throw error;
+      
+      // Update local state
+      setDrivers(prevDrivers => 
+        prevDrivers.map(driver => 
+          driver.id === driverId ? { ...driver, points } : driver
+        )
+      );
+      
+      toast.success('Driver points updated successfully');
+    } catch (error) {
+      console.error('Error updating driver points:', error);
+      toast.error('Failed to update driver points');
+    }
+  };
 
-  useEffect(() => {
-    localStorage.setItem('f1-races', JSON.stringify(races));
-  }, [races]);
-
-  useEffect(() => {
-    localStorage.setItem('f1-config', JSON.stringify(config));
-  }, [config]);
-
-  useEffect(() => {
-    localStorage.setItem('f1-news', JSON.stringify(news));
-  }, [news]);
-
+  // Calculate team points based on driver points
   useEffect(() => {
     const teamPointsMap = new Map<string, number>();
     
@@ -182,22 +254,32 @@ export const F1DataProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     });
     
     if (teamPointsMap.size > 0) {
-      setTeams(prevTeams => 
-        prevTeams.map(team => ({
-          ...team,
-          points: teamPointsMap.get(team.name) || 0
-        }))
-      );
+      // Update team points in local state
+      const updatedTeams = teams.map(team => ({
+        ...team,
+        points: teamPointsMap.get(team.name) || 0
+      }));
+      
+      setTeams(updatedTeams);
+      
+      // Update team points in Supabase (only if teams exist)
+      if (teams.length > 0) {
+        teams.forEach(async (team) => {
+          const newPoints = teamPointsMap.get(team.name) || 0;
+          if (newPoints !== team.points) {
+            try {
+              await supabase
+                .from('teams')
+                .update({ points: newPoints })
+                .eq('id', team.id);
+            } catch (error) {
+              console.error(`Error updating points for team ${team.name}:`, error);
+            }
+          }
+        });
+      }
     }
   }, [drivers]);
-
-  const updateDriverPoints = (driverId: string, points: number) => {
-    setDrivers(prevDrivers => 
-      prevDrivers.map(driver => 
-        driver.id === driverId ? { ...driver, points } : driver
-      )
-    );
-  };
 
   const sortedDrivers = [...drivers].sort((a, b) => b.points - a.points);
   const sortedTeams = [...teams].sort((a, b) => b.points - a.points);
@@ -221,7 +303,8 @@ export const F1DataProvider: React.FC<{ children: React.ReactNode }> = ({ childr
       sortedTeams,
       upcomingRaces,
       completedRaces,
-      updateDriverPoints
+      updateDriverPoints,
+      loading
     }}>
       {children}
     </F1DataContext.Provider>

@@ -1,12 +1,14 @@
+
 import React from 'react';
 import { Layout } from '../components/layout/Layout';
 import { useF1Data } from '../context/F1DataContext';
 import { Trophy, User } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 
 const Index = () => {
-  const { sortedDrivers, sortedTeams } = useF1Data();
+  const { sortedDrivers, sortedTeams, loading } = useF1Data();
 
   return (
     <Layout>
@@ -35,21 +37,25 @@ const Index = () => {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="overflow-x-auto">
-                  <table className="w-full">
-                    <thead>
-                      <tr className="border-b">
-                        <th className="px-4 py-3 text-left">Pos</th>
-                        <th className="px-4 py-3 text-left">Driver</th>
-                        <th className="px-4 py-3 text-left">Team</th>
-                        <th className="px-4 py-3 text-right">Points</th>
-                      </tr>
-                    </thead>
-                    <tbody>
+                {loading ? (
+                  <div className="flex justify-center items-center py-8">
+                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
+                  </div>
+                ) : (
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Pos</TableHead>
+                        <TableHead>Driver</TableHead>
+                        <TableHead>Team</TableHead>
+                        <TableHead className="text-right">Points</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
                       {sortedDrivers.map((driver, index) => (
-                        <tr key={driver.id} className="border-b hover:bg-gray-50">
-                          <td className="px-4 py-3">{index + 1}</td>
-                          <td className="px-4 py-3">
+                        <TableRow key={driver.id}>
+                          <TableCell className="font-medium">{index + 1}</TableCell>
+                          <TableCell>
                             <div className="flex items-center">
                               <div className="w-1 h-8 rounded-full mr-3" style={{ backgroundColor: driver.color }}></div>
                               <div>
@@ -57,14 +63,14 @@ const Index = () => {
                                 <div className="text-xs text-gray-500">{driver.country}</div>
                               </div>
                             </div>
-                          </td>
-                          <td className="px-4 py-3">{driver.team}</td>
-                          <td className="px-4 py-3 text-right font-bold">{driver.points}</td>
-                        </tr>
+                          </TableCell>
+                          <TableCell>{driver.team}</TableCell>
+                          <TableCell className="text-right font-bold">{driver.points}</TableCell>
+                        </TableRow>
                       ))}
-                    </tbody>
-                  </table>
-                </div>
+                    </TableBody>
+                  </Table>
+                )}
               </CardContent>
             </Card>
           </TabsContent>
@@ -78,31 +84,35 @@ const Index = () => {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="overflow-x-auto">
-                  <table className="w-full">
-                    <thead>
-                      <tr className="border-b">
-                        <th className="px-4 py-3 text-left">Pos</th>
-                        <th className="px-4 py-3 text-left">Team</th>
-                        <th className="px-4 py-3 text-right">Points</th>
-                      </tr>
-                    </thead>
-                    <tbody>
+                {loading ? (
+                  <div className="flex justify-center items-center py-8">
+                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
+                  </div>
+                ) : (
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Pos</TableHead>
+                        <TableHead>Team</TableHead>
+                        <TableHead className="text-right">Points</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
                       {sortedTeams.map((team, index) => (
-                        <tr key={team.id} className="border-b hover:bg-gray-50">
-                          <td className="px-4 py-3">{index + 1}</td>
-                          <td className="px-4 py-3">
+                        <TableRow key={team.id}>
+                          <TableCell className="font-medium">{index + 1}</TableCell>
+                          <TableCell>
                             <div className="flex items-center">
                               <div className="w-1 h-8 rounded-full mr-3" style={{ backgroundColor: team.color }}></div>
                               <div className="font-medium">{team.name}</div>
                             </div>
-                          </td>
-                          <td className="px-4 py-3 text-right font-bold">{team.points}</td>
-                        </tr>
+                          </TableCell>
+                          <TableCell className="text-right font-bold">{team.points}</TableCell>
+                        </TableRow>
                       ))}
-                    </tbody>
-                  </table>
-                </div>
+                    </TableBody>
+                  </Table>
+                )}
               </CardContent>
             </Card>
           </TabsContent>
