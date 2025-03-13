@@ -15,6 +15,8 @@ import { cn } from "@/lib/utils";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { sendWebhookNotification } from '@/utils/webhook';
+import { Form, FormControl, FormField, FormItem, FormLabel } from '@/components/ui/form';
+import { useForm } from 'react-hook-form';
 
 // Interfaces for race details
 interface RaceDriver {
@@ -40,6 +42,7 @@ interface Race {
   location: string;
   completed: boolean;
   winner?: string;
+  details?: RaceDetails; // Now storing race details with the race
 }
 
 const CalendarPage = () => {
@@ -47,6 +50,10 @@ const CalendarPage = () => {
   const [selectedRace, setSelectedRace] = useState<any>(null);
   const [isRaceDetailsOpen, setIsRaceDetailsOpen] = useState(false);
   const [isAddRaceOpen, setIsAddRaceOpen] = useState(false);
+  const [isEditGridOpen, setIsEditGridOpen] = useState(false);
+  const [raceDetails, setRaceDetails] = useState<RaceDetails>({
+    grid: []
+  });
   const [newRace, setNewRace] = useState({
     id: '',
     name: '',
@@ -55,9 +62,6 @@ const CalendarPage = () => {
     location: '',
     completed: false,
     winner: ''
-  });
-  const [raceDetails, setRaceDetails] = useState<RaceDetails>({
-    grid: []
   });
   const [editMode, setEditMode] = useState(false);
 
@@ -71,21 +75,25 @@ const CalendarPage = () => {
   const handleRaceClick = (race: any) => {
     setSelectedRace(race);
     
-    // Generate mock race details if none exist
-    // In a real application, you would fetch this from your API/database
-    const mockDetails: RaceDetails = {
-      grid: drivers.slice(0, 10).map((driver, index) => ({
-        driverId: driver.id,
-        driverName: driver.name,
-        position: index + 1,
-        bestLapTime: `1:${Math.floor(Math.random() * 10) + 30}:${Math.floor(Math.random() * 60)}`,
-        totalTime: `${Math.floor(Math.random() * 2) + 1}:${Math.floor(Math.random() * 60)}:${Math.floor(Math.random() * 60)}`,
-        points: race.completed ? (10 - index) * 2 : 0,
-        stops: Math.floor(Math.random() * 3) + 1
-      }))
-    };
+    // If the race has stored details, use them
+    if (race.details) {
+      setRaceDetails(race.details);
+    } else {
+      // Generate mock race details if none exist
+      const mockDetails: RaceDetails = {
+        grid: drivers.slice(0, 10).map((driver, index) => ({
+          driverId: driver.id,
+          driverName: driver.name,
+          position: index + 1,
+          bestLapTime: `1:${Math.floor(Math.random() * 10) + 30}:${Math.floor(Math.random() * 60)}`,
+          totalTime: `${Math.floor(Math.random() * 2) + 1}:${Math.floor(Math.random() * 60)}:${Math.floor(Math.random() * 60)}`,
+          points: race.completed ? (10 - index) * 2 : 0,
+          stops: Math.floor(Math.random() * 3) + 1
+        }))
+      };
+      setRaceDetails(mockDetails);
+    }
     
-    setRaceDetails(mockDetails);
     setIsRaceDetailsOpen(true);
   };
 
@@ -156,7 +164,8 @@ const CalendarPage = () => {
     // Convert the Date object to an ISO string for storage
     const raceToSave = {
       ...newRace,
-      date: newRace.date.toISOString() // Convert Date to string
+      date: newRace.date.toISOString(), // Convert Date to string
+      details: selectedRace?.details // Keep race details if editing
     };
 
     if (editMode) {
@@ -189,6 +198,58 @@ const CalendarPage = () => {
       );
     }
     closeAddRaceForm();
+  };
+
+  const openEditGrid = () => {
+    setIsEditGridOpen(true);
+  };
+
+  const closeEditGrid = () => {
+    setIsEditGridOpen(false);
+  };
+
+  // Updates a specific driver's details in the grid
+  const updateDriverDetail = (driverId: string, field: keyof RaceDriver, value: any) => {
+    setRaceDetails(prev => {
+      const updatedGrid = prev.grid.map(driver => 
+        driver.driverId === driverId 
+          ? { ...driver, [field]: field === 'position' || field === 'points' || field === 'stops' ? Number(value) : value }
+          : driver
+      );
+      return { ...prev, grid: updatedGrid };
+    });
+  };
+
+  // Save race details and update the race
+  const saveRaceDetails = () => {
+    if (!selectedRace) return;
+
+    // Sort grid by position
+    const sortedGrid = [...raceDetails.grid].sort((a, b) => a.position - b.position);
+    const updatedDetails = { ...raceDetails, grid: sortedGrid };
+
+    // Update the race with the new details
+    const updatedRace = {
+      ...selectedRace,
+      details: updatedDetails
+    };
+
+    setRaces(prevRaces => 
+      prevRaces.map(race => race.id === selectedRace.id ? updatedRace : race)
+    );
+
+    setSelectedRace(updatedRace);
+    closeEditGrid();
+
+    sendWebhookNotification(
+      "Race Grid Updated",
+      "admin",
+      {
+        action: "Updated race grid",
+        race: selectedRace.name,
+        circuit: selectedRace.circuit
+      }
+    );
   };
 
   return (
@@ -281,12 +342,17 @@ const CalendarPage = () => {
                 <div className="mt-4">
                   <div className="flex justify-between items-center mb-4">
                     <h3 className="text-lg font-semibold">Race Results</h3>
-                    {selectedRace.winner && (
-                      <div className="flex items-center gap-2">
-                        <Award className="text-yellow-500 w-5 h-5" />
-                        <span>Winner: <strong>{selectedRace.winner}</strong></span>
-                      </div>
-                    )}
+                    <div className="flex items-center gap-2">
+                      {selectedRace.winner && (
+                        <div className="flex items-center mr-4">
+                          <Award className="text-yellow-500 w-5 h-5 mr-1" />
+                          <span>Winner: <strong>{selectedRace.winner}</strong></span>
+                        </div>
+                      )}
+                      <Button variant="outline" onClick={openEditGrid}>
+                        Edit Grid
+                      </Button>
+                    </div>
                   </div>
                   
                   <div className="overflow-x-auto">
@@ -329,6 +395,94 @@ const CalendarPage = () => {
             )}
           </DialogContent>
         </Dialog>
+
+        {/* Edit Grid Sheet */}
+        <Sheet open={isEditGridOpen} onOpenChange={setIsEditGridOpen}>
+          <SheetContent className="sm:max-w-[600px] overflow-y-auto">
+            <SheetHeader>
+              <SheetTitle>Edit Race Grid</SheetTitle>
+              <SheetDescription>
+                Update driver positions, times, points, and pit stops.
+              </SheetDescription>
+            </SheetHeader>
+            
+            <div className="py-6">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Position</TableHead>
+                    <TableHead>Driver</TableHead>
+                    <TableHead>Best Lap</TableHead>
+                    <TableHead>Total Time</TableHead>
+                    <TableHead>Stops</TableHead>
+                    <TableHead>Points</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {raceDetails.grid.map((driver) => (
+                    <TableRow key={driver.driverId}>
+                      <TableCell>
+                        <Input 
+                          type="number" 
+                          value={driver.position} 
+                          min={1}
+                          onChange={(e) => updateDriverDetail(driver.driverId, 'position', e.target.value)}
+                          className="w-16"
+                        />
+                      </TableCell>
+                      <TableCell>{driver.driverName}</TableCell>
+                      <TableCell>
+                        <Input 
+                          type="text" 
+                          value={driver.bestLapTime || ''} 
+                          onChange={(e) => updateDriverDetail(driver.driverId, 'bestLapTime', e.target.value)}
+                          placeholder="0:00:00"
+                          className="w-24"
+                        />
+                      </TableCell>
+                      <TableCell>
+                        <Input 
+                          type="text" 
+                          value={driver.totalTime || ''} 
+                          onChange={(e) => updateDriverDetail(driver.driverId, 'totalTime', e.target.value)}
+                          placeholder="0:00:00"
+                          className="w-24"
+                        />
+                      </TableCell>
+                      <TableCell>
+                        <Input 
+                          type="number" 
+                          value={driver.stops} 
+                          min={0}
+                          onChange={(e) => updateDriverDetail(driver.driverId, 'stops', e.target.value)}
+                          className="w-16"
+                        />
+                      </TableCell>
+                      <TableCell>
+                        <Input 
+                          type="number" 
+                          value={driver.points} 
+                          min={0}
+                          onChange={(e) => updateDriverDetail(driver.driverId, 'points', e.target.value)}
+                          className="w-16"
+                        />
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+            
+            <SheetFooter className="mt-6">
+              <Button variant="outline" onClick={closeEditGrid} className="mr-2">
+                Cancel
+              </Button>
+              <Button onClick={saveRaceDetails}>
+                Save Grid
+              </Button>
+            </SheetFooter>
+          </SheetContent>
+        </Sheet>
 
         {/* Add/Edit Race Sheet */}
         <Sheet open={isAddRaceOpen} onOpenChange={setIsAddRaceOpen}>
