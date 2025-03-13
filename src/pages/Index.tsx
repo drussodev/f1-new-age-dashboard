@@ -12,11 +12,11 @@ const Index = () => {
   return (
     <Layout>
       <div className="bg-f1-red bg-opacity-5 py-16 relative">
-        {/* Portugal F1 Track Wallpaper */}
+        {/* F1 Race Start Wallpaper */}
         <div 
-          className="absolute inset-0 bg-cover bg-center bg-no-repeat opacity-10 pointer-events-none z-0" 
+          className="absolute inset-0 bg-cover bg-center bg-no-repeat opacity-20 pointer-events-none z-0" 
           style={{ 
-            backgroundImage: "url('https://images.unsplash.com/photo-1591979353528-1788c8a94425?q=80&w=2000')",
+            backgroundImage: "url('/lovable-uploads/ddd39ce8-2c26-4d8b-a75d-b576000d2296.png')",
           }}
           id="f1-wallpaper"
         ></div>
