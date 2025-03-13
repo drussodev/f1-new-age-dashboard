@@ -3,22 +3,19 @@ import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { useAuth } from '../context/AuthContext';
 import { toast } from 'sonner';
-import { F1DataProvider } from '../context/F1DataContext';
 
 const MaintenancePage: React.FC = () => {
   const [password, setPassword] = useState('');
   const [isAuthorized, setIsAuthorized] = useState(false);
-  const { isAuthenticated } = useAuth();
-
+  
   // Check if user was previously authorized
   useEffect(() => {
     const authorized = localStorage.getItem('maintenance_authorized');
-    if (authorized === 'true' || isAuthenticated) {
+    if (authorized === 'true') {
       setIsAuthorized(true);
     }
-  }, [isAuthenticated]);
+  }, []);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -27,6 +24,9 @@ const MaintenancePage: React.FC = () => {
       localStorage.setItem('maintenance_authorized', 'true');
       setIsAuthorized(true);
       toast.success('Access granted!');
+      
+      // Reload the page to render the full app
+      window.location.reload();
     } else {
       toast.error('Incorrect password');
     }
