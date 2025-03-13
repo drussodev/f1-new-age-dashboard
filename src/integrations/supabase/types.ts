@@ -9,7 +9,203 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      [_ in never]: never
+      config: {
+        Row: {
+          created_at: string
+          id: string
+          season: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          season?: string
+          title?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          season?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      drivers: {
+        Row: {
+          color: string
+          country: string
+          created_at: string
+          id: string
+          image_url: string | null
+          name: string
+          points: number
+          team: string
+          updated_at: string
+        }
+        Insert: {
+          color: string
+          country: string
+          created_at?: string
+          id?: string
+          image_url?: string | null
+          name: string
+          points?: number
+          team: string
+          updated_at?: string
+        }
+        Update: {
+          color?: string
+          country?: string
+          created_at?: string
+          id?: string
+          image_url?: string | null
+          name?: string
+          points?: number
+          team?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      news: {
+        Row: {
+          content: string
+          created_at: string
+          date: string
+          featured: boolean
+          id: string
+          image_url: string | null
+          title: string
+          updated_at: string
+          video_url: string | null
+        }
+        Insert: {
+          content: string
+          created_at?: string
+          date: string
+          featured?: boolean
+          id?: string
+          image_url?: string | null
+          title: string
+          updated_at?: string
+          video_url?: string | null
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          date?: string
+          featured?: boolean
+          id?: string
+          image_url?: string | null
+          title?: string
+          updated_at?: string
+          video_url?: string | null
+        }
+        Relationships: []
+      }
+      races: {
+        Row: {
+          circuit: string
+          completed: boolean
+          created_at: string
+          date: string
+          id: string
+          location: string
+          name: string
+          updated_at: string
+          winner: string | null
+        }
+        Insert: {
+          circuit: string
+          completed?: boolean
+          created_at?: string
+          date: string
+          id?: string
+          location: string
+          name: string
+          updated_at?: string
+          winner?: string | null
+        }
+        Update: {
+          circuit?: string
+          completed?: boolean
+          created_at?: string
+          date?: string
+          id?: string
+          location?: string
+          name?: string
+          updated_at?: string
+          winner?: string | null
+        }
+        Relationships: []
+      }
+      streamers: {
+        Row: {
+          config_id: string
+          created_at: string
+          display_name: string | null
+          id: string
+          updated_at: string
+          username: string
+        }
+        Insert: {
+          config_id: string
+          created_at?: string
+          display_name?: string | null
+          id?: string
+          updated_at?: string
+          username: string
+        }
+        Update: {
+          config_id?: string
+          created_at?: string
+          display_name?: string | null
+          id?: string
+          updated_at?: string
+          username?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "streamers_config_id_fkey"
+            columns: ["config_id"]
+            isOneToOne: false
+            referencedRelation: "config"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      teams: {
+        Row: {
+          color: string
+          created_at: string
+          id: string
+          logo_url: string | null
+          name: string
+          points: number
+          updated_at: string
+        }
+        Insert: {
+          color: string
+          created_at?: string
+          id?: string
+          logo_url?: string | null
+          name: string
+          points?: number
+          updated_at?: string
+        }
+        Update: {
+          color?: string
+          created_at?: string
+          id?: string
+          logo_url?: string | null
+          name?: string
+          points?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
