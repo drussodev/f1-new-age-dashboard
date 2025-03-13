@@ -64,6 +64,7 @@ interface F1DataContextType {
   sortedTeams: Team[];
   upcomingRaces: Race[];
   completedRaces: Race[];
+  updateDriverPoints: (driverId: string, points: number) => void;
 }
 
 const defaultDrivers: Driver[] = [
@@ -171,6 +172,33 @@ export const F1DataProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     localStorage.setItem('f1-news', JSON.stringify(news));
   }, [news]);
 
+  useEffect(() => {
+    const teamPointsMap = new Map<string, number>();
+    
+    drivers.forEach(driver => {
+      const teamName = driver.team;
+      const currentPoints = teamPointsMap.get(teamName) || 0;
+      teamPointsMap.set(teamName, currentPoints + driver.points);
+    });
+    
+    if (teamPointsMap.size > 0) {
+      setTeams(prevTeams => 
+        prevTeams.map(team => ({
+          ...team,
+          points: teamPointsMap.get(team.name) || 0
+        }))
+      );
+    }
+  }, [drivers]);
+
+  const updateDriverPoints = (driverId: string, points: number) => {
+    setDrivers(prevDrivers => 
+      prevDrivers.map(driver => 
+        driver.id === driverId ? { ...driver, points } : driver
+      )
+    );
+  };
+
   const sortedDrivers = [...drivers].sort((a, b) => b.points - a.points);
   const sortedTeams = [...teams].sort((a, b) => b.points - a.points);
   
@@ -192,7 +220,8 @@ export const F1DataProvider: React.FC<{ children: React.ReactNode }> = ({ childr
       sortedDrivers,
       sortedTeams,
       upcomingRaces,
-      completedRaces
+      completedRaces,
+      updateDriverPoints
     }}>
       {children}
     </F1DataContext.Provider>

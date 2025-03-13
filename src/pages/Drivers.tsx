@@ -17,7 +17,7 @@ import {
 } from "@/components/ui/select";
 
 const Drivers = () => {
-  const { drivers, setDrivers, teams } = useF1Data();
+  const { drivers, setDrivers, teams, updateDriverPoints } = useF1Data();
   const { isAdmin } = useAuth();
   const [expandedDriverId, setExpandedDriverId] = useState<string | null>(null);
   const [editingDriverId, setEditingDriverId] = useState<string | null>(null);
@@ -82,9 +82,14 @@ const Drivers = () => {
   };
 
   const saveDriverChanges = (driverId: string) => {
+    // Update driver info
     setDrivers(drivers.map(driver => 
       driver.id === driverId ? { ...driver, ...editFormData } : driver
     ));
+    
+    // Update team points automatically
+    updateDriverPoints(driverId, editFormData.points);
+    
     setEditingDriverId(null);
     toast.success("Driver information updated successfully");
   };
