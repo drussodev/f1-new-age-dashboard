@@ -1,5 +1,4 @@
-
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Layout } from '../components/layout/Layout';
 import { useF1Data } from '../context/F1DataContext';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -17,8 +16,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { sendWebhookNotification } from '@/utils/webhook';
 import { Form, FormControl, FormField, FormItem, FormLabel } from '@/components/ui/form';
 import { useForm } from 'react-hook-form';
+import RacePreparationPopup from '@/components/calendar/RacePreparationPopup';
 
-// Interfaces for race details
 interface RaceDriver {
   driverId: string;
   driverName: string;
@@ -33,16 +32,15 @@ interface RaceDetails {
   grid: RaceDriver[];
 }
 
-// Interface for Race with string date type
 interface Race {
   id: string;
   name: string;
   circuit: string;
-  date: string; // This is a string in the F1DataContext
+  date: string;
   location: string;
   completed: boolean;
   winner?: string;
-  details?: RaceDetails; // Now storing race details with the race
+  details?: RaceDetails;
 }
 
 const CalendarPage = () => {
@@ -51,6 +49,7 @@ const CalendarPage = () => {
   const [isRaceDetailsOpen, setIsRaceDetailsOpen] = useState(false);
   const [isAddRaceOpen, setIsAddRaceOpen] = useState(false);
   const [isEditGridOpen, setIsEditGridOpen] = useState(false);
+  const [isPreparationPopupOpen, setIsPreparationPopupOpen] = useState(false);
   const [raceDetails, setRaceDetails] = useState<RaceDetails>({
     grid: []
   });
@@ -65,21 +64,22 @@ const CalendarPage = () => {
   });
   const [editMode, setEditMode] = useState(false);
 
-  // Sort races by date
   const sortedRaces = [...races].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
 
-  // Separate upcoming and completed races
   const upcomingRaces = sortedRaces.filter(race => !race.completed);
   const completedRaces = sortedRaces.filter(race => race.completed);
 
   const handleRaceClick = (race: any) => {
     setSelectedRace(race);
     
-    // If the race has stored details, use them
+    if (!race.completed) {
+      setIsPreparationPopupOpen(true);
+      return;
+    }
+    
     if (race.details) {
       setRaceDetails(race.details);
     } else {
-      // Generate mock race details if none exist
       const mockDetails: RaceDetails = {
         grid: drivers.slice(0, 10).map((driver, index) => ({
           driverId: driver.id,
@@ -100,6 +100,29 @@ const CalendarPage = () => {
   const closeRaceDetails = () => {
     setIsRaceDetailsOpen(false);
     setSelectedRace(null);
+  };
+
+  const closePreparationPopup = () => {
+    setIsPreparationPopupOpen(false);
+    if (selectedRace && !selectedRace.completed) {
+      if (selectedRace.details) {
+        setRaceDetails(selectedRace.details);
+      } else {
+        const mockDetails: RaceDetails = {
+          grid: drivers.slice(0, 10).map((driver, index) => ({
+            driverId: driver.id,
+            driverName: driver.name,
+            position: index + 1,
+            bestLapTime: `1:${Math.floor(Math.random() * 10) + 30}:${Math.floor(Math.random() * 60)}`,
+            totalTime: `${Math.floor(Math.random() * 2) + 1}:${Math.floor(Math.random() * 60)}:${Math.floor(Math.random() * 60)}`,
+            points: 0,
+            stops: Math.floor(Math.random() * 3) + 1
+          }))
+        };
+        setRaceDetails(mockDetails);
+      }
+      setIsRaceDetailsOpen(true);
+    }
   };
 
   const openAddRaceForm = () => {
@@ -161,11 +184,10 @@ const CalendarPage = () => {
   };
 
   const handleAddOrUpdateRace = () => {
-    // Convert the Date object to an ISO string for storage
     const raceToSave = {
       ...newRace,
-      date: newRace.date.toISOString(), // Convert Date to string
-      details: selectedRace?.details // Keep race details if editing
+      date: newRace.date.toISOString(),
+      details: selectedRace?.details
     };
 
     if (editMode) {
@@ -174,7 +196,7 @@ const CalendarPage = () => {
       );
       sendWebhookNotification(
         "Race Updated",
-        "admin", // You would get this from your auth context
+        "admin",
         {
           action: "Updated race",
           race: newRace.name,
@@ -187,7 +209,7 @@ const CalendarPage = () => {
       setRaces(prevRaces => [...prevRaces, raceToSave as Race]);
       sendWebhookNotification(
         "Race Added",
-        "admin", // You would get this from your auth context
+        "admin",
         {
           action: "Added new race",
           race: newRace.name,
@@ -208,7 +230,6 @@ const CalendarPage = () => {
     setIsEditGridOpen(false);
   };
 
-  // Updates a specific driver's details in the grid
   const updateDriverDetail = (driverId: string, field: keyof RaceDriver, value: any) => {
     setRaceDetails(prev => {
       const updatedGrid = prev.grid.map(driver => 
@@ -220,15 +241,12 @@ const CalendarPage = () => {
     });
   };
 
-  // Save race details and update the race
   const saveRaceDetails = () => {
     if (!selectedRace) return;
 
-    // Sort grid by position
     const sortedGrid = [...raceDetails.grid].sort((a, b) => a.position - b.position);
     const updatedDetails = { ...raceDetails, grid: sortedGrid };
 
-    // Update the race with the new details
     const updatedRace = {
       ...selectedRace,
       details: updatedDetails
@@ -268,7 +286,6 @@ const CalendarPage = () => {
           </Button>
         </div>
 
-        {/* Upcoming Races */}
         {upcomingRaces.length > 0 && (
           <div className="mb-8">
             <h2 className="text-2xl font-semibold mb-4">Upcoming Races</h2>
@@ -293,7 +310,6 @@ const CalendarPage = () => {
           </div>
         )}
 
-        {/* Completed Races */}
         {completedRaces.length > 0 && (
           <div>
             <h2 className="text-2xl font-semibold mb-4">Completed Races</h2>
@@ -319,7 +335,6 @@ const CalendarPage = () => {
           </div>
         )}
 
-        {/* Message if no races are available */}
         {races.length === 0 && (
           <div className="text-center py-12">
             <CalendarIcon className="w-12 h-12 mx-auto mb-4 text-gray-400" />
@@ -327,7 +342,16 @@ const CalendarPage = () => {
           </div>
         )}
 
-        {/* Race Details Dialog */}
+        {selectedRace && (
+          <RacePreparationPopup
+            isOpen={isPreparationPopupOpen}
+            onClose={closePreparationPopup}
+            raceName={selectedRace.name}
+            raceDate={selectedRace.date}
+            circuit={selectedRace.circuit}
+          />
+        )}
+
         <Dialog open={isRaceDetailsOpen} onOpenChange={setIsRaceDetailsOpen}>
           <DialogContent className="sm:max-w-[800px]">
             {selectedRace && (
@@ -396,7 +420,6 @@ const CalendarPage = () => {
           </DialogContent>
         </Dialog>
 
-        {/* Edit Grid Sheet */}
         <Sheet open={isEditGridOpen} onOpenChange={setIsEditGridOpen}>
           <SheetContent className="sm:max-w-[600px] overflow-y-auto">
             <SheetHeader>
@@ -484,7 +507,6 @@ const CalendarPage = () => {
           </SheetContent>
         </Sheet>
 
-        {/* Add/Edit Race Sheet */}
         <Sheet open={isAddRaceOpen} onOpenChange={setIsAddRaceOpen}>
           <SheetContent className="sm:max-w-[500px]">
             <SheetHeader>
