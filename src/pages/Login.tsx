@@ -6,12 +6,14 @@ import { Layout } from '../components/layout/Layout';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { LockKeyhole } from 'lucide-react';
+import { LockKeyhole, AlertCircle } from 'lucide-react';
+import { toast } from 'sonner';
 
 const Login = () => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const { login, isAuthenticated, isRoot } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
@@ -29,11 +31,19 @@ const Login = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
+    setError(null);
+    
     try {
       const success = await login(username, password);
       if (success) {
+        toast.success("Login successful!");
         navigate(from, { replace: true });
+      } else {
+        setError("Login failed. Please check your credentials.");
       }
+    } catch (err) {
+      console.error("Login error:", err);
+      setError("An unexpected error occurred. Please try again.");
     } finally {
       setIsLoading(false);
     }
@@ -57,6 +67,12 @@ const Login = () => {
             </CardDescription>
           </CardHeader>
           <CardContent>
+            {error && (
+              <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded mb-4 flex items-start">
+                <AlertCircle className="h-5 w-5 mr-2 mt-0.5 flex-shrink-0" />
+                <span>{error}</span>
+              </div>
+            )}
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="space-y-2">
                 <label htmlFor="username" className="text-sm font-medium">Username</label>

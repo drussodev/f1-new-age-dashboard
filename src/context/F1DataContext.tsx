@@ -2,6 +2,7 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { useAuth } from './AuthContext';
 
 interface Driver {
   id: string;
@@ -69,6 +70,7 @@ interface F1DataContextType {
   completedRaces: Race[];
   updateDriverPoints: (driverId: string, points: number) => void;
   loading: boolean;
+  refreshData: () => Promise<void>;
 }
 
 const defaultConfig: Config = {
@@ -89,9 +91,11 @@ export const F1DataProvider: React.FC<{ children: React.ReactNode }> = ({ childr
   const [config, setConfig] = useState<Config>(defaultConfig);
   const [news, setNews] = useState<News[]>([]);
   const [loading, setLoading] = useState(true);
+  const { isAuthenticated } = useAuth();
 
   // Function to fetch all data from Supabase
   const fetchAllData = async () => {
+    console.log("Fetching all data from Supabase...");
     setLoading(true);
     try {
       // Fetch drivers
@@ -112,6 +116,7 @@ export const F1DataProvider: React.FC<{ children: React.ReactNode }> = ({ childr
         image: driver.image_url
       }));
       setDrivers(mappedDrivers);
+      console.log("Fetched drivers:", mappedDrivers.length);
 
       // Fetch teams
       const { data: teamsData, error: teamsError } = await supabase
@@ -128,6 +133,7 @@ export const F1DataProvider: React.FC<{ children: React.ReactNode }> = ({ childr
         logo: team.logo_url
       }));
       setTeams(mappedTeams);
+      console.log("Fetched teams:", mappedTeams.length);
 
       // Fetch races
       const { data: racesData, error: racesError } = await supabase
@@ -146,6 +152,7 @@ export const F1DataProvider: React.FC<{ children: React.ReactNode }> = ({ childr
         winner: race.winner
       }));
       setRaces(mappedRaces);
+      console.log("Fetched races:", mappedRaces.length);
 
       // Fetch config and streamers
       const { data: configData, error: configError } = await supabase
@@ -156,12 +163,16 @@ export const F1DataProvider: React.FC<{ children: React.ReactNode }> = ({ childr
       if (configError && configError.code !== 'PGRST116') throw configError;
 
       // Fetch streamers related to config
-      const { data: streamersData, error: streamersError } = await supabase
-        .from('streamers')
-        .select('*')
-        .eq('config_id', configData?.id);
+      let streamersData = [];
+      if (configData?.id) {
+        const { data: fetchedStreamers, error: streamersError } = await supabase
+          .from('streamers')
+          .select('*')
+          .eq('config_id', configData.id);
 
-      if (streamersError) throw streamersError;
+        if (streamersError) throw streamersError;
+        streamersData = fetchedStreamers;
+      }
       
       const mappedStreamers = streamersData.map(streamer => ({
         username: streamer.username,
@@ -173,6 +184,7 @@ export const F1DataProvider: React.FC<{ children: React.ReactNode }> = ({ childr
         season: configData?.season || defaultConfig.season,
         streamers: mappedStreamers.length > 0 ? mappedStreamers : defaultConfig.streamers
       });
+      console.log("Fetched config and streamers");
 
       // Fetch news
       const { data: newsData, error: newsError } = await supabase
@@ -191,32 +203,97 @@ export const F1DataProvider: React.FC<{ children: React.ReactNode }> = ({ childr
         featured: item.featured
       }));
       setNews(mappedNews);
+      console.log("Fetched news:", mappedNews.length);
 
     } catch (error) {
       console.error('Error fetching data from Supabase:', error);
-      toast.error('Failed to load data from the database. Using default data instead.');
-      
-      // If there's an error, load data from localStorage as fallback
-      const savedDrivers = localStorage.getItem('f1-drivers');
-      const savedTeams = localStorage.getItem('f1-teams');
-      const savedRaces = localStorage.getItem('f1-races');
-      const savedConfig = localStorage.getItem('f1-config');
-      const savedNews = localStorage.getItem('f1-news');
-      
-      if (savedDrivers) setDrivers(JSON.parse(savedDrivers));
-      if (savedTeams) setTeams(JSON.parse(savedTeams));
-      if (savedRaces) setRaces(JSON.parse(savedRaces));
-      if (savedConfig) setConfig(JSON.parse(savedConfig));
-      if (savedNews) setNews(JSON.parse(savedNews));
+      toast.error('Failed to load data from the database.');
     } finally {
       setLoading(false);
     }
   };
 
-  // Initial data load from Supabase
+  // Set up Supabase realtime subscriptions for data updates
   useEffect(() => {
-    fetchAllData();
-  }, []);
+    if (!isAuthenticated) return;
+    
+    console.log("Setting up Supabase realtime subscriptions...");
+    
+    const driversChannel = supabase
+      .channel('drivers-changes')
+      .on('postgres_changes', { 
+        event: '*', 
+        schema: 'public', 
+        table: 'drivers' 
+      }, () => {
+        console.log("Drivers changed, refreshing data...");
+        fetchAllData();
+      })
+      .subscribe();
+      
+    const teamsChannel = supabase
+      .channel('teams-changes')
+      .on('postgres_changes', { 
+        event: '*', 
+        schema: 'public', 
+        table: 'teams' 
+      }, () => {
+        console.log("Teams changed, refreshing data...");
+        fetchAllData();
+      })
+      .subscribe();
+      
+    const racesChannel = supabase
+      .channel('races-changes')
+      .on('postgres_changes', { 
+        event: '*', 
+        schema: 'public', 
+        table: 'races' 
+      }, () => {
+        console.log("Races changed, refreshing data...");
+        fetchAllData();
+      })
+      .subscribe();
+      
+    const newsChannel = supabase
+      .channel('news-changes')
+      .on('postgres_changes', { 
+        event: '*', 
+        schema: 'public', 
+        table: 'news' 
+      }, () => {
+        console.log("News changed, refreshing data...");
+        fetchAllData();
+      })
+      .subscribe();
+      
+    const configChannel = supabase
+      .channel('config-changes')
+      .on('postgres_changes', { 
+        event: '*', 
+        schema: 'public', 
+        table: 'config' 
+      }, () => {
+        console.log("Config changed, refreshing data...");
+        fetchAllData();
+      })
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(driversChannel);
+      supabase.removeChannel(teamsChannel);
+      supabase.removeChannel(racesChannel);
+      supabase.removeChannel(newsChannel);
+      supabase.removeChannel(configChannel);
+    };
+  }, [isAuthenticated]);
+
+  // Initial data load when the component mounts or when authentication status changes
+  useEffect(() => {
+    if (isAuthenticated) {
+      fetchAllData();
+    }
+  }, [isAuthenticated]);
 
   // Update driver points in Supabase and local state
   const updateDriverPoints = async (driverId: string, points: number) => {
@@ -229,7 +306,7 @@ export const F1DataProvider: React.FC<{ children: React.ReactNode }> = ({ childr
       
       if (error) throw error;
       
-      // Update local state
+      // Update local state (this will be redundant with realtime subscriptions, but acts as a fallback)
       setDrivers(prevDrivers => 
         prevDrivers.map(driver => 
           driver.id === driverId ? { ...driver, points } : driver
@@ -243,44 +320,7 @@ export const F1DataProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     }
   };
 
-  // Calculate team points based on driver points
-  useEffect(() => {
-    const teamPointsMap = new Map<string, number>();
-    
-    drivers.forEach(driver => {
-      const teamName = driver.team;
-      const currentPoints = teamPointsMap.get(teamName) || 0;
-      teamPointsMap.set(teamName, currentPoints + driver.points);
-    });
-    
-    if (teamPointsMap.size > 0) {
-      // Update team points in local state
-      const updatedTeams = teams.map(team => ({
-        ...team,
-        points: teamPointsMap.get(team.name) || 0
-      }));
-      
-      setTeams(updatedTeams);
-      
-      // Update team points in Supabase (only if teams exist)
-      if (teams.length > 0) {
-        teams.forEach(async (team) => {
-          const newPoints = teamPointsMap.get(team.name) || 0;
-          if (newPoints !== team.points) {
-            try {
-              await supabase
-                .from('teams')
-                .update({ points: newPoints })
-                .eq('id', team.id);
-            } catch (error) {
-              console.error(`Error updating points for team ${team.name}:`, error);
-            }
-          }
-        });
-      }
-    }
-  }, [drivers]);
-
+  // Calculate derived state
   const sortedDrivers = [...drivers].sort((a, b) => b.points - a.points);
   const sortedTeams = [...teams].sort((a, b) => b.points - a.points);
   
@@ -291,6 +331,13 @@ export const F1DataProvider: React.FC<{ children: React.ReactNode }> = ({ childr
   const completedRaces = [...races]
     .filter(race => race.completed)
     .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+
+  // Function to manually refresh data
+  const refreshData = async () => {
+    console.log("Manually refreshing data...");
+    await fetchAllData();
+    toast.success("Data refreshed successfully");
+  };
 
   return (
     <F1DataContext.Provider value={{
@@ -304,7 +351,8 @@ export const F1DataProvider: React.FC<{ children: React.ReactNode }> = ({ childr
       upcomingRaces,
       completedRaces,
       updateDriverPoints,
-      loading
+      loading,
+      refreshData
     }}>
       {children}
     </F1DataContext.Provider>
