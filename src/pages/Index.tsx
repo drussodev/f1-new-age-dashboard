@@ -16,14 +16,14 @@ const Index = () => {
         <div 
           className="absolute inset-0 bg-cover bg-center bg-no-repeat opacity-70 pointer-events-none z-0" 
           style={{ 
-            backgroundImage: "url('https://www.shutterstock.com/image-illustration/fast-ride-on-racing-track-600nw-2486053041.jpg')",
+            backgroundImage: "url('https://i.imgur.com/GMmxc6E.png')",
           }}
           id="f1-wallpaper"
         ></div>
         
         <div className="container mx-auto text-center px-4 relative z-10">
           <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">F1 New Age Tournament</h1>
-          <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+          <p className="text-xl text-gray-800 max-w-3xl mx-auto font-medium">
             Follow the latest standings, driver profiles, and race calendar for the F1 New Age Tournament
           </p>
         </div>
