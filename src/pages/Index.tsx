@@ -14,7 +14,7 @@ const Index = () => {
       <div className="bg-gray-100 py-16 relative">
         {/* F1 Race Start Wallpaper */}
         <div 
-          className="absolute inset-0 bg-cover bg-center bg-no-repeat opacity-0 pointer-events-none z-0" 
+          className="absolute inset-0 bg-cover bg-center bg-no-repeat opacity-70 pointer-events-none z-0" 
           style={{ 
             backgroundImage: "url('/lovable-uploads/ddd39ce8-2c26-4d8b-a75d-b576000d2296.png')",
           }}
