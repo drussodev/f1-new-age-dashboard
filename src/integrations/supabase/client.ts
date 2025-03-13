@@ -14,10 +14,19 @@ export const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABL
     persistSession: true,
     autoRefreshToken: true,
     detectSessionInUrl: true,
+    storageKey: 'f1-tournament-auth-token',
   },
   realtime: {
     params: {
       eventsPerSecond: 10,
+    },
+  },
+  db: {
+    schema: 'public',
+  },
+  global: {
+    headers: {
+      'X-Client-Info': 'f1-tournament-app',
     },
   },
 });

@@ -91,17 +91,22 @@ export const F1DataProvider: React.FC<{ children: React.ReactNode }> = ({ childr
   const [config, setConfig] = useState<Config>(defaultConfig);
   const [news, setNews] = useState<News[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
   const { isAuthenticated } = useAuth();
 
   // Function to fetch all data from Supabase
   const fetchAllData = async () => {
     console.log("Fetching all data from Supabase...");
     setLoading(true);
+    setError(null);
+    
     try {
       // Fetch drivers
       const { data: driversData, error: driversError } = await supabase
         .from('drivers')
-        .select('*');
+        .select('*')
+        .order('points', { ascending: false });
 
       if (driversError) throw driversError;
       
@@ -121,7 +126,8 @@ export const F1DataProvider: React.FC<{ children: React.ReactNode }> = ({ childr
       // Fetch teams
       const { data: teamsData, error: teamsError } = await supabase
         .from('teams')
-        .select('*');
+        .select('*')
+        .order('points', { ascending: false });
 
       if (teamsError) throw teamsError;
       
@@ -138,7 +144,8 @@ export const F1DataProvider: React.FC<{ children: React.ReactNode }> = ({ childr
       // Fetch races
       const { data: racesData, error: racesError } = await supabase
         .from('races')
-        .select('*');
+        .select('*')
+        .order('date', { ascending: true });
 
       if (racesError) throw racesError;
       
@@ -189,7 +196,8 @@ export const F1DataProvider: React.FC<{ children: React.ReactNode }> = ({ childr
       // Fetch news
       const { data: newsData, error: newsError } = await supabase
         .from('news')
-        .select('*');
+        .select('*')
+        .order('date', { ascending: false });
 
       if (newsError) throw newsError;
       
@@ -204,9 +212,13 @@ export const F1DataProvider: React.FC<{ children: React.ReactNode }> = ({ childr
       }));
       setNews(mappedNews);
       console.log("Fetched news:", mappedNews.length);
+      
+      // Update last fetched timestamp
+      setLastUpdated(new Date());
 
     } catch (error) {
       console.error('Error fetching data from Supabase:', error);
+      setError('Failed to load data from the database.');
       toast.error('Failed to load data from the database.');
     } finally {
       setLoading(false);
@@ -219,73 +231,88 @@ export const F1DataProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     
     console.log("Setting up Supabase realtime subscriptions...");
     
-    const driversChannel = supabase
-      .channel('drivers-changes')
-      .on('postgres_changes', { 
-        event: '*', 
-        schema: 'public', 
-        table: 'drivers' 
-      }, () => {
-        console.log("Drivers changed, refreshing data...");
-        fetchAllData();
-      })
-      .subscribe();
-      
-    const teamsChannel = supabase
-      .channel('teams-changes')
-      .on('postgres_changes', { 
-        event: '*', 
-        schema: 'public', 
-        table: 'teams' 
-      }, () => {
-        console.log("Teams changed, refreshing data...");
-        fetchAllData();
-      })
-      .subscribe();
-      
-    const racesChannel = supabase
-      .channel('races-changes')
-      .on('postgres_changes', { 
-        event: '*', 
-        schema: 'public', 
-        table: 'races' 
-      }, () => {
-        console.log("Races changed, refreshing data...");
-        fetchAllData();
-      })
-      .subscribe();
-      
-    const newsChannel = supabase
-      .channel('news-changes')
-      .on('postgres_changes', { 
-        event: '*', 
-        schema: 'public', 
-        table: 'news' 
-      }, () => {
-        console.log("News changed, refreshing data...");
-        fetchAllData();
-      })
-      .subscribe();
-      
-    const configChannel = supabase
-      .channel('config-changes')
-      .on('postgres_changes', { 
-        event: '*', 
-        schema: 'public', 
-        table: 'config' 
-      }, () => {
-        console.log("Config changed, refreshing data...");
-        fetchAllData();
-      })
-      .subscribe();
+    // Enable full replica identity for all tables
+    const setupRealtimeSubscriptions = async () => {
+      try {
+        // Set up channel for drivers table
+        const driversChannel = supabase
+          .channel('drivers-changes')
+          .on('postgres_changes', { 
+            event: '*', 
+            schema: 'public', 
+            table: 'drivers' 
+          }, () => {
+            console.log("Drivers changed, refreshing data...");
+            fetchAllData();
+          })
+          .subscribe();
+          
+        // Set up channel for teams table
+        const teamsChannel = supabase
+          .channel('teams-changes')
+          .on('postgres_changes', { 
+            event: '*', 
+            schema: 'public', 
+            table: 'teams' 
+          }, () => {
+            console.log("Teams changed, refreshing data...");
+            fetchAllData();
+          })
+          .subscribe();
+          
+        // Set up channel for races table
+        const racesChannel = supabase
+          .channel('races-changes')
+          .on('postgres_changes', { 
+            event: '*', 
+            schema: 'public', 
+            table: 'races' 
+          }, () => {
+            console.log("Races changed, refreshing data...");
+            fetchAllData();
+          })
+          .subscribe();
+          
+        // Set up channel for news table
+        const newsChannel = supabase
+          .channel('news-changes')
+          .on('postgres_changes', { 
+            event: '*', 
+            schema: 'public', 
+            table: 'news' 
+          }, () => {
+            console.log("News changed, refreshing data...");
+            fetchAllData();
+          })
+          .subscribe();
+          
+        // Set up channel for config table
+        const configChannel = supabase
+          .channel('config-changes')
+          .on('postgres_changes', { 
+            event: '*', 
+            schema: 'public', 
+            table: 'config' 
+          }, () => {
+            console.log("Config changed, refreshing data...");
+            fetchAllData();
+          })
+          .subscribe();
 
-    return () => {
-      supabase.removeChannel(driversChannel);
-      supabase.removeChannel(teamsChannel);
-      supabase.removeChannel(racesChannel);
-      supabase.removeChannel(newsChannel);
-      supabase.removeChannel(configChannel);
+        return () => {
+          supabase.removeChannel(driversChannel);
+          supabase.removeChannel(teamsChannel);
+          supabase.removeChannel(racesChannel);
+          supabase.removeChannel(newsChannel);
+          supabase.removeChannel(configChannel);
+        };
+      } catch (error) {
+        console.error("Error setting up realtime subscriptions:", error);
+        toast.error("Failed to set up realtime updates");
+      }
     };
+
+    setupRealtimeSubscriptions();
   }, [isAuthenticated]);
 
   // Initial data load when the component mounts or when authentication status changes
@@ -305,6 +332,25 @@ export const F1DataProvider: React.FC<{ children: React.ReactNode }> = ({ childr
         .eq('id', driverId);
       
       if (error) throw error;
+      
+      // Also update the team points
+      const driver = drivers.find(d => d.id === driverId);
+      if (driver) {
+        const team = teams.find(t => t.name === driver.team);
+        if (team) {
+          // Calculate new team points by summing all drivers from that team
+          const teamDrivers = drivers.filter(d => d.team === team.name && d.id !== driverId);
+          const newTeamPoints = teamDrivers.reduce((sum, d) => sum + d.points, points);
+          
+          // Update team points in Supabase
+          const { error: teamError } = await supabase
+            .from('teams')
+            .update({ points: newTeamPoints })
+            .eq('id', team.id);
+            
+          if (teamError) throw teamError;
+        }
+      }
       
       // Update local state (this will be redundant with realtime subscriptions, but acts as a fallback)
       setDrivers(prevDrivers => 
@@ -354,7 +400,19 @@ export const F1DataProvider: React.FC<{ children: React.ReactNode }> = ({ childr
       loading,
       refreshData
     }}>
-      {children}
+      {error ? (
+        <div className="p-4 bg-red-50 border border-red-200 rounded-md m-4">
+          <p className="text-red-700">{error}</p>
+          <button 
+            onClick={refreshData}
+            className="mt-2 px-4 py-2 bg-red-100 text-red-700 rounded-md hover:bg-red-200"
+          >
+            Retry
+          </button>
+        </div>
+      ) : (
+        children
+      )}
     </F1DataContext.Provider>
   );
 };
