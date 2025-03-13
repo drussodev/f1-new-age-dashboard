@@ -27,4 +27,7 @@ if (cachedVersion && cachedVersion !== appVersion.toString()) {
 // Store current version
 localStorage.setItem('app_version', appVersion.toString());
 
+// Set to true to enable maintenance mode, false to disable
+window.MAINTENANCE_MODE = true;
+
 createRoot(document.getElementById("root")!).render(<App />);
