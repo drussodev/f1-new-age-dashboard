@@ -2,6 +2,7 @@
 import React from 'react';
 import { Navbar } from './Navbar';
 import { useLocation } from 'react-router-dom';
+import { Helmet } from 'react-helmet';
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -13,6 +14,12 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
+      <Helmet>
+        <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+        <meta http-equiv="Pragma" content="no-cache" />
+        <meta http-equiv="Expires" content="0" />
+      </Helmet>
+      
       <div className="absolute top-0 left-0 w-full h-1 bg-f1-red"></div>
       <div className="absolute top-0 right-0 w-1 h-full bg-f1-red"></div>
 
