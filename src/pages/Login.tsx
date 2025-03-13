@@ -11,6 +11,7 @@ import { LockKeyhole } from 'lucide-react';
 const Login = () => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
   const { login, isAuthenticated, isRoot } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
@@ -25,11 +26,16 @@ const Login = () => {
     }
   }, [isAuthenticated, navigate, from]);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const success = login(username, password);
-    if (success) {
-      navigate(from, { replace: true });
+    setIsLoading(true);
+    try {
+      const success = await login(username, password);
+      if (success) {
+        navigate(from, { replace: true });
+      }
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -61,6 +67,7 @@ const Login = () => {
                   onChange={(e) => setUsername(e.target.value)}
                   placeholder="Enter your username"
                   required
+                  disabled={isLoading}
                 />
               </div>
               <div className="space-y-2">
@@ -72,10 +79,18 @@ const Login = () => {
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="Enter your password"
                   required
+                  disabled={isLoading}
                 />
               </div>
-              <Button type="submit" className="w-full">
-                Sign In
+              <Button type="submit" className="w-full" disabled={isLoading}>
+                {isLoading ? (
+                  <span className="flex items-center">
+                    <span className="animate-spin mr-2 h-4 w-4 border-2 border-white border-r-transparent rounded-full"></span>
+                    Signing In...
+                  </span>
+                ) : (
+                  'Sign In'
+                )}
               </Button>
               {isRoot && (
                 <div className="text-center mt-4">

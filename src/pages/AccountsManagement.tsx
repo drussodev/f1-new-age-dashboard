@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { Layout } from '../components/layout/Layout';
@@ -6,55 +7,75 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { LockKeyhole, UserPlus, Trash2, Shield } from 'lucide-react';
 import { sendWebhookNotification } from '../utils/webhook';
+import { toast } from 'sonner';
 
 const AccountsManagement = () => {
   const { accounts, addAccount, removeAccount, user } = useAuth();
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [role, setRole] = useState<'admin' | 'user' | 'root'>('user');
+  const [isLoading, setIsLoading] = useState(false);
+  const [isRemoving, setIsRemoving] = useState<string | null>(null);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (username && password) {
-      const success = addAccount({ username, password, role });
-      
-      if (success && user) {
-        sendWebhookNotification(
-          "Account Created", 
-          user.username, 
-          { 
-            action: "Created new account via management page",
-            newUsername: username,
-            role: role
-          }
-        );
+      setIsLoading(true);
+      try {
+        const success = await addAccount({ username, password, role });
+        
+        if (success && user) {
+          sendWebhookNotification(
+            "Account Created", 
+            user.username, 
+            { 
+              action: "Created new account via management page",
+              newUsername: username,
+              role: role
+            }
+          );
+          
+          setUsername('');
+          setPassword('');
+          setRole('user');
+        }
+      } catch (error) {
+        console.error("Error adding account:", error);
+        toast.error("Failed to add account");
+      } finally {
+        setIsLoading(false);
       }
-      
-      setUsername('');
-      setPassword('');
-      setRole('user');
     }
   };
 
-  const handleRemoveAccount = (username: string) => {
+  const handleRemoveAccount = async (username: string) => {
     if (user?.username === username) {
       return;
     }
     
     const accountToRemove = accounts.find(acc => acc.username === username);
+    if (!accountToRemove) return;
     
-    const success = removeAccount(username);
-    
-    if (success && user && accountToRemove) {
-      sendWebhookNotification(
-        "Account Removed", 
-        user.username, 
-        { 
-          action: "Removed account via management page",
-          removedUsername: username,
-          removedRole: accountToRemove.role
-        }
-      );
+    setIsRemoving(username);
+    try {
+      const success = await removeAccount(username);
+      
+      if (success && user) {
+        sendWebhookNotification(
+          "Account Removed", 
+          user.username, 
+          { 
+            action: "Removed account via management page",
+            removedUsername: username,
+            removedRole: accountToRemove.role
+          }
+        );
+      }
+    } catch (error) {
+      console.error("Error removing account:", error);
+      toast.error("Failed to remove account");
+    } finally {
+      setIsRemoving(null);
     }
   };
 
@@ -82,6 +103,7 @@ const AccountsManagement = () => {
                     onChange={(e) => setUsername(e.target.value)}
                     placeholder="Enter username"
                     required
+                    disabled={isLoading}
                   />
                 </div>
                 <div className="space-y-2">
@@ -93,6 +115,7 @@ const AccountsManagement = () => {
                     onChange={(e) => setPassword(e.target.value)}
                     placeholder="Enter password"
                     required
+                    disabled={isLoading}
                   />
                 </div>
                 <div className="space-y-2">
@@ -102,15 +125,25 @@ const AccountsManagement = () => {
                     value={role}
                     onChange={(e) => setRole(e.target.value as 'admin' | 'user' | 'root')}
                     className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                    disabled={isLoading}
                   >
                     <option value="user">User</option>
                     <option value="admin">Admin</option>
                     <option value="root">Root</option>
                   </select>
                 </div>
-                <Button type="submit" className="w-full">
-                  <UserPlus className="mr-2 h-4 w-4" />
-                  Add Account
+                <Button type="submit" className="w-full" disabled={isLoading}>
+                  {isLoading ? (
+                    <span className="flex items-center justify-center">
+                      <span className="animate-spin mr-2 h-4 w-4 border-2 border-white border-r-transparent rounded-full"></span>
+                      Adding Account...
+                    </span>
+                  ) : (
+                    <>
+                      <UserPlus className="mr-2 h-4 w-4" />
+                      Add Account
+                    </>
+                  )}
                 </Button>
               </form>
             </CardContent>
@@ -146,10 +179,14 @@ const AccountsManagement = () => {
                       variant="destructive"
                       size="sm"
                       onClick={() => handleRemoveAccount(account.username)}
-                      disabled={user?.username === account.username}
+                      disabled={user?.username === account.username || isRemoving === account.username}
                       title={user?.username === account.username ? "Cannot remove your own account" : "Remove account"}
                     >
-                      <Trash2 className="h-4 w-4" />
+                      {isRemoving === account.username ? (
+                        <span className="animate-spin h-4 w-4 border-2 border-white border-r-transparent rounded-full"></span>
+                      ) : (
+                        <Trash2 className="h-4 w-4" />
+                      )}
                     </Button>
                   </div>
                 ))}
