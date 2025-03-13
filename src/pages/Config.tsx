@@ -27,6 +27,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
+import { sendWebhookNotification } from '../utils/webhook';
 
 const Config = () => {
   const { 
@@ -37,29 +38,38 @@ const Config = () => {
     news, setNews
   } = useF1Data();
   
-  const { isRoot } = useAuth();
+  const { isRoot, user } = useAuth();
 
-  // Title and season state
   const [title, setTitle] = useState(config.title);
   const [season, setSeason] = useState(config.season);
 
-  // New streamer state
   const [newStreamer, setNewStreamer] = useState('');
 
-  // Save general settings
   const saveGeneralSettings = () => {
     setConfig({
       ...config,
       title,
       season
     });
+    
+    if (user && (user.role === 'admin' || user.role === 'root')) {
+      sendWebhookNotification(
+        "Settings Updated", 
+        user.username, 
+        { 
+          action: "Updated general settings",
+          title,
+          season 
+        }
+      );
+    }
+    
     toast({
       title: "Settings saved",
       description: "Your general settings have been updated",
     });
   };
 
-  // Add new streamer
   const addStreamer = () => {
     if (!newStreamer.trim()) {
       toast({
@@ -70,7 +80,6 @@ const Config = () => {
       return;
     }
 
-    // Check if streamer already exists
     if (config.streamers.some(s => s.username.toLowerCase() === newStreamer.toLowerCase())) {
       toast({
         title: "Error",
@@ -90,6 +99,17 @@ const Config = () => {
       streamers: updatedStreamers
     });
 
+    if (user && (user.role === 'admin' || user.role === 'root')) {
+      sendWebhookNotification(
+        "Streamer Added", 
+        user.username, 
+        { 
+          action: "Added new streamer",
+          streamer: newStreamer.trim()
+        }
+      );
+    }
+
     setNewStreamer('');
     
     toast({
@@ -98,7 +118,6 @@ const Config = () => {
     });
   };
 
-  // Remove streamer
   const removeStreamer = (username: string) => {
     const updatedStreamers = config.streamers.filter(
       streamer => streamer.username !== username
@@ -109,13 +128,23 @@ const Config = () => {
       streamers: updatedStreamers
     });
 
+    if (user && (user.role === 'admin' || user.role === 'root')) {
+      sendWebhookNotification(
+        "Streamer Removed", 
+        user.username, 
+        { 
+          action: "Removed streamer",
+          streamer: username
+        }
+      );
+    }
+
     toast({
       title: "Streamer removed",
       description: `${username} has been removed from the streamers list`,
     });
   };
 
-  // Driver State
   const [driverName, setDriverName] = useState('');
   const [driverTeam, setDriverTeam] = useState('');
   const [driverCountry, setDriverCountry] = useState('');
@@ -123,11 +152,9 @@ const Config = () => {
   const [driverColor, setDriverColor] = useState('');
   const [selectedTeamName, setSelectedTeamName] = useState('');
 
-  // Handle team selection
   const handleTeamSelect = (teamId: string) => {
     setDriverTeam(teamId);
     
-    // Find the selected team and set its color
     const selectedTeam = teams.find(team => team.id === teamId);
     if (selectedTeam) {
       setDriverColor(selectedTeam.color);
@@ -155,6 +182,20 @@ const Config = () => {
     };
 
     setDrivers([...drivers, newDriver]);
+    
+    if (user && (user.role === 'admin' || user.role === 'root')) {
+      sendWebhookNotification(
+        "Driver Added", 
+        user.username, 
+        { 
+          action: "Added new driver",
+          driver: driverName,
+          team: selectedTeamName,
+          points: driverPoints
+        }
+      );
+    }
+    
     setDriverName('');
     setDriverTeam('');
     setSelectedTeamName('');
@@ -169,14 +210,28 @@ const Config = () => {
   };
 
   const removeDriver = (id: string) => {
+    const driverToRemove = drivers.find(d => d.id === id);
+    
     setDrivers(drivers.filter(driver => driver.id !== id));
+    
+    if (user && (user.role === 'admin' || user.role === 'root') && driverToRemove) {
+      sendWebhookNotification(
+        "Driver Removed", 
+        user.username, 
+        { 
+          action: "Removed driver",
+          driver: driverToRemove.name,
+          team: driverToRemove.team
+        }
+      );
+    }
+    
     toast({
       title: "Driver removed",
       description: `Driver has been removed from the drivers list`,
     });
   };
 
-  // Team State
   const [teamName, setTeamName] = useState('');
   const [teamColor, setTeamColor] = useState('');
   const [teamPoints, setTeamPoints] = useState('');
@@ -199,6 +254,20 @@ const Config = () => {
     };
 
     setTeams([...teams, newTeam]);
+    
+    if (user && (user.role === 'admin' || user.role === 'root')) {
+      sendWebhookNotification(
+        "Team Added", 
+        user.username, 
+        { 
+          action: "Added new team",
+          team: teamName,
+          color: teamColor,
+          points: teamPoints
+        }
+      );
+    }
+    
     setTeamName('');
     setTeamColor('');
     setTeamPoints('');
@@ -210,14 +279,27 @@ const Config = () => {
   };
 
   const removeTeam = (id: string) => {
+    const teamToRemove = teams.find(t => t.id === id);
+    
     setTeams(teams.filter(team => team.id !== id));
+    
+    if (user && (user.role === 'admin' || user.role === 'root') && teamToRemove) {
+      sendWebhookNotification(
+        "Team Removed", 
+        user.username, 
+        { 
+          action: "Removed team",
+          team: teamToRemove.name
+        }
+      );
+    }
+    
     toast({
       title: "Team removed",
       description: `Team has been removed from the teams list`,
     });
   };
 
-  // Race State
   const [raceName, setRaceName] = useState('');
   const [raceCircuit, setRaceCircuit] = useState('');
   const [raceDate, setRaceDate] = useState('');
@@ -246,6 +328,21 @@ const Config = () => {
     };
 
     setRaces([...races, newRace]);
+    
+    if (user && (user.role === 'admin' || user.role === 'root')) {
+      sendWebhookNotification(
+        "Race Added", 
+        user.username, 
+        { 
+          action: "Added new race",
+          race: raceName,
+          circuit: raceCircuit,
+          date: raceDate,
+          completed: raceCompleted ? "Yes" : "No"
+        }
+      );
+    }
+    
     setRaceName('');
     setRaceCircuit('');
     setRaceDate('');
@@ -260,14 +357,28 @@ const Config = () => {
   };
 
   const removeRace = (id: string) => {
+    const raceToRemove = races.find(r => r.id === id);
+    
     setRaces(races.filter(race => race.id !== id));
+    
+    if (user && (user.role === 'admin' || user.role === 'root') && raceToRemove) {
+      sendWebhookNotification(
+        "Race Removed", 
+        user.username, 
+        { 
+          action: "Removed race",
+          race: raceToRemove.name,
+          circuit: raceToRemove.circuit
+        }
+      );
+    }
+    
     toast({
       title: "Race removed",
       description: `Race has been removed from the race calendar`,
     });
   };
 
-  // News State
   const [newsTitle, setNewsTitle] = useState('');
   const [newsContent, setNewsContent] = useState('');
   const [newsDate, setNewsDate] = useState('');
@@ -285,7 +396,6 @@ const Config = () => {
       return;
     }
 
-    // Check if both image and video URLs are provided
     if (newsImageUrl && newsVideoUrl) {
       toast({
         title: "Warning",
@@ -304,6 +414,20 @@ const Config = () => {
     };
 
     setNews([...news, newNews]);
+    
+    if (user && (user.role === 'admin' || user.role === 'root')) {
+      sendWebhookNotification(
+        "News Added", 
+        user.username, 
+        { 
+          action: "Added news article",
+          title: newsTitle,
+          date: newsDate,
+          featured: newsFeatured ? "Yes" : "No"
+        }
+      );
+    }
+    
     setNewsTitle('');
     setNewsContent('');
     setNewsDate('');
@@ -318,7 +442,21 @@ const Config = () => {
   };
 
   const removeNews = (id: string) => {
+    const newsToRemove = news.find(n => n.id === id);
+    
     setNews(news.filter(newsItem => newsItem.id !== id));
+    
+    if (user && (user.role === 'admin' || user.role === 'root') && newsToRemove) {
+      sendWebhookNotification(
+        "News Removed", 
+        user.username, 
+        { 
+          action: "Removed news article",
+          title: newsToRemove.title
+        }
+      );
+    }
+    
     toast({
       title: "News removed",
       description: `News has been removed from the news list`,
@@ -937,3 +1075,4 @@ const Config = () => {
 };
 
 export default Config;
+

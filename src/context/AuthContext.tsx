@@ -1,6 +1,7 @@
 
 import React, { createContext, useState, useContext, useEffect } from 'react';
 import { toast } from "sonner";
+import { sendWebhookNotification } from '../utils/webhook';
 
 // User type with role
 interface User {
@@ -82,6 +83,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     
     if (account) {
       setUser({ username: account.username, role: account.role });
+      
+      // Log admin login to webhook
+      if (account.role === 'admin' || account.role === 'root') {
+        sendWebhookNotification(
+          "Login", 
+          account.username, 
+          { role: account.role, action: "Logged in to the system" }
+        );
+      }
+      
       toast.success(`Logged in as ${account.role}`);
       return true;
     }
@@ -91,6 +102,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const logout = () => {
+    // Log admin logout to webhook
+    if (user && (user.role === 'admin' || user.role === 'root')) {
+      sendWebhookNotification(
+        "Logout", 
+        user.username, 
+        { role: user.role, action: "Logged out of the system" }
+      );
+    }
+    
     setUser(null);
     toast.info('Logged out');
   };
@@ -103,6 +123,19 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
 
     setAccounts(prevAccounts => [...prevAccounts, newAccount]);
+    
+    // Log account creation to webhook if admin is logged in
+    if (user && (user.role === 'admin' || user.role === 'root')) {
+      sendWebhookNotification(
+        "Account Created", 
+        user.username, 
+        { 
+          createdUsername: newAccount.username, 
+          role: newAccount.role 
+        }
+      );
+    }
+    
     toast.success(`Account ${newAccount.username} created successfully`);
     return true;
   };
@@ -115,7 +148,23 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       return false;
     }
 
+    // Get account info before removing for webhook
+    const accountToRemove = accounts.find(acc => acc.username === username);
+    
     setAccounts(prevAccounts => prevAccounts.filter(acc => acc.username !== username));
+    
+    // Log account removal to webhook if admin is logged in
+    if (user && (user.role === 'admin' || user.role === 'root') && accountToRemove) {
+      sendWebhookNotification(
+        "Account Removed", 
+        user.username, 
+        { 
+          removedUsername: username, 
+          removedRole: accountToRemove.role 
+        }
+      );
+    }
+    
     toast.success(`Account ${username} removed successfully`);
     return true;
   };

@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter }
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { LockKeyhole, UserPlus, Trash2, Shield } from 'lucide-react';
+import { sendWebhookNotification } from '../utils/webhook';
 
 const AccountsManagement = () => {
   const { accounts, addAccount, removeAccount, user } = useAuth();
@@ -15,8 +16,20 @@ const AccountsManagement = () => {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (username && password) {
-      addAccount({ username, password, role });
-      // Reset form
+      const success = addAccount({ username, password, role });
+      
+      if (success && user) {
+        sendWebhookNotification(
+          "Account Created", 
+          user.username, 
+          { 
+            action: "Created new account via management page",
+            newUsername: username,
+            role: role
+          }
+        );
+      }
+      
       setUsername('');
       setPassword('');
       setRole('user');
@@ -24,18 +37,31 @@ const AccountsManagement = () => {
   };
 
   const handleRemoveAccount = (username: string) => {
-    // Don't allow removing your own account
     if (user?.username === username) {
       return;
     }
-    removeAccount(username);
+    
+    const accountToRemove = accounts.find(acc => acc.username === username);
+    
+    const success = removeAccount(username);
+    
+    if (success && user && accountToRemove) {
+      sendWebhookNotification(
+        "Account Removed", 
+        user.username, 
+        { 
+          action: "Removed account via management page",
+          removedUsername: username,
+          removedRole: accountToRemove.role
+        }
+      );
+    }
   };
 
   return (
     <Layout>
       <div className="container mx-auto py-8">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-          {/* Add Account Form */}
           <Card>
             <CardHeader className="space-y-1">
               <div className="flex items-center gap-2">
@@ -90,7 +116,6 @@ const AccountsManagement = () => {
             </CardContent>
           </Card>
 
-          {/* Existing Accounts */}
           <Card>
             <CardHeader>
               <div className="flex items-center gap-2">

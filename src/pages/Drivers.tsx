@@ -14,10 +14,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { sendWebhookNotification } from '../utils/webhook';
 
 const Drivers = () => {
   const { drivers, setDrivers, teams, updateDriverPoints } = useF1Data();
-  const { isAdmin } = useAuth();
+  const { isAdmin, user } = useAuth();
   const [expandedDriverId, setExpandedDriverId] = useState<string | null>(null);
   const [editingDriverId, setEditingDriverId] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState<string>('');
@@ -41,7 +42,6 @@ const Drivers = () => {
       return;
     }
     
-    // Find team ID based on team name
     const teamFound = teams.find(team => team.name === driver.team);
     const teamId = teamFound ? teamFound.id : '';
     
@@ -82,19 +82,33 @@ const Drivers = () => {
   };
 
   const saveDriverChanges = (driverId: string) => {
-    // Update driver info
+    const originalDriver = drivers.find(driver => driver.id === driverId);
+    
     setDrivers(drivers.map(driver => 
       driver.id === driverId ? { ...driver, ...editFormData } : driver
     ));
     
-    // Update team points automatically
     updateDriverPoints(driverId, editFormData.points);
+    
+    if (user && (user.role === 'admin' || user.role === 'root') && originalDriver) {
+      sendWebhookNotification(
+        "Driver Updated", 
+        user.username, 
+        { 
+          action: "Updated driver information",
+          driver: editFormData.name,
+          originalTeam: originalDriver.team,
+          newTeam: editFormData.team,
+          originalPoints: originalDriver.points,
+          newPoints: editFormData.points
+        }
+      );
+    }
     
     setEditingDriverId(null);
     toast.success("Driver information updated successfully");
   };
 
-  // Filter drivers based on search query
   const filteredDrivers = drivers.filter(driver => 
     driver.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
     driver.team.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -118,7 +132,6 @@ const Drivers = () => {
               )}
             </div>
             
-            {/* Search Bar */}
             <div className="relative w-full max-w-md mb-6">
               <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
                 <Search className="h-5 w-5 text-gray-400" />
@@ -164,7 +177,6 @@ const Drivers = () => {
                   <div className="h-4" style={{ backgroundColor: driver.color }}></div>
                   <CardContent className="p-6">
                     {editingDriverId === driver.id ? (
-                      // Edit Mode
                       <div className="space-y-4">
                         <div className="flex justify-between mb-2">
                           <h3 className="font-bold text-lg">Edit Driver</h3>
@@ -277,7 +289,6 @@ const Drivers = () => {
                         </div>
                       </div>
                     ) : (
-                      // View Mode
                       <>
                         <div className="flex items-center mb-4">
                           <div className="flex-1">
