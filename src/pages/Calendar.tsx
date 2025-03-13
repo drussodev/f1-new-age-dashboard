@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { Layout } from '../components/layout/Layout';
 import { useF1Data } from '../context/F1DataContext';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Calendar as CalendarIcon, Plus, Clock, TrophyClock, Flag, Timer, Award } from "lucide-react";
+import { CalendarIcon, Plus, Clock, Timer, Flag, Award } from "lucide-react";
 import { format } from 'date-fns';
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
@@ -29,6 +29,17 @@ interface RaceDriver {
 
 interface RaceDetails {
   grid: RaceDriver[];
+}
+
+// Interface for Race with string date type
+interface Race {
+  id: string;
+  name: string;
+  circuit: string;
+  date: string; // This is a string in the F1DataContext
+  location: string;
+  completed: boolean;
+  winner?: string;
 }
 
 const CalendarPage = () => {
@@ -142,9 +153,15 @@ const CalendarPage = () => {
   };
 
   const handleAddOrUpdateRace = () => {
+    // Convert the Date object to an ISO string for storage
+    const raceToSave = {
+      ...newRace,
+      date: newRace.date.toISOString() // Convert Date to string
+    };
+
     if (editMode) {
       setRaces(prevRaces => 
-        prevRaces.map(race => race.id === newRace.id ? newRace : race)
+        prevRaces.map(race => race.id === raceToSave.id ? raceToSave as Race : race)
       );
       sendWebhookNotification(
         "Race Updated",
@@ -158,7 +175,7 @@ const CalendarPage = () => {
         }
       );
     } else {
-      setRaces(prevRaces => [...prevRaces, newRace]);
+      setRaces(prevRaces => [...prevRaces, raceToSave as Race]);
       sendWebhookNotification(
         "Race Added",
         "admin", // You would get this from your auth context
