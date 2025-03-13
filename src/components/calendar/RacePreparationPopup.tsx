@@ -76,16 +76,6 @@ const RacePreparationPopup: React.FC<RacePreparationPopupProps> = ({
               <div>{circuit}</div>
             </div>
           </div>
-          
-          <div className="p-4 bg-gray-100 dark:bg-gray-800 rounded-lg">
-            <h4 className="font-medium mb-2">Pre-race checklist:</h4>
-            <ul className="list-disc pl-5 space-y-1">
-              <li>Check team strategies</li>
-              <li>Review driver performance</li>
-              <li>Prepare for weather conditions</li>
-              <li>Set up viewing arrangements</li>
-            </ul>
-          </div>
         </div>
         
         <DialogFooter>
