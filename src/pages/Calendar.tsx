@@ -104,25 +104,7 @@ const CalendarPage = () => {
 
   const closePreparationPopup = () => {
     setIsPreparationPopupOpen(false);
-    if (selectedRace && !selectedRace.completed) {
-      if (selectedRace.details) {
-        setRaceDetails(selectedRace.details);
-      } else {
-        const mockDetails: RaceDetails = {
-          grid: drivers.slice(0, 10).map((driver, index) => ({
-            driverId: driver.id,
-            driverName: driver.name,
-            position: index + 1,
-            bestLapTime: `1:${Math.floor(Math.random() * 10) + 30}:${Math.floor(Math.random() * 60)}`,
-            totalTime: `${Math.floor(Math.random() * 2) + 1}:${Math.floor(Math.random() * 60)}:${Math.floor(Math.random() * 60)}`,
-            points: 0,
-            stops: Math.floor(Math.random() * 3) + 1
-          }))
-        };
-        setRaceDetails(mockDetails);
-      }
-      setIsRaceDetailsOpen(true);
-    }
+    setSelectedRace(null);
   };
 
   const openAddRaceForm = () => {
