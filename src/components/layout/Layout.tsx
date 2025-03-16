@@ -3,6 +3,7 @@ import React from 'react';
 import { Navbar } from './Navbar';
 import { useLocation } from 'react-router-dom';
 import { Helmet } from 'react-helmet';
+import { Toaster } from 'sonner';
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -32,6 +33,7 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
       </div>
 
       <Navbar />
+      <Toaster position="top-right" />
       
       <main className={`flex-1 ${isAdmin ? 'container mx-auto px-4 py-8' : ''}`}>
         {children}

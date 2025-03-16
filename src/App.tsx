@@ -1,5 +1,4 @@
 
-import { Toaster } from "sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
@@ -49,7 +48,6 @@ const App = () => {
       <QueryClientProvider client={queryClient}>
         <BrowserRouter>
           <TooltipProvider>
-            <Toaster />
             <MaintenancePage />
           </TooltipProvider>
         </BrowserRouter>
@@ -64,7 +62,6 @@ const App = () => {
         <AuthProvider>
           <F1DataProvider>
             <TooltipProvider>
-              <Toaster />
               <Routes>
                 <Route path="/" element={<Index />} />
                 <Route path="/drivers" element={<Drivers />} />
