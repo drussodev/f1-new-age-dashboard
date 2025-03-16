@@ -7,7 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { LockKeyhole, AlertCircle } from 'lucide-react';
-import { toast } from 'sonner';
+import { toast } from '@/components/ui/use-toast';
 
 const Login = () => {
   const [username, setUsername] = useState('');

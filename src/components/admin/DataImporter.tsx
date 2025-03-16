@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Loader2, CheckCircle, AlertCircle } from 'lucide-react';
-import { toast } from 'sonner';
+import { toast } from '@/components/ui/use-toast';
 import { useAuth } from '@/context/AuthContext';
 import { useF1Data } from '@/context/F1DataContext';
 
