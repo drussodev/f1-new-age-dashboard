@@ -1,4 +1,5 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+
+import React, { createContext, useContext, useState, useEffect, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { useAuth } from './AuthContext';
@@ -94,6 +95,8 @@ export const F1DataProvider: React.FC<{ children: React.ReactNode }> = ({ childr
   const [error, setError] = useState<string | null>(null);
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
   const { isAuthenticated } = useAuth();
+  const channelsSetupRef = useRef(false);
+  const isInitialLoadRef = useRef(true);
 
   const fetchAllData = async () => {
     console.log("Fetching all data from Supabase...");
@@ -213,11 +216,21 @@ export const F1DataProvider: React.FC<{ children: React.ReactNode }> = ({ childr
       toast.error('Failed to load data from the database.');
     } finally {
       setLoading(false);
+      isInitialLoadRef.current = false;
     }
   };
 
   useEffect(() => {
     if (!isAuthenticated) return;
+    
+    // Only fetch data on initial load
+    if (isInitialLoadRef.current) {
+      fetchAllData();
+    }
+  }, [isAuthenticated]);
+
+  useEffect(() => {
+    if (!isAuthenticated || channelsSetupRef.current) return;
     
     console.log("Setting up Supabase realtime subscriptions...");
     
@@ -229,9 +242,28 @@ export const F1DataProvider: React.FC<{ children: React.ReactNode }> = ({ childr
             event: '*', 
             schema: 'public', 
             table: 'drivers' 
-          }, () => {
-            console.log("Drivers changed, refreshing data...");
-            fetchAllData();
+          }, (payload) => {
+            console.log("Drivers changed:", payload);
+            // Instead of refreshing all data, update just the drivers
+            if (payload.eventType === 'UPDATE' && payload.new) {
+              setDrivers(prev => 
+                prev.map(driver => 
+                  driver.id === payload.new.id ? {
+                    id: payload.new.id,
+                    name: payload.new.name,
+                    team: payload.new.team,
+                    country: payload.new.country,
+                    points: payload.new.points,
+                    color: payload.new.color,
+                    image: payload.new.image_url
+                  } : driver
+                )
+              );
+              setLastUpdated(new Date());
+            } else {
+              // For other events (INSERT, DELETE), fetch only drivers
+              fetchDriversOnly();
+            }
           })
           .subscribe();
           
@@ -241,9 +273,26 @@ export const F1DataProvider: React.FC<{ children: React.ReactNode }> = ({ childr
             event: '*', 
             schema: 'public', 
             table: 'teams' 
-          }, () => {
-            console.log("Teams changed, refreshing data...");
-            fetchAllData();
+          }, (payload) => {
+            console.log("Teams changed:", payload);
+            // Update only teams instead of all data
+            if (payload.eventType === 'UPDATE' && payload.new) {
+              setTeams(prev => 
+                prev.map(team => 
+                  team.id === payload.new.id ? {
+                    id: payload.new.id,
+                    name: payload.new.name,
+                    color: payload.new.color,
+                    points: payload.new.points,
+                    logo: payload.new.logo_url
+                  } : team
+                )
+              );
+              setLastUpdated(new Date());
+            } else {
+              // For other events, fetch only teams
+              fetchTeamsOnly();
+            }
           })
           .subscribe();
           
@@ -253,9 +302,28 @@ export const F1DataProvider: React.FC<{ children: React.ReactNode }> = ({ childr
             event: '*', 
             schema: 'public', 
             table: 'races' 
-          }, () => {
-            console.log("Races changed, refreshing data...");
-            fetchAllData();
+          }, (payload) => {
+            console.log("Races changed:", payload);
+            // Update only races instead of all data
+            if (payload.eventType === 'UPDATE' && payload.new) {
+              setRaces(prev => 
+                prev.map(race => 
+                  race.id === payload.new.id ? {
+                    id: payload.new.id,
+                    name: payload.new.name,
+                    circuit: payload.new.circuit,
+                    date: payload.new.date,
+                    location: payload.new.location,
+                    completed: payload.new.completed,
+                    winner: payload.new.winner
+                  } : race
+                )
+              );
+              setLastUpdated(new Date());
+            } else {
+              // For other events, fetch only races
+              fetchRacesOnly();
+            }
           })
           .subscribe();
           
@@ -265,9 +333,28 @@ export const F1DataProvider: React.FC<{ children: React.ReactNode }> = ({ childr
             event: '*', 
             schema: 'public', 
             table: 'news' 
-          }, () => {
-            console.log("News changed, refreshing data...");
-            fetchAllData();
+          }, (payload) => {
+            console.log("News changed:", payload);
+            // Update only news instead of all data
+            if (payload.eventType === 'UPDATE' && payload.new) {
+              setNews(prev => 
+                prev.map(item => 
+                  item.id === payload.new.id ? {
+                    id: payload.new.id,
+                    title: payload.new.title,
+                    content: payload.new.content,
+                    date: payload.new.date,
+                    imageUrl: payload.new.image_url,
+                    videoUrl: payload.new.video_url,
+                    featured: payload.new.featured
+                  } : item
+                )
+              );
+              setLastUpdated(new Date());
+            } else {
+              // For other events, fetch only news
+              fetchNewsOnly();
+            }
           })
           .subscribe();
           
@@ -277,11 +364,14 @@ export const F1DataProvider: React.FC<{ children: React.ReactNode }> = ({ childr
             event: '*', 
             schema: 'public', 
             table: 'config' 
-          }, () => {
-            console.log("Config changed, refreshing data...");
-            fetchAllData();
+          }, (payload) => {
+            console.log("Config changed:", payload);
+            // Only fetch config instead of all data
+            fetchConfigOnly();
           })
           .subscribe();
+
+        channelsSetupRef.current = true;
 
         return () => {
           supabase.removeChannel(driversChannel);
@@ -289,6 +379,7 @@ export const F1DataProvider: React.FC<{ children: React.ReactNode }> = ({ childr
           supabase.removeChannel(racesChannel);
           supabase.removeChannel(newsChannel);
           supabase.removeChannel(configChannel);
+          channelsSetupRef.current = false;
         };
       } catch (error) {
         console.error("Error setting up realtime subscriptions:", error);
@@ -299,11 +390,140 @@ export const F1DataProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     setupRealtimeSubscriptions();
   }, [isAuthenticated]);
 
-  useEffect(() => {
-    if (isAuthenticated) {
-      fetchAllData();
+  // Individual fetch functions for each data type
+  const fetchDriversOnly = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('drivers')
+        .select('*')
+        .order('points', { ascending: false });
+
+      if (error) throw error;
+      
+      const mappedDrivers = data.map(driver => ({
+        id: driver.id,
+        name: driver.name,
+        team: driver.team,
+        country: driver.country,
+        points: driver.points,
+        color: driver.color,
+        image: driver.image_url
+      }));
+      setDrivers(mappedDrivers);
+      setLastUpdated(new Date());
+    } catch (error) {
+      console.error('Error fetching drivers:', error);
     }
-  }, [isAuthenticated]);
+  };
+
+  const fetchTeamsOnly = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('teams')
+        .select('*')
+        .order('points', { ascending: false });
+
+      if (error) throw error;
+      
+      const mappedTeams = data.map(team => ({
+        id: team.id,
+        name: team.name,
+        color: team.color,
+        points: team.points,
+        logo: team.logo_url
+      }));
+      setTeams(mappedTeams);
+      setLastUpdated(new Date());
+    } catch (error) {
+      console.error('Error fetching teams:', error);
+    }
+  };
+
+  const fetchRacesOnly = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('races')
+        .select('*')
+        .order('date', { ascending: true });
+
+      if (error) throw error;
+      
+      const mappedRaces = data.map(race => ({
+        id: race.id,
+        name: race.name,
+        circuit: race.circuit,
+        date: race.date,
+        location: race.location,
+        completed: race.completed,
+        winner: race.winner
+      }));
+      setRaces(mappedRaces);
+      setLastUpdated(new Date());
+    } catch (error) {
+      console.error('Error fetching races:', error);
+    }
+  };
+
+  const fetchNewsOnly = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('news')
+        .select('*')
+        .order('date', { ascending: false });
+
+      if (error) throw error;
+      
+      const mappedNews = data.map(item => ({
+        id: item.id,
+        title: item.title,
+        content: item.content,
+        date: item.date,
+        imageUrl: item.image_url,
+        videoUrl: item.video_url,
+        featured: item.featured
+      }));
+      setNews(mappedNews);
+      setLastUpdated(new Date());
+    } catch (error) {
+      console.error('Error fetching news:', error);
+    }
+  };
+
+  const fetchConfigOnly = async () => {
+    try {
+      const { data: configData, error: configError } = await supabase
+        .from('config')
+        .select('*')
+        .single();
+
+      if (configError && configError.code !== 'PGRST116') throw configError;
+
+      let streamersData = [];
+      if (configData?.id) {
+        const { data: fetchedStreamers, error: streamersError } = await supabase
+          .from('streamers')
+          .select('*')
+          .eq('config_id', configData.id);
+
+        if (streamersError) throw streamersError;
+        streamersData = fetchedStreamers;
+      }
+      
+      const mappedStreamers = streamersData.map(streamer => ({
+        username: streamer.username,
+        displayName: streamer.display_name
+      }));
+
+      setConfig({
+        title: configData?.title || defaultConfig.title,
+        season: configData?.season || defaultConfig.season,
+        streamers: mappedStreamers.length > 0 ? mappedStreamers : defaultConfig.streamers
+      });
+      setLastUpdated(new Date());
+    } catch (error) {
+      console.error('Error fetching config:', error);
+    }
+  };
 
   const updateDriverPoints = async (driverId: string, points: number) => {
     try {
