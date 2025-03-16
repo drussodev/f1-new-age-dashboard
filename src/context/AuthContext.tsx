@@ -2,8 +2,6 @@
 import React, { createContext, useState, useContext, useEffect } from 'react';
 import { toast } from "sonner";
 import { sendWebhookNotification } from '../utils/webhook';
-import { supabase } from '../integrations/supabase/client';
-import { Session, User } from '@supabase/supabase-js';
 
 // User type with role
 interface AppUser {
@@ -48,10 +46,14 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 // Storage keys
 const ACCOUNTS_STORAGE_KEY = 'f1-new-age-accounts';
+const CURRENT_USER_KEY = 'f1-new-age-current-user';
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [user, setUser] = useState<AppUser | null>(null);
-  const [session, setSession] = useState<Session | null>(null);
+  const [user, setUser] = useState<AppUser | null>(() => {
+    const storedUser = localStorage.getItem(CURRENT_USER_KEY);
+    return storedUser ? JSON.parse(storedUser) : null;
+  });
+  
   const [accounts, setAccounts] = useState<Account[]>(() => {
     const storedAccounts = localStorage.getItem(ACCOUNTS_STORAGE_KEY);
     return storedAccounts ? JSON.parse(storedAccounts) : DEFAULT_ACCOUNTS;
@@ -61,46 +63,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const isAdmin = !!user && (user.role === 'admin' || user.role === 'root');
   const isRoot = !!user && user.role === 'root';
 
-  // Initialize session from Supabase
+  // Store the user in localStorage when it changes
   useEffect(() => {
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (_event, session) => {
-        setSession(session);
-        if (session?.user) {
-          // Find the account that matches the email
-          const foundAccount = accounts.find(acc => acc.username === session.user?.email);
-          if (foundAccount) {
-            setUser({
-              username: foundAccount.username,
-              role: foundAccount.role
-            });
-          }
-        } else {
-          setUser(null);
-        }
-      }
-    );
+    if (user) {
+      localStorage.setItem(CURRENT_USER_KEY, JSON.stringify(user));
+    } else {
+      localStorage.removeItem(CURRENT_USER_KEY);
+    }
+  }, [user]);
 
-    // Initial session check
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
-      if (session?.user) {
-        // Find the account that matches the email
-        const foundAccount = accounts.find(acc => acc.username === session.user?.email);
-        if (foundAccount) {
-          setUser({
-            username: foundAccount.username,
-            role: foundAccount.role
-          });
-        }
-      }
-    });
-
-    return () => {
-      subscription.unsubscribe();
-    };
-  }, [accounts]);
-
+  // Store accounts in localStorage when they change
   useEffect(() => {
     localStorage.setItem(ACCOUNTS_STORAGE_KEY, JSON.stringify(accounts));
   }, [accounts]);
@@ -117,57 +89,19 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         return false;
       }
       
-      // First check if the user exists in Supabase
-      const { data: existingUsers, error: checkError } = await supabase.auth.signInWithPassword({
-        email: username,
-        password: password,
-      });
+      setUser({ username: account.username, role: account.role });
       
-      if (existingUsers.user) {
-        setUser({ username: account.username, role: account.role });
-        
-        // Log admin login to webhook
-        if (account.role === 'admin' || account.role === 'root') {
-          sendWebhookNotification(
-            "Login", 
-            account.username, 
-            { role: account.role, action: "Logged in to the system" }
-          );
-        }
-        
-        toast.success(`Logged in as ${account.role}`);
-        return true;
-      } else {
-        // If user doesn't exist, sign them up
-        const { data, error } = await supabase.auth.signUp({
-          email: username,
-          password: password,
-        });
-        
-        if (error) {
-          console.error("Signup error:", error);
-          toast.error(error.message);
-          return false;
-        }
-        
-        if (data.user) {
-          setUser({ username: account.username, role: account.role });
-          
-          // Log admin login to webhook
-          if (account.role === 'admin' || account.role === 'root') {
-            sendWebhookNotification(
-              "Login", 
-              account.username, 
-              { role: account.role, action: "Logged in to the system" }
-            );
-          }
-          
-          toast.success(`Logged in as ${account.role}`);
-          return true;
-        }
+      // Log admin login to webhook
+      if (account.role === 'admin' || account.role === 'root') {
+        sendWebhookNotification(
+          "Login", 
+          account.username, 
+          { role: account.role, action: "Logged in to the system" }
+        );
       }
       
-      return false;
+      toast.success(`Logged in as ${account.role}`);
+      return true;
     } catch (error) {
       console.error("Login error:", error);
       toast.error('An error occurred during login');
@@ -186,8 +120,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         );
       }
       
-      await supabase.auth.signOut();
       setUser(null);
+      localStorage.removeItem(CURRENT_USER_KEY);
       toast.info('Logged out');
     } catch (error) {
       console.error("Logout error:", error);
@@ -200,18 +134,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       // Check if username already exists
       if (accounts.some(acc => acc.username === newAccount.username)) {
         toast.error('Username already exists');
-        return false;
-      }
-  
-      // Add account to Supabase
-      const { data, error } = await supabase.auth.signUp({
-        email: newAccount.username,
-        password: newAccount.password,
-      });
-  
-      if (error) {
-        console.error("Account creation error:", error);
-        toast.error(error.message);
         return false;
       }
   

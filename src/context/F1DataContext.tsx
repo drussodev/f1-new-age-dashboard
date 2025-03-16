@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState, useEffect, useRef } from 'react';
 import { toast } from 'sonner';
 import { useAuth } from './AuthContext';
@@ -103,22 +102,18 @@ export const F1DataProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     setError(null);
     
     try {
-      // Fetch drivers
       const driversData = await localDataService.fetchDrivers();
       setDrivers(driversData);
       console.log("Fetched drivers:", driversData.length);
 
-      // Fetch teams
       const teamsData = await localDataService.fetchTeams();
       setTeams(teamsData);
       console.log("Fetched teams:", teamsData.length);
 
-      // Fetch races
       const racesData = await localDataService.fetchRaces();
       setRaces(racesData);
       console.log("Fetched races:", racesData.length);
 
-      // Fetch config and streamers
       const configData = await localDataService.fetchConfig();
       const streamersData = await localDataService.fetchStreamers();
       
@@ -134,7 +129,6 @@ export const F1DataProvider: React.FC<{ children: React.ReactNode }> = ({ childr
       });
       console.log("Fetched config and streamers");
 
-      // Fetch news
       const newsData = await localDataService.fetchNews();
       setNews(newsData);
       console.log("Fetched news:", newsData.length);
@@ -150,7 +144,6 @@ export const F1DataProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     }
   };
 
-  // Load data on initial load
   useEffect(() => {
     fetchAllData();
   }, []);
@@ -160,14 +153,12 @@ export const F1DataProvider: React.FC<{ children: React.ReactNode }> = ({ childr
       const success = await localDataService.updateDriverPoints(driverId, points);
       
       if (success) {
-        // Update local state
         setDrivers(prevDrivers => 
           prevDrivers.map(driver => 
             driver.id === driverId ? { ...driver, points } : driver
           )
         );
         
-        // Refresh team data
         const updatedTeams = await localDataService.fetchTeams();
         setTeams(updatedTeams);
         

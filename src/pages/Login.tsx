@@ -6,48 +6,20 @@ import { Layout } from '../components/layout/Layout';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { LockKeyhole, AlertCircle, RefreshCw } from 'lucide-react';
+import { LockKeyhole, AlertCircle } from 'lucide-react';
 import { toast } from 'sonner';
-import { supabase } from '@/integrations/supabase/client';
 
 const Login = () => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [connectionStatus, setConnectionStatus] = useState<'checking' | 'connected' | 'error'>('checking');
   const { login, isAuthenticated, isRoot } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   
   // Get the redirect path from the location state, or default to home
   const from = location.state?.from?.pathname || '/';
-
-  // Check Supabase connection
-  useEffect(() => {
-    const checkConnection = async () => {
-      setConnectionStatus('checking');
-      try {
-        // Simple check if we can reach Supabase by fetching a single row
-        const { error } = await supabase
-          .from('config')
-          .select('id')
-          .limit(1);
-
-        if (error) {
-          console.error('Supabase connection error:', error);
-          setConnectionStatus('error');
-        } else {
-          setConnectionStatus('connected');
-        }
-      } catch (err) {
-        console.error('Supabase check failed:', err);
-        setConnectionStatus('error');
-      }
-    };
-
-    checkConnection();
-  }, []);
 
   // If already authenticated, redirect
   useEffect(() => {
@@ -77,12 +49,6 @@ const Login = () => {
     }
   };
 
-  const retryConnection = () => {
-    setConnectionStatus('checking');
-    // Force page reload to reset connection
-    window.location.reload();
-  };
-
   if (isAuthenticated) {
     return null; // Redirect will happen due to useEffect
   }
@@ -101,32 +67,6 @@ const Login = () => {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            {connectionStatus === 'error' && (
-              <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded mb-4 flex items-start">
-                <AlertCircle className="h-5 w-5 mr-2 mt-0.5 flex-shrink-0" />
-                <div>
-                  <p className="font-medium">Database connection error</p>
-                  <p className="text-sm mt-1">Cannot connect to the Supabase database. This might be a temporary issue.</p>
-                  <Button 
-                    size="sm" 
-                    variant="outline" 
-                    className="mt-2" 
-                    onClick={retryConnection}
-                  >
-                    <RefreshCw className="h-4 w-4 mr-2" />
-                    Retry Connection
-                  </Button>
-                </div>
-              </div>
-            )}
-            
-            {connectionStatus === 'checking' && (
-              <div className="bg-blue-50 border border-blue-200 text-blue-700 px-4 py-3 rounded mb-4 flex items-center">
-                <div className="animate-spin h-4 w-4 mr-2 border-2 border-blue-700 border-r-transparent rounded-full"></div>
-                <span>Checking database connection...</span>
-              </div>
-            )}
-            
             {error && (
               <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded mb-4 flex items-start">
                 <AlertCircle className="h-5 w-5 mr-2 mt-0.5 flex-shrink-0" />
@@ -144,7 +84,7 @@ const Login = () => {
                   onChange={(e) => setUsername(e.target.value)}
                   placeholder="Enter your username"
                   required
-                  disabled={isLoading || connectionStatus !== 'connected'}
+                  disabled={isLoading}
                 />
               </div>
               <div className="space-y-2">
@@ -156,13 +96,13 @@ const Login = () => {
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="Enter your password"
                   required
-                  disabled={isLoading || connectionStatus !== 'connected'}
+                  disabled={isLoading}
                 />
               </div>
               <Button 
                 type="submit" 
                 className="w-full" 
-                disabled={isLoading || connectionStatus !== 'connected'}
+                disabled={isLoading}
               >
                 {isLoading ? (
                   <span className="flex items-center">
