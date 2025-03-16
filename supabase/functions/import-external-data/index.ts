@@ -51,153 +51,45 @@ serve(async (req) => {
       )
     }
 
-    // Verify if the user is an admin (you might want to add this check)
-    // For this example, we'll assume this edge function should only be called by authorized personnel
-
     console.log('Starting data import from external database')
 
-    // Connect to the external MySQL database
+    // Connect to the MySQL database
     const mysqlClient = await new Client().connect({
-      hostname: Deno.env.get('EXTERNAL_DB_HOST') ?? '',
-      username: Deno.env.get('EXTERNAL_DB_USER') ?? '',
-      password: Deno.env.get('EXTERNAL_DB_PASSWORD') ?? '',
-      db: Deno.env.get('EXTERNAL_DB_NAME') ?? '',
+      hostname: "185.113.141.167",
+      username: "russo",
+      password: "drusso22", 
+      db: "f1tournament",
     })
 
-    // Fetch data from MySQL tables
-    console.log('Fetching drivers data from external database')
+    // This is now just a direct connection to your MySQL server
+    // We fetch data but no longer need to import it to Supabase
+    console.log('Fetching data from MySQL database')
+    
     const drivers = await mysqlClient.query(`SELECT * FROM drivers`)
-    
-    console.log('Fetching teams data from external database')
     const teams = await mysqlClient.query(`SELECT * FROM teams`)
-    
-    console.log('Fetching races data from external database')
     const races = await mysqlClient.query(`SELECT * FROM races`)
-    
-    console.log('Fetching news data from external database')
     const news = await mysqlClient.query(`SELECT * FROM news`)
-    
-    console.log('Fetching config data from external database')
     const configData = await mysqlClient.query(`SELECT * FROM config`)
-    
-    console.log('Fetching streamers data from external database')
     const streamers = await mysqlClient.query(`SELECT * FROM streamers`)
 
     // Close the MySQL connection
     await mysqlClient.close()
 
-    // Clear existing data from Supabase tables (if needed)
-    // Note: This will remove all existing data, use with caution!
-    console.log('Clearing existing data from Supabase tables')
-    await supabaseClient.from('drivers').delete().neq('id', '00000000-0000-0000-0000-000000000000')
-    await supabaseClient.from('teams').delete().neq('id', '00000000-0000-0000-0000-000000000000')
-    await supabaseClient.from('races').delete().neq('id', '00000000-0000-0000-0000-000000000000')
-    await supabaseClient.from('news').delete().neq('id', '00000000-0000-0000-0000-000000000000')
-    await supabaseClient.from('streamers').delete().neq('id', '00000000-0000-0000-0000-000000000000')
-    await supabaseClient.from('config').delete().neq('id', '00000000-0000-0000-0000-000000000000')
-
-    // Insert data into Supabase tables
-    console.log('Inserting drivers data into Supabase')
-    const transformedDrivers = drivers.map((driver: any) => ({
-      name: driver.name,
-      team: driver.team,
-      country: driver.country,
-      points: driver.points,
-      color: driver.color || '#FF1E00', // Default color if not provided
-      image_url: driver.image_url,
-    }))
-    
-    if (transformedDrivers.length > 0) {
-      const { error: driversError } = await supabaseClient.from('drivers').insert(transformedDrivers)
-      if (driversError) {
-        console.error('Error inserting drivers:', driversError)
-      }
-    }
-
-    console.log('Inserting teams data into Supabase')
-    const transformedTeams = teams.map((team: any) => ({
-      name: team.name,
-      color: team.color || '#FF1E00', // Default color if not provided
-      points: team.points,
-      logo_url: team.logo_url,
-    }))
-    
-    if (transformedTeams.length > 0) {
-      const { error: teamsError } = await supabaseClient.from('teams').insert(transformedTeams)
-      if (teamsError) {
-        console.error('Error inserting teams:', teamsError)
-      }
-    }
-
-    console.log('Inserting races data into Supabase')
-    const transformedRaces = races.map((race: any) => ({
-      name: race.name,
-      circuit: race.circuit,
-      date: race.date,
-      location: race.location,
-      completed: race.completed || false,
-      winner: race.winner,
-    }))
-    
-    if (transformedRaces.length > 0) {
-      const { error: racesError } = await supabaseClient.from('races').insert(transformedRaces)
-      if (racesError) {
-        console.error('Error inserting races:', racesError)
-      }
-    }
-
-    console.log('Inserting news data into Supabase')
-    const transformedNews = news.map((item: any) => ({
-      title: item.title,
-      content: item.content,
-      date: item.date,
-      image_url: item.image_url,
-      video_url: item.video_url,
-      featured: item.featured || false,
-    }))
-    
-    if (transformedNews.length > 0) {
-      const { error: newsError } = await supabaseClient.from('news').insert(transformedNews)
-      if (newsError) {
-        console.error('Error inserting news:', newsError)
-      }
-    }
-
-    console.log('Inserting config data into Supabase')
-    if (configData && configData.length > 0) {
-      const { error: configError } = await supabaseClient.from('config').insert({
-        title: configData[0].title || 'F1 New Age Tournament',
-        season: configData[0].season || '2023',
-      })
-      
-      if (configError) {
-        console.error('Error inserting config:', configError)
-      } else {
-        // Get the config ID for streamers
-        const { data: configInfo } = await supabaseClient.from('config').select('id').limit(1).single()
-        
-        if (configInfo && configInfo.id) {
-          console.log('Inserting streamers data into Supabase')
-          const transformedStreamers = streamers.map((streamer: any) => ({
-            username: streamer.username,
-            display_name: streamer.display_name,
-            config_id: configInfo.id,
-          }))
-          
-          if (transformedStreamers.length > 0) {
-            const { error: streamersError } = await supabaseClient.from('streamers').insert(transformedStreamers)
-            if (streamersError) {
-              console.error('Error inserting streamers:', streamersError)
-            }
-          }
-        }
-      }
-    }
-
-    console.log('Data import completed successfully')
+    console.log('MySQL data retrieval successful')
 
     return new Response(
-      JSON.stringify({ success: true, message: 'Data imported successfully' }),
+      JSON.stringify({ 
+        success: true, 
+        message: 'MySQL connection successful',
+        counts: {
+          drivers: drivers.length,
+          teams: teams.length,
+          races: races.length,
+          news: news.length,
+          config: configData.length,
+          streamers: streamers.length
+        }
+      }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     )
   } catch (error) {
