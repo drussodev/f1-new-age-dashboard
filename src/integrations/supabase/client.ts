@@ -29,8 +29,4 @@ export const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABL
       'X-Client-Info': 'f1-tournament-app',
     },
   },
-  // Enable the functions module to call Edge Functions
-  functions: {
-    // Not needed if using the default URL
-  },
 });

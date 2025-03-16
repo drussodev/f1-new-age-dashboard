@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState, useEffect, useRef } from 'react';
 import { toast } from 'sonner';
 import { useAuth } from './AuthContext';
@@ -78,8 +77,8 @@ const defaultConfig: Config = {
   title: 'F1 New Age Tournament',
   season: '2023',
   streamers: [
-    { username: 'formula1', displayName: 'Official F1' },
-    { username: 'grandprixracing', displayName: 'Grand Prix Racing' }
+    { username: 'formula1', display_name: 'Official F1' },
+    { username: 'grandprixracing', display_name: 'Grand Prix Racing' }
   ]
 };
 
@@ -94,7 +93,7 @@ export const F1DataProvider: React.FC<{ children: React.ReactNode }> = ({ childr
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
-  const { isAuthenticated, user, session } = useAuth();
+  const { isAuthenticated, user } = useAuth();
   const isInitialLoadRef = useRef(true);
   const pollingIntervalRef = useRef<number | null>(null);
 
@@ -125,7 +124,7 @@ export const F1DataProvider: React.FC<{ children: React.ReactNode }> = ({ childr
       
       const mappedStreamers = streamersData.map(streamer => ({
         username: streamer.username,
-        displayName: streamer.display_name
+        display_name: streamer.display_name
       }));
 
       setConfig({

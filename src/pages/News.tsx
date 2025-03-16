@@ -94,16 +94,16 @@ const News = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {sortedNews.map((newsItem) => (
               <Card key={newsItem.id} className="h-full flex flex-col overflow-hidden hover:shadow-lg transition-shadow">
-                {newsItem.imageUrl && !newsItem.videoUrl && (
+                {newsItem.image_url && !newsItem.video_url && (
                   <div 
                     className="relative h-48 overflow-hidden cursor-pointer"
-                    onClick={() => openImagePopup(newsItem.imageUrl, newsItem.title)}
+                    onClick={() => openImagePopup(newsItem.image_url!, newsItem.title)}
                   >
                     <div className="absolute top-2 left-2 bg-black/50 text-white p-1 rounded-md">
                       <Image className="w-4 h-4" />
                     </div>
                     <img 
-                      src={newsItem.imageUrl} 
+                      src={newsItem.image_url} 
                       alt={newsItem.title} 
                       className="w-full h-full object-cover"
                     />
@@ -116,17 +116,17 @@ const News = () => {
                   </div>
                 )}
                 
-                {newsItem.videoUrl && (
+                {newsItem.video_url && (
                   <div 
                     className="relative h-48 overflow-hidden cursor-pointer"
-                    onClick={() => openVideoPopup(newsItem.videoUrl, newsItem.title)}
+                    onClick={() => openVideoPopup(newsItem.video_url!, newsItem.title)}
                   >
                     <div className="absolute top-2 left-2 bg-black/50 text-white p-1 rounded-md z-10">
                       <Video className="w-4 h-4" />
                     </div>
                     <div className="w-full h-full">
                       <iframe 
-                        src={getEmbedUrl(newsItem.videoUrl)} 
+                        src={getEmbedUrl(newsItem.video_url)} 
                         title={newsItem.title}
                         className="w-full h-full"
                         allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
@@ -143,10 +143,10 @@ const News = () => {
                   </div>
                 )}
                 
-                <CardHeader className={newsItem.imageUrl || newsItem.videoUrl ? "" : "pb-2"}>
+                <CardHeader className={newsItem.image_url || newsItem.video_url ? "" : "pb-2"}>
                   <div className="flex justify-between items-start">
                     <CardTitle className="text-xl">{newsItem.title}</CardTitle>
-                    {!newsItem.imageUrl && !newsItem.videoUrl && newsItem.featured && (
+                    {!newsItem.image_url && !newsItem.video_url && newsItem.featured && (
                       <Star className="w-5 h-5 text-f1-red" />
                     )}
                   </div>

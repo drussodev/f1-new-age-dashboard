@@ -1,5 +1,5 @@
 
-import { Client } from 'https://deno.land/x/mysql@v2.11.0/mod.ts';
+import mysql from 'mysql2/promise';
 
 export interface MySQLConfig {
   hostname: string;
@@ -16,23 +16,23 @@ const defaultConfig: MySQLConfig = {
 };
 
 export const getClient = async (config: MySQLConfig = defaultConfig) => {
-  const client = await new Client().connect({
-    hostname: config.hostname,
-    username: config.username,
+  const connection = await mysql.createConnection({
+    host: config.hostname,
+    user: config.username,
     password: config.password,
-    db: config.database,
+    database: config.database,
   });
   
-  return client;
+  return connection;
 };
 
 export const query = async <T = any>(sql: string, params: any[] = []): Promise<T[]> => {
-  const client = await getClient();
+  const connection = await getClient();
   try {
-    const result = await client.query(sql, params) as T[];
-    return result;
+    const [rows] = await connection.query(sql, params);
+    return rows as T[];
   } finally {
-    await client.close();
+    await connection.end();
   }
 };
 

@@ -92,7 +92,7 @@ const Config = () => {
 
     const updatedStreamers = [...config.streamers, { 
       username: newStreamer.trim(),
-      displayName: newStreamer.trim() 
+      display_name: newStreamer.trim() 
     }];
 
     setConfig({
@@ -409,8 +409,8 @@ const Config = () => {
       title: newsTitle,
       content: newsContent,
       date: newsDate,
-      imageUrl: newsImageUrl || undefined,
-      videoUrl: newsVideoUrl || undefined,
+      image_url: newsImageUrl || undefined,
+      video_url: newsVideoUrl || undefined,
       featured: newsFeatured
     };
 
@@ -982,9 +982,9 @@ const Config = () => {
                               <TableCell className="max-w-[200px] truncate">{newsItem.content}</TableCell>
                               <TableCell>{newsItem.date}</TableCell>
                               <TableCell>
-                                {newsItem.videoUrl && <Video className="h-4 w-4 inline mr-1" />}
-                                {newsItem.imageUrl && !newsItem.videoUrl && <Image className="h-4 w-4 inline mr-1" />}
-                                {!newsItem.imageUrl && !newsItem.videoUrl && 'None'}
+                                {newsItem.video_url && <Video className="h-4 w-4 inline mr-1" />}
+                                {newsItem.image_url && !newsItem.video_url && <Image className="h-4 w-4 inline mr-1" />}
+                                {!newsItem.image_url && !newsItem.video_url && 'None'}
                               </TableCell>
                               <TableCell>{newsItem.featured ? 
                                 <Star className="h-4 w-4 text-f1-red" /> : 'No'}

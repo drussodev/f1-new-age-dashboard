@@ -29,7 +29,7 @@ const Drivers = () => {
     country: '',
     points: 0,
     color: '',
-    image: '',
+    image_url: '',
   });
 
   const toggleDriverDetails = (driverId: string) => {
@@ -53,7 +53,7 @@ const Drivers = () => {
       country: driver.country,
       points: driver.points,
       color: driver.color,
-      image: driver.image || '',
+      image_url: driver.image_url || '',
     });
   };
 
@@ -269,15 +269,15 @@ const Drivers = () => {
                         <div>
                           <label className="text-xs text-gray-500">Image URL</label>
                           <Input 
-                            name="image"
-                            value={editFormData.image}
+                            name="image_url"
+                            value={editFormData.image_url}
                             onChange={handleInputChange}
                             placeholder="https://example.com/image.jpg"
                           />
-                          {editFormData.image && (
+                          {editFormData.image_url && (
                             <div className="mt-2 h-20 w-full rounded overflow-hidden">
                               <img 
-                                src={editFormData.image} 
+                                src={editFormData.image_url} 
                                 alt="Preview" 
                                 className="h-full w-full object-cover"
                                 onError={(e) => {
@@ -344,7 +344,7 @@ const Drivers = () => {
                               
                               <div className="aspect-square rounded-md overflow-hidden bg-gray-100">
                                 <img 
-                                  src={driver.image || "/placeholder.svg"} 
+                                  src={driver.image_url || "/placeholder.svg"} 
                                   alt={`${driver.name} profile`}
                                   className="w-full h-full object-cover"
                                   onError={(e) => {
