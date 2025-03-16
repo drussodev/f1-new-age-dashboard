@@ -28,6 +28,7 @@ import {
 } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
 import { sendWebhookNotification } from '../utils/webhook';
+import DataImporter from '@/components/admin/DataImporter';
 
 const Config = () => {
   const { 
@@ -465,12 +466,9 @@ const Config = () => {
 
   return (
     <Layout>
-      <div className="container mx-auto px-4 py-8">
-        <h1 className="text-3xl font-bold mb-6 flex items-center">
-          <Settings className="mr-2 h-8 w-8" />
-          Configuration Panel
-        </h1>
-
+      <div className="container mx-auto p-4">
+        <h1 className="text-2xl font-bold mb-6">Configuration</h1>
+        
         <Tabs defaultValue="general">
           <TabsList className="grid w-full md:w-auto md:inline-grid grid-cols-1 sm:grid-cols-3 md:grid-cols-5 lg:grid-cols-6 gap-2 mb-6">
             <TabsTrigger value="general" className="flex items-center">
@@ -1069,10 +1067,14 @@ const Config = () => {
             </Card>
           </TabsContent>
         </Tabs>
+
+        <div className="mt-8">
+          <h2 className="text-xl font-bold mb-4">External Data Import</h2>
+          <DataImporter />
+        </div>
       </div>
     </Layout>
   );
 };
 
 export default Config;
-
