@@ -1,0 +1,43 @@
+
+[
+  {
+    "id": "1",
+    "name": "Bahrain Grand Prix",
+    "date": "2023-03-05",
+    "circuit": "Bahrain International Circuit",
+    "location": "Sakhir, Bahrain",
+    "status": "completed"
+  },
+  {
+    "id": "2",
+    "name": "Saudi Arabian Grand Prix",
+    "date": "2023-03-19",
+    "circuit": "Jeddah Corniche Circuit",
+    "location": "Jeddah, Saudi Arabia",
+    "status": "completed"
+  },
+  {
+    "id": "3",
+    "name": "Australian Grand Prix",
+    "date": "2023-04-02",
+    "circuit": "Albert Park Circuit",
+    "location": "Melbourne, Australia",
+    "status": "completed"
+  },
+  {
+    "id": "4",
+    "name": "Miami Grand Prix",
+    "date": "2023-05-07",
+    "circuit": "Miami International Autodrome",
+    "location": "Miami, United States",
+    "status": "upcoming"
+  },
+  {
+    "id": "5",
+    "name": "Monaco Grand Prix",
+    "date": "2023-05-28",
+    "circuit": "Circuit de Monaco",
+    "location": "Monte Carlo, Monaco",
+    "status": "upcoming"
+  }
+]

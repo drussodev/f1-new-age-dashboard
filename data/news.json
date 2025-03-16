@@ -1,0 +1,35 @@
+
+[
+  {
+    "id": "1",
+    "title": "F1 New Age Tournament 2023 Season Announced",
+    "date": "2023-01-15",
+    "content": "The F1 New Age Tournament has announced its 2023 season schedule with 18 races across 15 countries. This season promises to be the most competitive yet with several rule changes aimed at leveling the playing field.",
+    "featured": true,
+    "image_url": "https://images.unsplash.com/photo-1541467655857-7f1e32962dad?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1000&q=80"
+  },
+  {
+    "id": "2",
+    "title": "Team Red Bull Unveils New Car Design",
+    "date": "2023-02-05",
+    "content": "Red Bull Racing has revealed their latest car design for the 2023 season featuring significant aerodynamic improvements. Chief Engineer Adrian Newey claims this could be their most innovative design yet.",
+    "featured": false,
+    "image_url": "https://images.unsplash.com/photo-1517421239241-83c8387edf1d?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1000&q=80"
+  },
+  {
+    "id": "3",
+    "title": "Lewis Hamilton Signs Contract Extension",
+    "date": "2023-03-10",
+    "content": "Seven-time champion Lewis Hamilton has signed a two-year contract extension with Mercedes. This agreement ensures Hamilton will continue to race with the team through the 2025 season.",
+    "featured": true,
+    "video_url": "https://www.youtube.com/watch?v=dQw4w9WgXcQ"
+  },
+  {
+    "id": "4",
+    "title": "Monaco Grand Prix Preparations Underway",
+    "date": "2023-04-18",
+    "content": "Preparations for the iconic Monaco Grand Prix are well underway. The street circuit, known for its tight corners and challenging layout, is being readied for what promises to be an exciting race weekend.",
+    "featured": false,
+    "image_url": "https://images.unsplash.com/photo-1520208422220-d12a3c588e6c?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1000&q=80"
+  }
+]

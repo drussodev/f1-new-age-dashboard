@@ -1,0 +1,48 @@
+
+[
+  {
+    "id": "1",
+    "name": "Max Verstappen",
+    "team": "Red Bull Racing",
+    "country": "Netherlands",
+    "points": 150,
+    "color": "#0600EF",
+    "image_url": "https://www.formula1.com/content/dam/fom-website/drivers/M/MAXVER01_Max_Verstappen/maxver01.png.transform/2col/image.png"
+  },
+  {
+    "id": "2",
+    "name": "Lewis Hamilton",
+    "team": "Mercedes",
+    "country": "United Kingdom",
+    "points": 120,
+    "color": "#00D2BE",
+    "image_url": "https://www.formula1.com/content/dam/fom-website/drivers/L/LEWHAM01_Lewis_Hamilton/lewham01.png.transform/2col/image.png"
+  },
+  {
+    "id": "3",
+    "name": "Charles Leclerc",
+    "team": "Ferrari",
+    "country": "Monaco",
+    "points": 110,
+    "color": "#DC0000",
+    "image_url": "https://www.formula1.com/content/dam/fom-website/drivers/C/CHALEC01_Charles_Leclerc/chalec01.png.transform/2col/image.png"
+  },
+  {
+    "id": "4",
+    "name": "Lando Norris",
+    "team": "McLaren",
+    "country": "United Kingdom",
+    "points": 95,
+    "color": "#FF8700",
+    "image_url": "https://www.formula1.com/content/dam/fom-website/drivers/L/LANNOR01_Lando_Norris/lannor01.png.transform/2col/image.png"
+  },
+  {
+    "id": "5",
+    "name": "Carlos Sainz",
+    "team": "Ferrari",
+    "country": "Spain",
+    "points": 85,
+    "color": "#DC0000",
+    "image_url": "https://www.formula1.com/content/dam/fom-website/drivers/C/CARSAI01_Carlos_Sainz/carsai01.png.transform/2col/image.png"
+  }
+]

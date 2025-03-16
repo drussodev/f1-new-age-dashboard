@@ -1,0 +1,23 @@
+
+{
+  "streamers": [
+    {
+      "username": "formula1",
+      "display_name": "Formula 1 Official"
+    },
+    {
+      "username": "f1_driver_max",
+      "display_name": "Max Verstappen"
+    },
+    {
+      "username": "lando_norris_gameplay",
+      "display_name": "Lando Norris"
+    }
+  ],
+  "maintenance_mode": false,
+  "maintenance_password": "drussoelindo",
+  "webhooks": {
+    "enabled": false,
+    "url": ""
+  }
+}

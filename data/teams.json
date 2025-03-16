@@ -1,0 +1,33 @@
+
+[
+  {
+    "id": "1",
+    "name": "Red Bull Racing",
+    "points": 220,
+    "color": "#0600EF"
+  },
+  {
+    "id": "2",
+    "name": "Ferrari",
+    "points": 195,
+    "color": "#DC0000"
+  },
+  {
+    "id": "3",
+    "name": "Mercedes",
+    "points": 180,
+    "color": "#00D2BE"
+  },
+  {
+    "id": "4",
+    "name": "McLaren",
+    "points": 150,
+    "color": "#FF8700"
+  },
+  {
+    "id": "5",
+    "name": "Aston Martin",
+    "points": 85,
+    "color": "#006F62"
+  }
+]
