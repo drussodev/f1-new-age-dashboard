@@ -1,13 +1,6 @@
 
-// Mock data for frontend use - MySQL cannot be used directly in the browser
+// Mock data for frontend use - No database connection required
 import { toast } from "sonner";
-
-export interface MySQLConfig {
-  hostname: string;
-  username: string;
-  password: string;
-  database: string;
-}
 
 // Mock data structures
 const mockDrivers = [
@@ -48,78 +41,117 @@ const mockStreamers = [
   { username: "f1newage", display_name: "F1 New Age Tournament" },
 ];
 
-// Mock functions that would normally connect to MySQL
-export const getClient = async () => {
-  console.log("Mock MySQL client created");
-  return { query: () => {}, end: () => {} };
+// Local storage functions to persist data
+const saveToLocalStorage = (key, data) => {
+  try {
+    localStorage.setItem(key, JSON.stringify(data));
+  } catch (error) {
+    console.error(`Error saving to localStorage: ${key}`, error);
+  }
 };
 
-export const query = async <T = any>(sql: string, params: any[] = []): Promise<T[]> => {
-  console.log("Mock query executed:", sql, params);
-  
-  // Return mock data based on the query
-  if (sql.includes("drivers")) return mockDrivers as unknown as T[];
-  if (sql.includes("teams")) return mockTeams as unknown as T[];
-  if (sql.includes("races")) return mockRaces as unknown as T[];
-  if (sql.includes("news")) return mockNews as unknown as T[];
-  if (sql.includes("config")) return [mockConfig] as unknown as T[];
-  if (sql.includes("streamers")) return mockStreamers as unknown as T[];
-  
-  return [] as T[];
+const getFromLocalStorage = (key, defaultValue) => {
+  try {
+    const data = localStorage.getItem(key);
+    return data ? JSON.parse(data) : defaultValue;
+  } catch (error) {
+    console.error(`Error loading from localStorage: ${key}`, error);
+    return defaultValue;
+  }
 };
 
+// Initialize local data
+const initLocalData = () => {
+  if (!localStorage.getItem('f1_drivers')) saveToLocalStorage('f1_drivers', mockDrivers);
+  if (!localStorage.getItem('f1_teams')) saveToLocalStorage('f1_teams', mockTeams);
+  if (!localStorage.getItem('f1_races')) saveToLocalStorage('f1_races', mockRaces);
+  if (!localStorage.getItem('f1_news')) saveToLocalStorage('f1_news', mockNews);
+  if (!localStorage.getItem('f1_config')) saveToLocalStorage('f1_config', mockConfig);
+  if (!localStorage.getItem('f1_streamers')) saveToLocalStorage('f1_streamers', mockStreamers);
+};
+
+// Run initialization
+initLocalData();
+
+// Mock functions that use localStorage instead of a database
 export const fetchDrivers = async () => {
-  console.log("Fetching mock drivers data");
-  return mockDrivers;
+  console.log("Fetching drivers from local storage");
+  return getFromLocalStorage('f1_drivers', mockDrivers);
 };
 
 export const fetchTeams = async () => {
-  console.log("Fetching mock teams data");
-  return mockTeams;
+  console.log("Fetching teams from local storage");
+  return getFromLocalStorage('f1_teams', mockTeams);
 };
 
 export const fetchRaces = async () => {
-  console.log("Fetching mock races data");
-  return mockRaces;
+  console.log("Fetching races from local storage");
+  return getFromLocalStorage('f1_races', mockRaces);
 };
 
 export const fetchNews = async () => {
-  console.log("Fetching mock news data");
-  return mockNews;
+  console.log("Fetching news from local storage");
+  return getFromLocalStorage('f1_news', mockNews);
 };
 
 export const fetchConfig = async () => {
-  console.log("Fetching mock config data");
-  return [mockConfig];
+  console.log("Fetching config from local storage");
+  return [getFromLocalStorage('f1_config', mockConfig)];
 };
 
 export const fetchStreamers = async () => {
-  console.log("Fetching mock streamers data");
-  return mockStreamers;
+  console.log("Fetching streamers from local storage");
+  return getFromLocalStorage('f1_streamers', mockStreamers);
 };
 
-export const updateDriverPoints = async (driverId: string, points: number) => {
-  console.log("Updating driver points (mock):", driverId, points);
+export const updateDriverPoints = async (driverId, points) => {
+  console.log("Updating driver points in local storage:", driverId, points);
   
-  // Update the mock data
-  const driverIndex = mockDrivers.findIndex(d => d.id === driverId);
+  // Get current data
+  const drivers = getFromLocalStorage('f1_drivers', mockDrivers);
+  const teams = getFromLocalStorage('f1_teams', mockTeams);
+  
+  // Update driver points
+  const driverIndex = drivers.findIndex(d => d.id === driverId);
   if (driverIndex >= 0) {
-    mockDrivers[driverIndex].points = points;
+    drivers[driverIndex].points = points;
+    saveToLocalStorage('f1_drivers', drivers);
     
     // Update team points
-    const driver = mockDrivers[driverIndex];
-    const teamDrivers = mockDrivers.filter(d => d.team === driver.team && d.id !== driverId);
+    const driver = drivers[driverIndex];
+    const teamDrivers = drivers.filter(d => d.team === driver.team && d.id !== driverId);
     const teamPoints = teamDrivers.reduce((sum, d) => sum + d.points, 0) + points;
     
-    const teamIndex = mockTeams.findIndex(t => t.name === driver.team);
+    const teamIndex = teams.findIndex(t => t.name === driver.team);
     if (teamIndex >= 0) {
-      mockTeams[teamIndex].points = teamPoints;
+      teams[teamIndex].points = teamPoints;
+      saveToLocalStorage('f1_teams', teams);
     }
     
-    toast.success("Driver points updated successfully (mock)");
+    toast.success("Driver points updated successfully");
     return true;
   }
   
   toast.error("Driver not found");
   return false;
+};
+
+// Clean up unused MySQL functions
+export const getClient = async () => {
+  console.log("Mock client created (no database connection)");
+  return { query: () => {}, end: () => {} };
+};
+
+export const query = async (sql, params = []) => {
+  console.log("Mock query executed (no database connection):", sql, params);
+  
+  // Return mock data based on the query
+  if (sql.includes("drivers")) return getFromLocalStorage('f1_drivers', mockDrivers);
+  if (sql.includes("teams")) return getFromLocalStorage('f1_teams', mockTeams);
+  if (sql.includes("races")) return getFromLocalStorage('f1_races', mockRaces);
+  if (sql.includes("news")) return getFromLocalStorage('f1_news', mockNews);
+  if (sql.includes("config")) return [getFromLocalStorage('f1_config', mockConfig)];
+  if (sql.includes("streamers")) return getFromLocalStorage('f1_streamers', mockStreamers);
+  
+  return [];
 };

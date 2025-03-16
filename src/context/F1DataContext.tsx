@@ -1,7 +1,8 @@
+
 import React, { createContext, useContext, useState, useEffect, useRef } from 'react';
 import { toast } from 'sonner';
 import { useAuth } from './AuthContext';
-import * as mysqlService from '@/services/mysqlService';
+import * as localDataService from '@/services/mysqlService';
 
 interface Driver {
   id: string;
@@ -93,34 +94,33 @@ export const F1DataProvider: React.FC<{ children: React.ReactNode }> = ({ childr
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
-  const { isAuthenticated, user } = useAuth();
+  const { isAuthenticated } = useAuth();
   const isInitialLoadRef = useRef(true);
-  const pollingIntervalRef = useRef<number | null>(null);
 
   const fetchAllData = async () => {
-    console.log("Fetching all data from MySQL server...");
+    console.log("Fetching all data from local storage...");
     setLoading(true);
     setError(null);
     
     try {
       // Fetch drivers
-      const driversData = await mysqlService.fetchDrivers();
+      const driversData = await localDataService.fetchDrivers();
       setDrivers(driversData);
       console.log("Fetched drivers:", driversData.length);
 
       // Fetch teams
-      const teamsData = await mysqlService.fetchTeams();
+      const teamsData = await localDataService.fetchTeams();
       setTeams(teamsData);
       console.log("Fetched teams:", teamsData.length);
 
       // Fetch races
-      const racesData = await mysqlService.fetchRaces();
+      const racesData = await localDataService.fetchRaces();
       setRaces(racesData);
       console.log("Fetched races:", racesData.length);
 
       // Fetch config and streamers
-      const configData = await mysqlService.fetchConfig();
-      const streamersData = await mysqlService.fetchStreamers();
+      const configData = await localDataService.fetchConfig();
+      const streamersData = await localDataService.fetchStreamers();
       
       const mappedStreamers = streamersData.map(streamer => ({
         username: streamer.username,
@@ -135,47 +135,29 @@ export const F1DataProvider: React.FC<{ children: React.ReactNode }> = ({ childr
       console.log("Fetched config and streamers");
 
       // Fetch news
-      const newsData = await mysqlService.fetchNews();
+      const newsData = await localDataService.fetchNews();
       setNews(newsData);
       console.log("Fetched news:", newsData.length);
       
       setLastUpdated(new Date());
     } catch (error) {
-      console.error('Error fetching data from MySQL:', error);
-      setError('Failed to load data from the database.');
-      toast.error('Failed to load data from the database.');
+      console.error('Error fetching data from local storage:', error);
+      setError('Failed to load data from local storage.');
+      toast.error('Failed to load data from local storage.');
     } finally {
       setLoading(false);
       isInitialLoadRef.current = false;
     }
   };
 
-  // Setup polling for data refreshes instead of Supabase realtime subscriptions
+  // Load data on initial load
   useEffect(() => {
-    if (!isAuthenticated) return;
-    
-    // Only fetch data on initial load
-    if (isInitialLoadRef.current) {
-      fetchAllData();
-    }
-
-    // Setup polling every 30 seconds to refresh data
-    pollingIntervalRef.current = window.setInterval(() => {
-      console.log("Polling for data updates...");
-      fetchAllData();
-    }, 30000); // 30 seconds
-
-    return () => {
-      if (pollingIntervalRef.current) {
-        clearInterval(pollingIntervalRef.current);
-        pollingIntervalRef.current = null;
-      }
-    };
-  }, [isAuthenticated]);
+    fetchAllData();
+  }, []);
 
   const updateDriverPoints = async (driverId: string, points: number) => {
     try {
-      const success = await mysqlService.updateDriverPoints(driverId, points);
+      const success = await localDataService.updateDriverPoints(driverId, points);
       
       if (success) {
         // Update local state
@@ -186,7 +168,7 @@ export const F1DataProvider: React.FC<{ children: React.ReactNode }> = ({ childr
         );
         
         // Refresh team data
-        const updatedTeams = await mysqlService.fetchTeams();
+        const updatedTeams = await localDataService.fetchTeams();
         setTeams(updatedTeams);
         
         toast.success('Driver points updated successfully');

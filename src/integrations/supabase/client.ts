@@ -30,3 +30,6 @@ export const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABL
     },
   },
 });
+
+// Add a note in the console that we're not using Supabase for data
+console.log("Note: Supabase is only used for authentication. All data is stored locally.");

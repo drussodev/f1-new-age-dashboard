@@ -13,25 +13,33 @@ export const DataImporter = () => {
   const { user } = useAuth();
   const { refreshData } = useF1Data();
 
-  const importData = async () => {
+  const resetToDefaults = async () => {
     setLoading(true);
     setResult(null);
     
     try {
       if (!user) {
-        toast.error("You must be logged in to import data");
+        toast.error("You must be logged in to reset data");
         setResult('error');
         return;
       }
       
-      // Simply refresh data from MySQL since we're directly connected to the source
+      // Clear local storage for F1 data
+      localStorage.removeItem('f1_drivers');
+      localStorage.removeItem('f1_teams');
+      localStorage.removeItem('f1_races');
+      localStorage.removeItem('f1_news');
+      localStorage.removeItem('f1_config');
+      localStorage.removeItem('f1_streamers');
+      
+      // Refresh data to load defaults
       await refreshData();
       
-      console.log('Import completed by refreshing data');
-      toast.success("Data refreshed successfully!");
+      console.log('Data reset to defaults successfully');
+      toast.success("Data reset to defaults successfully!");
       setResult('success');
     } catch (err) {
-      console.error('Error in data refresh process:', err);
+      console.error('Error in data reset process:', err);
       toast.error("An unexpected error occurred");
       setResult('error');
     } finally {
@@ -42,40 +50,40 @@ export const DataImporter = () => {
   return (
     <Card className="w-full max-w-lg">
       <CardHeader>
-        <CardTitle>Refresh MySQL Data</CardTitle>
+        <CardTitle>Reset Local Data</CardTitle>
         <CardDescription>
-          Refresh F1 tournament data from MySQL database
+          Reset F1 tournament data to default values
         </CardDescription>
       </CardHeader>
       <CardContent>
         <p className="mb-4 text-sm">
-          This will refresh all data from the MySQL database at 185.113.141.167.
+          This will reset all data to the default values. Any changes you've made will be lost.
         </p>
         {result === 'success' && (
           <div className="flex items-center text-green-600 p-3 bg-green-50 rounded-md mb-4">
             <CheckCircle className="h-5 w-5 mr-2" />
-            <span>Data refreshed successfully!</span>
+            <span>Data reset successfully!</span>
           </div>
         )}
         {result === 'error' && (
           <div className="flex items-center text-red-600 p-3 bg-red-50 rounded-md mb-4">
             <AlertCircle className="h-5 w-5 mr-2" />
-            <span>Failed to refresh data. Check console for details.</span>
+            <span>Failed to reset data. Check console for details.</span>
           </div>
         )}
       </CardContent>
       <CardFooter>
         <Button 
-          onClick={importData} 
+          onClick={resetToDefaults} 
           disabled={loading}
           className="w-full"
         >
           {loading ? (
             <>
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              Refreshing Data...
+              Resetting Data...
             </>
-          ) : "Refresh Data"}
+          ) : "Reset to Defaults"}
         </Button>
       </CardFooter>
     </Card>

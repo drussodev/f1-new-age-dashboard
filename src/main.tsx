@@ -27,7 +27,8 @@ if (cachedVersion && cachedVersion !== appVersion.toString()) {
 // Store current version
 localStorage.setItem('app_version', appVersion.toString());
 
-// Set to false to disable maintenance mode
+// Always set to false to disable maintenance mode
 window.MAINTENANCE_MODE = false;
+console.log("Local storage mode enabled - no database connections required");
 
 createRoot(document.getElementById("root")!).render(<App />);
