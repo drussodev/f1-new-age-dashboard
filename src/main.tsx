@@ -31,4 +31,10 @@ localStorage.setItem('app_version', appVersion.toString());
 window.MAINTENANCE_MODE = false;
 console.log("Local storage mode enabled - no database connections required");
 
-createRoot(document.getElementById("root")!).render(<App />);
+// Standard DOM initialization without development-specific code
+const rootElement = document.getElementById("root");
+if (rootElement) {
+  createRoot(rootElement).render(<App />);
+} else {
+  console.error("Root element not found");
+}
